@@ -9,15 +9,14 @@ namespace Domain.Entities
         public string Email { get; set; }
         public string HashPassword { get; set; }
         public string Phone { get; set; }
-        public Guid? WishListId { get; set; }
-        public Guid CartId { get; set; }
 
         // Navigations
         public ICollection<Address> Addresses { get; set; }
         public ICollection<Order> Orders { get; set; }
-        public WishList WishList { get; set; }
+        public Wishlist Wishlist { get; set; }
         public Cart Cart { get; set; }
         public ICollection<Review> Reviews { get; set; }
         public ICollection<Shipment> Shipments { get; set; }
+        public ICollection<Payment> Payments { get; set; }
     }
 }

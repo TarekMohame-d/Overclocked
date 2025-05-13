@@ -4,10 +4,8 @@ namespace Domain.Entities
 {
     public class Order : BaseEntity
     {
-        public double TotalPrice { get; set; }
-        public DateTime OrderDate { get; set; }
+        public decimal TotalPrice { get; set; }
         public Guid CustomerId { get; set; }
-        public Guid? PaymentId { get; set; }
         public Guid ShipmentId { get; set; }
         public int StatusId { get; set; }
 
@@ -15,7 +13,7 @@ namespace Domain.Entities
         public Customer Customer { get; set; }
         public Payment Payment { get; set; }
         public Shipment Shipment { get; set; }
-        public OrderStatus Status { get; set; }
+        public OrderStatus OrderStatus { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; }
     }
 }

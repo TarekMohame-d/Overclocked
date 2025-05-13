@@ -1,9 +1,12 @@
-﻿namespace Domain.Entities
+﻿using Domain.Entities.Common;
+
+namespace Domain.Entities
 {
-    public class CartProduct
+    public class CartProduct : BaseEntity
     {
-        public Guid CartId { get; set; }
+        public int Quantity { get; set; }
         public Guid ProductId { get; set; }
+        public Guid CartId { get; set; }
 
         // Navigations
         public Product Product { get; set; }

@@ -11,5 +11,6 @@ namespace Domain.Entities
 
         // Navigations
         public Customer Customer { get; set; }
+        public ICollection<Shipment> Shipments { get; set; }
     }
 }

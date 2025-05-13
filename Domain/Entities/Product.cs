@@ -20,6 +20,6 @@ namespace Domain.Entities
         public ICollection<TagProduct> TagProducts { get; set; }
         public ICollection<ProductImage> ProductImages { get; set; }
         public ICollection<Specification> Specifications { get; set; }
-        public ICollection<WishListProduct> WishListProducts { get; set; }
+        public ICollection<WishlistProduct> WishlistProducts { get; set; }
     }
 }
