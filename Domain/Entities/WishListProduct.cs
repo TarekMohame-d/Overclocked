@@ -1,12 +1,12 @@
 ﻿namespace Domain.Entities
 {
-    public class WishListProduct
+    public class WishlistProduct
     {
-        public Guid Id { get; set; }
+        public Guid WishlistId { get; set; }
         public Guid ProductId { get; set; }
 
         // Navigations
         public Product Product { get; set; }
-        public WishList WishList { get; set; }
+        public Wishlist Wishlist { get; set; }
     }
 }

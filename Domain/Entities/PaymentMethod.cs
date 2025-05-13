@@ -2,8 +2,8 @@
 {
     public class PaymentMethod
     {
-        public Guid PaymentMethodId { get; set; }
-        public string PaymentName { get; set; }
+        public int PaymentMethodId { get; set; }
+        public string PaymentMethodName { get; set; }
 
         // Navigations
         public ICollection<Payment> Payments { get; set; }

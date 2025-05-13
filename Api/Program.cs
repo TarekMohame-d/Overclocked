@@ -1,3 +1,5 @@
+using Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,7 +13,7 @@ builder.Services.AddSwaggerGen();
 
 
 #region Dependency Injection
-
+builder.Services.ConfigureInfrastructureServices(builder.Configuration);
 #endregion
 
 

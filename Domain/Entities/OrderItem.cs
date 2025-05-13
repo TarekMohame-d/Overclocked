@@ -1,8 +1,9 @@
-﻿namespace Domain.Entities
+﻿using Domain.Entities.Common;
+
+namespace Domain.Entities
 {
-    public class OrderItem
+    public class OrderItem : BaseEntity
     {
-        public Guid Id { get; set; }
         public Guid OrderId { get; set; }
         public Guid ProductId { get; set; }
         public int Quantity { get; set; }
