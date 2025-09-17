@@ -1,0 +1,14 @@
+using Domain.Entities.Common;
+
+namespace Domain.Entities;
+
+public class ReviewReply : BaseEntity
+{
+    public Guid ReviewId { get; set; }
+    public Guid EmployeeId { get; set; }
+    public required string Reply { get; set; }
+
+    // Navigation Properties
+    public Employee? Employee { get; set; }
+    public Review? Review { get; set; }
+}
