@@ -12,6 +12,9 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder.HasKey(t => t.Id);
         builder.Property(t => t.Id).ValueGeneratedNever().IsRequired();
         builder.Property(t => t.Name).HasMaxLength(50).IsRequired();
+        builder.Property(t => t.NormalizedName)
+            .HasMaxLength(50)
+            .HasComputedColumnSql("UPPER(\"Name\")", stored: true);
         builder.Property(t => t.CreatedAt).HasColumnType("timestamptz")
             .HasDefaultValueSql("NOW()");
         builder.Property(t => t.UpdatedAt).HasColumnType("timestamptz")
@@ -21,6 +24,8 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
 
         // Indexes
         builder.HasIndex(t => t.Name)
+            .IsUnique();
+        builder.HasIndex(t => t.NormalizedName)
             .IsUnique();
     }
 }

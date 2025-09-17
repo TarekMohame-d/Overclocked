@@ -14,6 +14,9 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.CategoryId).IsRequired();
         builder.Property(p => p.BrandId).IsRequired();
         builder.Property(p => p.Name).HasMaxLength(50).IsRequired();
+        builder.Property(p => p.NormalizedName)
+            .HasMaxLength(50)
+            .HasComputedColumnSql("UPPER(\"Name\")", stored: true);
         builder.Property(p => p.Thumbnail).IsRequired();
         builder.Property(p => p.Description).HasMaxLength(500).IsRequired();
         builder.Property(p => p.Price).HasColumnType("decimal(8,2)").IsRequired();
@@ -39,6 +42,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         // Indexes
         builder.HasIndex(p => p.Name)
+            .IsUnique();
+        builder.HasIndex(p => p.NormalizedName)
             .IsUnique();
         builder.HasIndex(p => p.Price);
         builder.HasIndex(p => p.Rating);
