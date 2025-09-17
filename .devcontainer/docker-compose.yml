@@ -1,0 +1,70 @@
+services:
+  devcontainer:
+    command: sleep infinity
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: overclocked-api
+    volumes:
+      - ../:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker.sock # Testcontainers
+      - ${HOME}/.nuget/packages:/root/.nuget/packages
+      - ./logs:/app/logs # 👈 persist logs to host ./logs folder
+    working_dir: /workspace
+    networks:
+      - overclocked-net
+    depends_on:
+      - postgres
+      - redis
+      - seq
+    environment:
+      ASPNETCORE_URLS: "http://0.0.0.0:5105"
+    ports:
+      - "5105:5105"
+
+  postgres:
+    image: postgres:latest
+    container_name: overclocked-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: post_147_gres
+      POSTGRES_DB: OverclockedDB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - overclocked-net
+
+  redis:
+    image: redis:latest
+    container_name: overclocked-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - overclocked-net
+
+  seq:
+    image: datalust/seq:latest
+    container_name: overclocked-seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_PASSWORD=admin123 # Change this in production
+    ports:
+      - "5341:5341"
+      - "8001:80"
+    volumes:
+      - seqdata:/data
+    networks:
+      - overclocked-net
+
+volumes:
+  pgdata:
+  seqdata:
+
+networks:
+  overclocked-net:
+    driver: bridge

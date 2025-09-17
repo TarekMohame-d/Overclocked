@@ -1,0 +1,123 @@
+## ===========================
+## Build Results
+## ===========================
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+bld/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+
+## ===========================
+## VS Code
+## ===========================
+.vscode/
+
+## ===========================
+## Visual Studio
+## ===========================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## ===========================
+## JetBrains Rider
+## ===========================
+.idea/
+*.sln.iml
+*.DotSettings.user
+.rider/
+.jetbrains/
+rider-backend-cache/
+rider-config/
+rider-plugins/
+
+## ===========================
+## .NET Core
+## ===========================
+project.lock.json
+project.fragment.lock.json
+
+## ===========================
+## NuGet
+## ===========================
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+*.symbols.nupkg
+
+## ===========================
+## Test Results
+## ===========================
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.vsmdi
+*.testsettings
+*.vsix
+*.appx
+*.appxbundle
+*.binlog
+*.coverage
+*.coveragexml
+*.codecoverage
+
+## NUnit
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+## MSTest
+*.testsettings
+*.vsmdi
+
+## ===========================
+## ASP.NET Scaffolding
+## ===========================
+ScaffoldingReadMe.txt
+
+## ===========================
+## MSBuild Logs
+## ===========================
+*.binlog
+
+## ===========================
+## Resharper / Rider
+## ===========================
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+.idea/
+.idea/**
+
+## ===========================
+## Others
+## ===========================
+~$*
+*~
+*.tmp
+*.bak
+*.swp
+*.swn
+*.swo
+*.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+configs.json
+.env
+*.env
+.env*
+.devcontainer/logs/*.txt

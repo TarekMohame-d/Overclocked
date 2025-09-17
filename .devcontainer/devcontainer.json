@@ -1,0 +1,50 @@
+{
+    "name": "Dotnet Dev Container",
+    "dockerComposeFile": ["./docker-compose.yml"],
+    "service": "devcontainer",
+    "workspaceFolder": "/workspace",
+    "overrideCommand": true,
+    "remoteUser": "root",
+    "forwardPorts": [5105, 5432, 6379, 5341],
+    "postCreateCommand": "dotnet restore && dotnet tool restore",
+    "shutdownAction": "stopCompose",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.vscode-dotnet-runtime",
+                "ms-dotnettools.csharp",
+                "ms-dotnettools.csdevkit",
+                "formulahendry.code-runner",
+                "streetsidesoftware.code-spell-checker",
+                "ms-azuretools.vscode-containers",
+                "ms-azuretools.vscode-docker",
+                "mhutchie.git-graph",
+                "donjayamanne.githistory",
+                "codezombiech.gitignore",
+                "oderwat.indent-rainbow",
+                "ionutvmi.path-autocomplete",
+                "christian-kohler.path-intellisense",
+                "esbenp.prettier-vscode",
+                "humao.rest-client",
+                "Gruntfuggly.todo-tree",
+                "Codeium.codeium",
+                "VisualStudioExptTeam.vscodeintellicode",
+                "EditorConfig.EditorConfig",
+                "patcx.vscode-nuget-gallery",
+                "kreativ-software.csharpextensions",
+                "josefpihrt-vscode.roslynator",
+                "adrianwilczynski.namespace",
+                "formulahendry.dotnet-test-explorer",
+                "k--kato.docomment",
+                "reflectiondm.ClassyNaming",
+                "ryanluker.vscode-coverage-gutters",
+                "jmrog.vscode-nuget-package-manager",
+                "sidp.strict-whitespace",
+                "yzhang.markdown-all-in-one",
+                "DavidAnson.vscode-markdownlint",
+                "jongrant.csharpsortusings",
+                "pflannery.vscode-versionlens"
+            ]
+        }
+    }
+}
