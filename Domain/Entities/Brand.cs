@@ -5,6 +5,7 @@ namespace Domain.Entities;
 public class Brand : BaseEntity
 {
     public required string Name { get; set; }
+    public string NormalizedName { get; set; } = default!;
     public required string Image { get; set; }
 
     // Navigation Properties

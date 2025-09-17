@@ -7,6 +7,7 @@ public class Product : BaseEntity
     public Guid CategoryId { get; set; }
     public Guid BrandId { get; set; }
     public required string Name { get; set; }
+    public string NormalizedName { get; set; } = default!;
     public required string Thumbnail { get; set; }
     public required string Description { get; set; }
     public decimal Price { get; set; }

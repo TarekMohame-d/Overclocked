@@ -13,6 +13,9 @@ public class SpecificationConfiguration : IEntityTypeConfiguration<Specification
         builder.Property(s => s.Id).ValueGeneratedNever().IsRequired();
         builder.Property(s => s.ProductId).IsRequired();
         builder.Property(s => s.Name).HasMaxLength(50).IsRequired();
+        builder.Property(s => s.NormalizedName)
+            .HasMaxLength(50)
+            .HasComputedColumnSql("UPPER(\"Name\")", stored: true);
         builder.Property(s => s.Value).HasMaxLength(300).IsRequired();
         builder.Property(s => s.CreatedAt).HasColumnType("timestamptz")
             .HasDefaultValueSql("NOW()");
@@ -28,6 +31,8 @@ public class SpecificationConfiguration : IEntityTypeConfiguration<Specification
         // Indexes
         builder.HasIndex(s => s.ProductId);
         builder.HasIndex(s => new { s.Name, s.ProductId })
+            .IsUnique();
+        builder.HasIndex(s => new { s.NormalizedName, s.ProductId })
             .IsUnique();
     }
 }

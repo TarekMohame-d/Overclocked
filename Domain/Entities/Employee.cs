@@ -12,6 +12,7 @@ public class Employee : BaseEntity
         set => RoleId = (int)value;
     }
     public required string Username { get; set; }
+    public string NormalizedUsername { get; set; } = default!;
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public required string PasswordHash { get; set; }

@@ -12,6 +12,9 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Id).ValueGeneratedNever().IsRequired();
         builder.Property(c => c.Name).HasMaxLength(50).IsRequired();
+        builder.Property(c => c.NormalizedName)
+            .HasMaxLength(50)
+            .HasComputedColumnSql("UPPER(\"Name\")", stored: true);
         builder.Property(c => c.Image).IsRequired();
         builder.Property(c => c.CreatedAt).HasColumnType("timestamptz")
             .HasDefaultValueSql("NOW()");
@@ -22,6 +25,8 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         // Indexes
         builder.HasIndex(c => c.Name)
+            .IsUnique();
+        builder.HasIndex(c => c.NormalizedName)
             .IsUnique();
     }
 }

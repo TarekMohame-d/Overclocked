@@ -12,6 +12,9 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Id).ValueGeneratedNever().IsRequired();
         builder.Property(e => e.Username).HasMaxLength(50).IsRequired();
+        builder.Property(e => e.NormalizedUsername)
+            .HasMaxLength(50)
+            .HasComputedColumnSql("UPPER(\"Username\")", stored: true);
         builder.Property(e => e.FirstName).HasMaxLength(20).IsRequired();
         builder.Property(e => e.LastName).HasMaxLength(20).IsRequired();
         builder.Property(e => e.PasswordHash).IsRequired();
@@ -34,6 +37,8 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
 
         // Indexes
         builder.HasIndex(e => e.Username)
+            .IsUnique();
+        builder.HasIndex(e => e.NormalizedUsername)
             .IsUnique();
         builder.HasIndex(e => e.RoleId);
         builder.HasIndex(e => e.IsActive);
