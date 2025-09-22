@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Application.Contract.Services;
+using Application.Abstraction.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using StackExchange.Redis;
 
@@ -36,9 +36,9 @@ public class CacheService : ICacheService
         await _cache.SetStringAsync(key, json, options, cancellationToken);
     }
 
-    public async Task RemoveAsync(string key)
+    public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
-        await _cache.RemoveAsync(key);
+        await _cache.RemoveAsync(key, cancellationToken);
     }
 
     // Works only with Redis
@@ -65,7 +65,7 @@ public class CacheService : ICacheService
         if (!keys.Any())
             return;
 
-        var removalTasks = keys.Select(RemoveAsync);
+        var removalTasks = keys.Select(x => RemoveAsync(x));
 
         await Task.WhenAll(removalTasks);
 

@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using Application.Contract;
+using Application.Abstraction.Services;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;

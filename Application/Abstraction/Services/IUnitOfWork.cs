@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace Application.Contract;
+namespace Application.Abstraction.Services;
 
 public interface IUnitOfWork
 {

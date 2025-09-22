@@ -17,7 +17,7 @@ public static class BrandMapping
         };
     }
 
-    public static void UpdateFrom(this BrandEntity entity, UpdateBrandWithIdCommand command, string? imageUrl)
+    public static void UpdateFrom(this BrandEntity entity, UpdateBrandWithIdCommand command, string? imageUrl = default)
     {
         entity.Name = command.Name;
         entity.Image = imageUrl ?? entity.Image;

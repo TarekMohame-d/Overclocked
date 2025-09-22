@@ -63,8 +63,11 @@ services:
 
 volumes:
   pgdata:
+    name: overclocked-pgdata
   seqdata:
+    name: overclocked-seqdata
 
 networks:
   overclocked-net:
     driver: bridge
+    name: overclocked-net

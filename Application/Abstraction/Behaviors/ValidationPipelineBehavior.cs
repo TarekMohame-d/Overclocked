@@ -8,7 +8,7 @@ namespace Application.Abstraction.Behaviors;
 
 public sealed class ValidationPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : ICommand<TRequest>
+    where TRequest : ICommand<TResponse>
     where TResponse : Result
 {
 
@@ -42,7 +42,13 @@ public sealed class ValidationPipelineBehavior<TRequest, TResponse>
                 errors
             );
 
-        return (TResponse)(object)Result.Failure(error, HttpStatusCode.BadRequest);
+        // Create the failure result by invoking the static 'Failure' method on the TResponse type.
+        // This works correctly for both Result and Result<T>.
+        var failureResult = typeof(TResponse)
+            .GetMethod(nameof(Result.Failure), new[] { typeof(Error), typeof(HttpStatusCode) })?
+            .Invoke(null, new object[] { error, HttpStatusCode.BadRequest });
+
+        return (TResponse)failureResult!;
     }
 
     private async Task<ValidationFailure[]> ValidateAsync(TRequest request, CancellationToken cancellationToken)

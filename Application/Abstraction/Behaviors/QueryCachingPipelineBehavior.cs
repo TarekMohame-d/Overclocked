@@ -1,6 +1,6 @@
 using Application.Abstraction.Messaging;
+using Application.Abstraction.Services;
 using Application.Common.Results;
-using Application.Contract.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Abstraction.Behaviors;

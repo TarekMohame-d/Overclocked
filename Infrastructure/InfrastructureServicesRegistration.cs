@@ -1,5 +1,4 @@
-﻿using Application.Contract;
-using Application.Contract.Services;
+﻿using Application.Abstraction.Services;
 using Domain.Repositories;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -38,6 +37,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBrandRepository, BrandRepository>();
         services.AddScoped<IFileStorageService, CloudFileStorageService>();
+        services.AddSingleton<IBackgroundJobClientWrapper, BackgroundJobClientWrapper>();
 
         return services;
     }

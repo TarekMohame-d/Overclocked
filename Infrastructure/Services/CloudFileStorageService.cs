@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Application.Contract.Services;
+using Application.Abstraction.Services;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Domain.Configurations;
@@ -23,20 +23,16 @@ public class CloudFileStorageService : IFileStorageService
         _cloudinary = new Cloudinary(account);
     }
 
-    public async Task<string> UploadFileAsync(IFormFile file, string category, CancellationToken cancellationToken = default)
+    public async Task<string> UploadFileAsync(Stream stream, string fileName, string category, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        await using var memoryStream = new MemoryStream();
-        await file.CopyToAsync(memoryStream, cancellationToken);  // Fully load into memory
-        memoryStream.Position = 0;
-
         var guidFileName = Guid.NewGuid().ToString();
-        var fileExtension = Path.GetExtension(file.FileName);
+        var fileExtension = Path.GetExtension(fileName);
 
         var uploadParams = new ImageUploadParams
         {
-            File = new FileDescription($"{guidFileName}{fileExtension}", memoryStream),
+            File = new FileDescription($"{guidFileName}{fileExtension}", stream),
             PublicId = guidFileName, // use custom PublicId
             Folder = $"images/{category}",
             UseFilename = false,
@@ -68,7 +64,8 @@ public class CloudFileStorageService : IFileStorageService
         var deletionParams = new DeletionParams(publicId);
         var result = await _cloudinary.DestroyAsync(deletionParams);
 
-        return result.Result is "ok" or "not_found";
+        if (result.Result is "ok" or "not_found")
+            return true;
 
         throw new FileDeleteFailedException($"Image delete failed: {result.Error?.Message ?? "Unknown error"}");
     }
