@@ -1,0 +1,6 @@
+@Api_HostAddress = http://localhost:5105
+
+GET {{Api_HostAddress}}/api/v1/brands
+Accept: application/json
+
+###

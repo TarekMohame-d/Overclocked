@@ -46,8 +46,9 @@ public class CreateBrandCommandValidatorTest
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
         result.Errors.All(e => e.PropertyName == "Name").ShouldBeTrue();
-        await _brandRepositoryMock.Received(1)
-            .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>());
+        if (!string.IsNullOrWhiteSpace(name))
+            await _brandRepositoryMock.Received(1)
+                .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]

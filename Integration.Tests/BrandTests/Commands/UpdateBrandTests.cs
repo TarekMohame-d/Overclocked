@@ -2,9 +2,7 @@
 using Infrastructure.Data;
 using Integration.Tests.Shared;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using NSubstitute.ClearExtensions;
 using Shouldly;
 using System.Net;

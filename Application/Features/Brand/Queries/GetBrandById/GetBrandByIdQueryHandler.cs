@@ -1,4 +1,5 @@
-﻿using Application.Abstraction.Messaging;
+﻿using System.Net;
+using Application.Abstraction.Messaging;
 using Application.Common.Results;
 using Application.Features.Brand.Mapping;
 using Domain.Repositories;
@@ -21,7 +22,7 @@ public class GetBrandByIdQueryHandler : IQueryHandler<GetBrandByIdQuery, Result<
         if (brand is null)
             return Result<BrandDto>.Failure(
                 Errors.BrandNotFound,
-                System.Net.HttpStatusCode.NotFound);
+                HttpStatusCode.NotFound);
 
         return brand.ToDto();
     }
