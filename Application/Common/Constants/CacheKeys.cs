@@ -1,0 +1,19 @@
+﻿namespace Application.Common.Constants;
+
+public static class CacheKeys
+{
+    public static string Brand(string id) => $"brand-{id}";
+    public static string AllBrands => "brands:all";
+
+    public static string Category(string id) => $"category-{id}";
+    public static string AllCategories => "categories:all";
+
+    public static string Tag(string id) => $"tag-{id}";
+    public static string AllTags => "tags:all";
+
+    public static string Product(string id) => $"product-{id}";
+    public static string ProductPaged(int page, int pageSize, string orderByColumn, bool asc)
+        => $"products:page={page}:size={pageSize}:order={orderByColumn.ToLower()}:{(asc ? "asc" : "desc")}";
+    public static string TotalProductsCount => "products:count";
+    public static string ProductSet => "products:pages";
+}

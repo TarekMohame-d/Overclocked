@@ -1,6 +1,5 @@
 using System.Net;
 using Application.Common.Results;
-using Application.Contract.Services;
 using Application.Features.Brand.Mapping;
 using Application.Features.Brand.Queries.GetBrandById;
 using ArchitectureTests.FakeData;
@@ -9,7 +8,7 @@ using NSubstitute;
 using Shouldly;
 using BrandEntity = Domain.Entities.Brand;
 
-namespace Unit.Tests.Brand.Queries;
+namespace Unit.Tests.BrandTests.Queries;
 
 public class GetBrandByIdQueryHandlerTests
 {
