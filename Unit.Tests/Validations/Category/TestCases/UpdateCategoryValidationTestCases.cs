@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using NSubstitute;
 
-namespace Unit.Tests.Validations.Brand.TestCases;
+namespace Unit.Tests.Validations.Category.TestCases;
 
-public static class UpdateBrandValidationTestCases
+public static class UpdateCategoryValidationTestCases
 {
     public static IEnumerable<object[]> InvalidNameCases()
     {
@@ -60,7 +60,7 @@ public static class UpdateBrandValidationTestCases
         imageFile.Length.Returns(1 * 1024 * 1024);
         imageFile.FileName.Returns("image.jpg");
 
-        yield return new object[] { "https://example.com/image.jpg", imageFile };  // both not null
+        yield return new object[] { "https://example.com/image.jpg", imageFile }; // both not null
         yield return new object[] { null!, null! }; // both null
     }
 }

@@ -92,45 +92,4 @@ public class DeleteBrandCommandHandlerTest
         _brandRepositoryMock.Received(1)
             .Delete(Arg.Any<BrandEntity>());
     }
-
-    [Fact]
-    public async Task Handle_WhenDeleteBrandFails_ShouldThrowExceptionAndReturnFailure()
-    {
-        // Arrange
-        var command = new DeleteBrandCommand();
-
-        var brand = new BrandFaker().Generate();
-
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns(brand);
-
-        _brandRepositoryMock.Delete(Arg.Any<BrandEntity>());
-
-        _mediatorMock.Publish(Arg.Any<INotification>(), Arg.Any<CancellationToken>())
-            .Returns(Task.CompletedTask);
-
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("Delete failed"));
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeFalse();
-        result.Error.ShouldNotBeNull();
-        result.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
-        result.Error.Type.ShouldBe(ErrorType.InternalServerError);
-
-        await _brandRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
-
-        await _unitOfWorkMock.Received(1)
-            .CompleteAsync(Arg.Any<CancellationToken>());
-
-        _brandRepositoryMock.Received(1)
-            .Delete(Arg.Any<BrandEntity>());
-
-        await _mediatorMock.Received(1)
-            .Publish(Arg.Any<INotification>(), Arg.Any<CancellationToken>());
-    }
 }

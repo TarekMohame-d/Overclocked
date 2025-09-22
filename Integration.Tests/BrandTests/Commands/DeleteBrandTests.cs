@@ -2,11 +2,8 @@
 using ArchitectureTests.FakeData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using NSubstitute.ClearExtensions;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
 using System.Net;
 using System.Net.Http.Headers;
