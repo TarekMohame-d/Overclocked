@@ -36,6 +36,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBrandRepository, BrandRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IFileStorageService, CloudFileStorageService>();
         services.AddSingleton<IBackgroundJobClientWrapper, BackgroundJobClientWrapper>();
 
