@@ -6,7 +6,7 @@ using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
 
-namespace Unit.Tests.Brand.Queries;
+namespace Unit.Tests.BrandTests.Queries;
 
 public class GetAllBrandsQueryHandlerTest
 {
