@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Api.Routing;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -19,11 +20,13 @@ public class CloudinarySignature : ControllerBase
     public IActionResult GenerateSignature([FromQuery] string category)
     {
         if (string.IsNullOrWhiteSpace(category))
-        {
             return BadRequest("The 'category' query parameter is required.");
-        }
 
-        var signatureResponse = _cloudinaryService.GenerateUploadSignature(category);
+        var sanitizedCategory = Regex.Replace(category.ToLower(), @"[^a-z0-9-]", "");
+        if (string.IsNullOrWhiteSpace(sanitizedCategory))
+            return BadRequest("The 'category' query parameter contains invalid characters.");
+
+        var signatureResponse = _cloudinaryService.GenerateUploadSignature(category.ToLower());
         return Ok(signatureResponse);
     }
 }

@@ -9,7 +9,7 @@ public sealed class CloudinarySignatureResponse
 
     /// <summary>
     /// The timestamp (in Unix time) used to generate the signature.
-    /// /// </summary>
+    /// </summary>
     public required long Timestamp { get; init; }
 
     /// <summary>
