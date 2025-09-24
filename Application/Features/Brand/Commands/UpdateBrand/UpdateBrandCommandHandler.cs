@@ -46,7 +46,7 @@ public class UpdateBrandCommandHandler : ICommandHandler<UpdateBrandWithIdComman
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        await _mediator.Publish(new BrandUpdatedNotification(request.Id, request.ImageFile, brand.Image), cancellationToken);
+        await _mediator.Publish(new BrandUpdatedNotification(request.Id), cancellationToken);
 
         return Result.Success();
     }

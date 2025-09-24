@@ -28,7 +28,6 @@ public class DeleteBrandTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await _factory.ResetDatabaseAsync();
-        _factory.FileStorageServiceMock.ClearSubstitute();
 
         var token = _factory.GenerateJwtToken();
         _factory.HttpClient.DefaultRequestHeaders.Authorization =

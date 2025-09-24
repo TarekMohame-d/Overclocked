@@ -1,4 +1,6 @@
 ﻿using Application.Abstraction.Services;
+using Application.Features.CloudinarySignature;
+using Application.Interfaces;
 using Domain.Repositories;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -38,7 +40,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IBrandRepository, BrandRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IFileStorageService, CloudFileStorageService>();
-        services.AddSingleton<IBackgroundJobClientWrapper, BackgroundJobClientWrapper>();
+        services.AddScoped<ICloudinaryService, CloudinaryService>();
 
         return services;
     }

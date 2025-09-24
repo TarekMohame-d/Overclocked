@@ -13,8 +13,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" />
     <PackageReference Include="Scrutor" />
     <PackageReference Include="Serilog" />
-    <PackageReference Include="Hangfire" />
-    <PackageReference Include="Hangfire.PostgreSql" />
   </ItemGroup>
 
   <ItemGroup>

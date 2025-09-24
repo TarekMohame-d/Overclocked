@@ -1,10 +1,9 @@
-﻿using System.Net;
+using System.Net;
 using Application.Abstraction.Services;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Domain.Configurations;
 using Domain.Exceptions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;
@@ -23,65 +22,69 @@ public class CloudFileStorageService : IFileStorageService
         _cloudinary = new Cloudinary(account);
     }
 
-    public async Task<string> UploadFileAsync(Stream stream, string fileName, string category, CancellationToken cancellationToken = default)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var guidFileName = Guid.NewGuid().ToString();
-        var fileExtension = Path.GetExtension(fileName);
-
-        var uploadParams = new ImageUploadParams
-        {
-            File = new FileDescription($"{guidFileName}{fileExtension}", stream),
-            PublicId = guidFileName, // use custom PublicId
-            Folder = $"images/{category}",
-            UseFilename = false,
-            UniqueFilename = false,
-            Overwrite = true,
-            Transformation = new Transformation()
-            .Quality("auto")
-            .FetchFormat("auto")
-            .Width(800)
-            .Crop("limit")
-        };
-
-        var result = await _cloudinary.UploadAsync(uploadParams, cancellationToken);
-
-        if (result.StatusCode == HttpStatusCode.OK)
-            return result.SecureUrl.ToString();
-
-        throw new FileUploadFailedException($"Image upload failed: {result.Error?.Message ?? "Unknown error"}");
-    }
-
     public async Task<bool> DeleteFileAsync(string fileUrl, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var publicId = ExtractPublicIdFromUrl(fileUrl);
+        var publicId = ExtractPublicId(fileUrl);
         if (string.IsNullOrEmpty(publicId))
             return false;
 
-        var deletionParams = new DeletionParams(publicId);
+        var deletionParams = new DeletionParams(publicId)
+        {
+            PublicId = publicId,
+            Invalidate = true
+        };
         var result = await _cloudinary.DestroyAsync(deletionParams);
 
-        if (result.Result is "ok" or "not_found")
+        if (result.StatusCode == HttpStatusCode.OK)
             return true;
 
         throw new FileDeleteFailedException($"Image delete failed: {result.Error?.Message ?? "Unknown error"}");
     }
 
-    private string? ExtractPublicIdFromUrl(string url)
+    public async Task<bool> DeleteFilesAsync(List<string> fileUrls, CancellationToken cancellationToken = default)
     {
-        string[] segments = url.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var publicIds = ExtractPublicIds(fileUrls);
+        var delResParams = new DelResParams()
+        {
+            PublicIds = publicIds,
+            Invalidate = true,
+            All = true
+        };
+        var result = await _cloudinary.DeleteResourcesAsync(delResParams, cancellationToken);
 
-        if (segments.Length < 3) return null;
+        if (result.StatusCode == HttpStatusCode.OK)
+            return true;
 
-        // Get last Three segments
-        var lastThree = segments[^3..];
+        throw new FileDeleteFailedException($"Image delete failed: {result.Error?.Message ?? "Unknown error"}");
+    }
 
-        // Remove extension from last segment
-        lastThree[^1] = Path.GetFileNameWithoutExtension(lastThree[^1]);
+    private string? ExtractPublicId(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return null;
 
-        return string.Join("/", lastThree);
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return null;
+
+        // Split URL path into segments
+        var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        var publicIdStart = Array.FindIndex(segments, s => s.Equals("images", StringComparison.OrdinalIgnoreCase));
+        if (publicIdStart < 0) return null;
+
+        // Join rest into the public ID
+        var publicIdWithExt = string.Join("/", segments.Skip(publicIdStart));
+
+        // Remove extension if any
+        var dotIndex = publicIdWithExt.LastIndexOf('.');
+        return dotIndex > 0 ? publicIdWithExt.Substring(0, dotIndex) : publicIdWithExt;
+    }
+
+    private List<string> ExtractPublicIds(List<string> urls)
+    {
+        return urls
+            .Select(ExtractPublicId)
+            .OfType<string>()
+            .ToList();
     }
 }

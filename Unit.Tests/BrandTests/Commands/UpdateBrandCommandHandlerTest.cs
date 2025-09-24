@@ -2,7 +2,6 @@ using System.Net;
 using Application.Common.Results;
 using Application.Features.Brand.Commands.UpdateBrand;
 using ArchitectureTests.FakeData;
-using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using Shouldly;
 using Domain.Repositories;
@@ -10,7 +9,7 @@ using Application.Abstraction.Messaging;
 using Domain.Entities;
 using Application.Abstraction.Services;
 
-namespace Unit.Tests.BrandTests.Commands.UpdateBrand;
+namespace Unit.Tests.BrandTests.Commands;
 
 public class UpdateBrandCommandHandlerTest
 {
@@ -31,16 +30,6 @@ public class UpdateBrandCommandHandlerTest
             _mediatorMock);
     }
 
-    private static IFormFile CreateImageFile(string fileName = "test.jpg", long size = 1024, string contentType = "image/jpeg")
-    {
-        var file = Substitute.For<IFormFile>();
-        file.FileName.Returns(fileName);
-        file.Length.Returns(size);
-        file.ContentType.Returns(contentType);
-        file.OpenReadStream().Returns(new MemoryStream(new byte[size]));
-        return file;
-    }
-
     [Fact]
     public async Task Handle_WhenBrandDoesNotExists_ShouldReturnFailure()
     {
@@ -49,7 +38,7 @@ public class UpdateBrandCommandHandlerTest
         {
             Id = Guid.CreateVersion7(),
             Name = "Nike",
-            ImageFile = CreateImageFile()
+            ImageUrl = "image.png"
         };
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
@@ -76,7 +65,7 @@ public class UpdateBrandCommandHandlerTest
         {
             Id = Guid.CreateVersion7(),
             Name = "Nike",
-            ImageFile = CreateImageFile()
+            ImageUrl = "image.png"
         };
 
         var brand = new BrandFaker().Generate();

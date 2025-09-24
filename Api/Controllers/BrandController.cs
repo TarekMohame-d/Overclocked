@@ -43,9 +43,8 @@ public class BrandController : ControllerBase
 
     //[Authorize]
     [HttpPost]
-    [Consumes("multipart/form-data")]
     [Route(BrandRoutes.Create)]
-    public async Task<IActionResult> Create([FromForm] CreateBrandCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateBrandCommand command, CancellationToken cancellationToken)
     {
         var response = await _mediator.Send(command, cancellationToken);
 
@@ -68,14 +67,13 @@ public class BrandController : ControllerBase
     [Route(BrandRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromForm] UpdateBrandCommand request,
+        [FromBody] UpdateBrandCommand request,
         CancellationToken cancellationToken)
     {
         var command = new UpdateBrandWithIdCommand
         {
             Id = id,
             Name = request.Name,
-            ImageFile = request.ImageFile,
             ImageUrl = request.ImageUrl
         };
 
