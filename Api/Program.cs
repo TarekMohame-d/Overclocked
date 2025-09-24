@@ -3,9 +3,6 @@ using Api.Infrastructure;
 using Api.Middleware;
 using Application;
 using Domain.Configurations;
-using Hangfire;
-using Hangfire.Dashboard.BasicAuthorization;
-using Hangfire.PostgreSql;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -40,6 +37,8 @@ builder.Services.Configure<JwtSettings>(jwtSettingsSection);
 var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+var cloudinarySettingsSection = builder.Configuration.GetSection("CloudinarySettings");
+var cloudinarySettings = cloudinarySettingsSection.Get<CloudinarySettings>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -85,21 +84,6 @@ builder.Services.AddProblemDetails(configure =>
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddHangfire(config =>
-    config.UsePostgreSqlStorage(options =>
-    {
-        // This is the new way to specify the connection string
-        options.UseNpgsqlConnection(connectionString);
-    }
-    // new PostgreSqlStorageOptions
-    // {
-    //     SchemaName = "hangfire"
-    // }
-    ));
-
-builder.Services.AddHangfireServer();
-
 #region Dependency Injection
 
 builder.Services
@@ -135,27 +119,6 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 
 app.UseAuthorization();
-
-app.UseHangfireDashboard("/dashboard", new DashboardOptions
-{
-    Authorization = new[]
-    {
-        new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
-        {
-            SslRedirect = false, // set to true in production if HTTPS enforced
-            RequireSsl = false,  // set to true in production
-            LoginCaseSensitive = true,
-            Users = new[]
-            {
-                new BasicAuthAuthorizationUser
-                {
-                    Login = "admin",
-                    PasswordClear = "admin"
-                }
-            }
-        })
-    }
-});
 
 // app.UseStaticFiles();
 

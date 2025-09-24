@@ -26,13 +26,13 @@ public class CreateBrandCommandHandler : ICommandHandler<CreateBrandCommand, Res
 
     public async Task<Result> Handle(CreateBrandCommand request, CancellationToken cancellationToken)
     {
-        var brand = request.ToEntity("temp.jpg");
+        var brand = request.ToEntity();
 
         await _brandRepository.AddAsync(brand, cancellationToken);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        await _mediator.Publish(new BrandCreatedNotification(brand.Id, request.ImageFile), cancellationToken);
+        await _mediator.Publish(new BrandCreatedNotification(brand.Id), cancellationToken);
 
         return Result.Success(HttpStatusCode.Created);
     }

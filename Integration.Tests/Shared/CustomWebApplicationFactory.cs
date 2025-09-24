@@ -37,7 +37,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
     private DbConnection _dbConnection = default!;
     private Respawner _respawner = default!;
     public HttpClient HttpClient { get; private set; } = default!;
-
     public IFileStorageService FileStorageServiceMock { get; } = Substitute.For<IFileStorageService>();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

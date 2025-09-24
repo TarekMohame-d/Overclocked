@@ -12,7 +12,6 @@
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
-    <PackageReference Include="Hangfire.Dashboard.BasicAuthorization" />
   </ItemGroup>
 
   <ItemGroup>

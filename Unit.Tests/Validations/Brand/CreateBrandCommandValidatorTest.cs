@@ -18,23 +18,17 @@ public class CreateBrandCommandValidatorTest
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
     }
 
-    private static IFormFile CreateImageFile(string fileName = "test.jpg", long size = 1024, string contentType = "image/jpeg")
-    {
-        var file = Substitute.For<IFormFile>();
-        file.FileName.Returns(fileName);
-        file.Length.Returns(size);
-        file.ContentType.Returns(contentType);
-        file.OpenReadStream().Returns(new MemoryStream(new byte[size]));
-        return file;
-    }
-
     [Theory]
     [MemberData(nameof(CreateBrandValidationTestCases.InvalidNameCases), MemberType = typeof(CreateBrandValidationTestCases))]
     public async Task BrandValidator_WhenNameIsInvalid_ShouldReturnError(string? name)
     {
         // Arrange
         var validator = new CreateBrandCommandValidator(_brandRepositoryMock);
-        var command = new CreateBrandCommand { Name = name!, ImageFile = CreateImageFile() };
+        var command = new CreateBrandCommand
+        {
+            Name = name!,
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
@@ -52,12 +46,16 @@ public class CreateBrandCommandValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateBrandValidationTestCases.InvalidImageFileCases), MemberType = typeof(CreateBrandValidationTestCases))]
-    public async Task BrandValidator_WhenImageIsInvalid_ShouldReturnError(IFormFile? image)
+    [MemberData(nameof(CreateBrandValidationTestCases.InvalidImageUrlCases), MemberType = typeof(CreateBrandValidationTestCases))]
+    public async Task BrandValidator_WhenImageIsInvalid_ShouldReturnError(string? imageUrl)
     {
         // Arrange
         var validator = new CreateBrandCommandValidator(_brandRepositoryMock);
-        var command = new CreateBrandCommand { Name = "Nike", ImageFile = image! };
+        var command = new CreateBrandCommand
+        {
+            Name = "Nike",
+            ImageUrl = imageUrl!
+        };
 
         _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
@@ -68,7 +66,7 @@ public class CreateBrandCommandValidatorTest
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "ImageFile").ShouldBeTrue();
+        result.Errors.All(e => e.PropertyName == "ImageUrl").ShouldBeTrue();
         await _brandRepositoryMock.Received(1)
             .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>());
     }
@@ -78,7 +76,11 @@ public class CreateBrandCommandValidatorTest
     {
         // Arrange
         var validator = new CreateBrandCommandValidator(_brandRepositoryMock);
-        var command = new CreateBrandCommand { Name = "Nike", ImageFile = CreateImageFile() };
+        var command = new CreateBrandCommand
+        {
+            Name = "Nike",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);

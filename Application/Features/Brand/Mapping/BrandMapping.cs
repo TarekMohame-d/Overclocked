@@ -8,19 +8,19 @@ namespace Application.Features.Brand.Mapping;
 
 public static class BrandMapping
 {
-    public static BrandEntity ToEntity(this CreateBrandCommand command, string imageUrl)
+    public static BrandEntity ToEntity(this CreateBrandCommand command)
     {
         return new BrandEntity
         {
             Name = command.Name,
-            Image = imageUrl
+            Image = command.ImageUrl
         };
     }
 
-    public static void UpdateFrom(this BrandEntity entity, UpdateBrandWithIdCommand command, string? imageUrl = default)
+    public static void UpdateFrom(this BrandEntity entity, UpdateBrandWithIdCommand command)
     {
         entity.Name = command.Name;
-        entity.Image = imageUrl ?? entity.Image;
+        entity.Image = command.ImageUrl;
         entity.UpdatedAt = DateTime.UtcNow;
     }
 

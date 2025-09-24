@@ -3,7 +3,6 @@ using Infrastructure.Data;
 using Integration.Tests.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute.ClearExtensions;
 using Shouldly;
 using System.Net;
 using System.Net.Http.Headers;
@@ -11,6 +10,8 @@ using System.Net.Http.Json;
 using Domain.Entities;
 using Application.Common.Results;
 using ArchitectureTests.FakeData;
+using System.Text.Json;
+using System.Text;
 
 namespace Integration.Tests.BrandTests.Commands;
 
@@ -29,7 +30,6 @@ public class UpdateBrandTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await _factory.ResetDatabaseAsync();
-        _factory.FileStorageServiceMock.ClearSubstitute();
 
         var token = _factory.GenerateJwtToken();
         _factory.HttpClient.DefaultRequestHeaders.Authorization =
@@ -43,7 +43,7 @@ public class UpdateBrandTests : IAsyncLifetime
         // Arrange
         var name = "NVIDIA";
         var id = Guid.NewGuid().ToString();
-        var form = CreateMultipartFormData(name, true);
+        var form = CreateJsonContent(name);
 
         // Act
         var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", id), form);
@@ -66,35 +66,7 @@ public class UpdateBrandTests : IAsyncLifetime
     {
         // Arrange
         var brand = await SeedDatabaseAsync();
-        var form = CreateMultipartFormData("New Name", true);
-
-        // Act
-        var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
-
-        // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-        var result = await response.Content.ReadFromJsonAsync<Result>();
-
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        Brand? updatedBrand = await dbContext.Brands.FindAsync(brand.Id);
-        updatedBrand.ShouldNotBeNull();
-        updatedBrand.Name.ShouldBe("New Name");
-
-        result.ShouldNotBeNull();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
-        result.IsSuccess.ShouldBeTrue();
-        result.Error.ShouldBeNull();
-    }
-
-    [Fact]
-    public async Task Update_WhenIdValidAndImageFileIsProvided_ShouldReturnSuccess()
-    {
-        // Arrange
-        var brand = await SeedDatabaseAsync();
-        var form = CreateMultipartFormData("New Name", false, true);
+        var form = CreateJsonContent("New Name", brand.Image);
 
         // Act
         var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
@@ -120,6 +92,7 @@ public class UpdateBrandTests : IAsyncLifetime
     private async Task<Brand> SeedDatabaseAsync()
     {
         Brand brand = new BrandFaker().Generate();
+        brand.Image = "https://res.cloudinary.com/over-clocked/image.jpg";
 
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -130,30 +103,16 @@ public class UpdateBrandTests : IAsyncLifetime
         return brand;
     }
 
-    private MultipartFormDataContent CreateMultipartFormData(
-        string? name = null,
-        bool includeImageUrl = false,
-        bool includeImageFile = false,
-        byte[]? fileBytes = null,
-        string fileName = "image.jpg",
-        string contentType = "image/jpeg")
+    private StringContent CreateJsonContent(string name, string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
     {
-        fileBytes ??= "fake-image-content"u8.ToArray();
+        var payload = new
+        {
+            Name = name,
+            ImageUrl = imageUrl
+        };
 
-        var imageContent = new ByteArrayContent(fileBytes);
-        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+        string json = JsonSerializer.Serialize(payload);
 
-        var form = new MultipartFormDataContent();
-
-        if (name is not null)
-            form.Add(new StringContent(name), "Name");
-
-        if (includeImageUrl)
-            form.Add(new StringContent("https://res.cloudinary.com/over-clocked/old.jpg"), "ImageUrl");
-
-        if (includeImageFile)
-            form.Add(imageContent, "ImageFile", fileName);
-
-        return form;
+        return new StringContent(json, Encoding.UTF8, "application/json");
     }
 }

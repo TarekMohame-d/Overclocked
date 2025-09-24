@@ -1,17 +1,14 @@
 using System.Net;
 using Application.Abstraction.Messaging;
-using Application.Common.Results;
 using Application.Features.Brand.Commands.CreateBrand;
 using ArchitectureTests.FakeData;
 using Domain.Repositories;
-using Microsoft.AspNetCore.Http;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
 using Domain.Entities;
 using Application.Abstraction.Services;
 
-namespace Unit.Tests.BrandTests.Commands.CreateBrand;
+namespace Unit.Tests.BrandTests.Commands;
 
 public class CreateBrandCommandHandlerTest
 {
@@ -38,7 +35,7 @@ public class CreateBrandCommandHandlerTest
         var command = new CreateBrandCommand
         {
             Name = "Nike",
-            ImageFile = Substitute.For<IFormFile>()
+            ImageUrl = "image.png"
         };
 
         var brand = new BrandFaker().Generate();

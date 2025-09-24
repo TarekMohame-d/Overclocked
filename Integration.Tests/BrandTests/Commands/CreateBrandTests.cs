@@ -9,9 +9,10 @@ using Integration.Tests.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute.ClearExtensions;
 using Shouldly;
 using Domain.Entities;
+using System.Text.Json;
+using System.Text;
 
 namespace Integration.Tests.BrandTests.Commands;
 
@@ -30,7 +31,6 @@ public class CreateBrandTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await _factory.ResetDatabaseAsync();
-        _factory.FileStorageServiceMock.ClearSubstitute();
 
         var token = _factory.GenerateJwtToken();
         _factory.HttpClient.DefaultRequestHeaders.Authorization =
@@ -44,7 +44,7 @@ public class CreateBrandTests : IAsyncLifetime
         // Arrange
         var name = "NVIDIA";
 
-        var form = CreateMultipartFormData(name);
+        var form = CreateJsonContent(name);
 
         // Act
         var response = await _client.PostAsync(BrandRoutes.Create, form);
@@ -57,7 +57,7 @@ public class CreateBrandTests : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var brand = await dbContext.Brands.SingleOrDefaultAsync(x => x.Name == name);
+        var brand = await dbContext.Brands.SingleOrDefaultAsync(x => x.NormalizedName == name.ToUpper());
         brand.ShouldNotBeNull();
 
         brand.Name.ShouldBe(name);
@@ -73,7 +73,7 @@ public class CreateBrandTests : IAsyncLifetime
     {
         // Arrange
         var brand = await SeedDatabaseAsync();
-        var form = CreateMultipartFormData(brand.Name);
+        var form = CreateJsonContent(brand.Name);
 
         // Act
         var response = await _client.PostAsync(BrandRoutes.Create, form);
@@ -102,23 +102,16 @@ public class CreateBrandTests : IAsyncLifetime
         return brand;
     }
 
-    private MultipartFormDataContent CreateMultipartFormData(
-        string name,
-        byte[]? fileBytes = null,
-        string fileName = "image.jpg",
-        string contentType = "image/jpeg")
+    private StringContent CreateJsonContent(string name, string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
     {
-        fileBytes ??= "fake-image-content"u8.ToArray();
+        var payload = new
+        {
+            Name = name,
+            ImageUrl = imageUrl
+        };
 
-        var imageContent = new ByteArrayContent(fileBytes);
-        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+        string json = JsonSerializer.Serialize(payload);
 
-        var form = new MultipartFormDataContent
-            {
-                { new StringContent(name), "Name" },
-                { imageContent, "ImageFile", fileName }
-            };
-
-        return form;
+        return new StringContent(json, Encoding.UTF8, "application/json");
     }
 }

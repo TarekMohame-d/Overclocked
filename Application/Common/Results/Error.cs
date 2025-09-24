@@ -32,4 +32,8 @@ public static class Errors
     // Brand errors
     public static readonly Error BrandNotFound = new(nameof(BrandNotFound), ErrorType.NotFound, "Brand not found.");
     public static readonly Error BrandNameAlreadyExists = new(nameof(BrandNameAlreadyExists), ErrorType.Conflict, "Brand name already exists.");
+
+    // Category errors
+    public static readonly Error CategoryNotFound = new(nameof(CategoryNotFound), ErrorType.NotFound, "Category not found.");
+    public static readonly Error CategoryNameAlreadyExists = new(nameof(CategoryNameAlreadyExists), ErrorType.Conflict, "Category name already exists.");
 }

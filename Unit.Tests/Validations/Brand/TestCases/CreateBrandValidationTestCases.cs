@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using NSubstitute;
-
-namespace Unit.Tests.Validations.Brand.TestCases;
+﻿namespace Unit.Tests.Validations.Brand.TestCases;
 
 public static class CreateBrandValidationTestCases
 {
@@ -10,35 +7,16 @@ public static class CreateBrandValidationTestCases
         yield return new object[] { null! };
         yield return new object[] { "" };
         yield return new object[] { "   " };
-        yield return new object[] { new string('a', 55) }; // long name
+        yield return new object[] { new string('a', 55) };
     }
 
-    public static IEnumerable<object[]> InvalidImageFileCases()
+    public static IEnumerable<object[]> InvalidImageUrlCases()
     {
-        // Mock an empty file (Length = 0)
-        var emptyFile = Substitute.For<IFormFile>();
-        emptyFile.Length.Returns(0);
-        emptyFile.FileName.Returns("image.jpg");
-
-        // Mock a file with invalid extension
-        var invalidExtFile = Substitute.For<IFormFile>();
-        invalidExtFile.Length.Returns(500 * 1024); // 500 KB
-        invalidExtFile.FileName.Returns("image.txt");
-
-        // Mock an oversized file (> 2MB)
-        var oversizedFile = Substitute.For<IFormFile>();
-        oversizedFile.Length.Returns(3 * 1024 * 1024); // 3 MB
-        oversizedFile.FileName.Returns("image.jpg");
-
-        // Mock a file with both bad extension and size (for coverage)
-        var badAllFile = Substitute.For<IFormFile>();
-        badAllFile.Length.Returns(5 * 1024 * 1024); // 5 MB
-        badAllFile.FileName.Returns("image.exe");
-
         yield return new object[] { null! };
-        yield return new object[] { emptyFile };
-        yield return new object[] { invalidExtFile };
-        yield return new object[] { oversizedFile };
-        yield return new object[] { badAllFile };
+        yield return new object[] { "https://res.cloudinary.com/over-clocked.txt" };    // invalid extension
+        yield return new object[] { "not-a-url" };                                      // invalid format
+        yield return new object[] { "ftp://example.com/image.jpg" };                    // invalid scheme
+        yield return new object[] { "www.example.com/image.jpg" };                      // missing scheme
+        yield return new object[] { "https://www.example.com/image.jpg" };              // not same host
     }
 }
