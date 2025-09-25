@@ -3,7 +3,6 @@ using ArchitectureTests.FakeData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute.ClearExtensions;
 using Shouldly;
 using System.Net;
 using System.Net.Http.Headers;

@@ -1,4 +1,6 @@
-﻿using Application.Features.Category.Queries.GetAllCategories;
+﻿using Application.Features.Category.Commands.CreateCategory;
+using Application.Features.Category.Commands.UpdateCategory;
+using Application.Features.Category.Queries.GetAllCategories;
 using Application.Features.Category.Queries.GetCategoryById;
 using CategoryEntity = Domain.Entities.Category;
 
@@ -6,22 +8,21 @@ namespace Application.Features.Category.Mapping;
 
 public static class CategoryMapping
 {
-    // public static CategoryEntity ToEntity(this CreateCategoryCommand command, string imageUrl)
-    // {
-    //     return new CategoryEntity
-    //     {
-    //         // Id = Guid.CreateVersion7(),
-    //         Name = command.Name,
-    //         Image = imageUrl
-    //     };
-    // }
+    public static CategoryEntity ToEntity(this CreateCategoryCommand command)
+    {
+        return new CategoryEntity
+        {
+            Name = command.Name,
+            Image = command.ImageUrl
+        };
+    }
 
-    // public static void UpdateFrom(this CategoryEntity entity, UpdateCategoryWithIdCommand command, string? imageUrl)
-    // {
-    //     entity.Name = command.Name;
-    //     entity.Image = imageUrl ?? entity.Image;
-    //     entity.UpdatedAt = DateTime.UtcNow;
-    // }
+    public static void UpdateFrom(this CategoryEntity entity, UpdateCategoryWithIdCommand command)
+    {
+        entity.Name = command.Name;
+        entity.Image = command.ImageUrl;
+        entity.UpdatedAt = DateTime.UtcNow;
+    }
 
     public static CategoryDto ToDto(this CategoryEntity entity)
     {

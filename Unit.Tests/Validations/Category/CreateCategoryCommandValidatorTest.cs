@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using Application.Features.Category.Commands.CreateCategory;
 using Domain.Repositories;
-using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using Shouldly;
 using Unit.Tests.Validations.Category.TestCases;
@@ -18,23 +17,17 @@ public class CreateCategoryCommandValidatorTest
         _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
     }
 
-    private static IFormFile CreateImageFile(string fileName = "test.jpg", long size = 1024, string contentType = "image/jpeg")
-    {
-        var file = Substitute.For<IFormFile>();
-        file.FileName.Returns(fileName);
-        file.Length.Returns(size);
-        file.ContentType.Returns(contentType);
-        file.OpenReadStream().Returns(new MemoryStream(new byte[size]));
-        return file;
-    }
-
     [Theory]
     [MemberData(nameof(CreateCategoryValidationTestCases.InvalidNameCases), MemberType = typeof(CreateCategoryValidationTestCases))]
     public async Task CategoryValidator_WhenNameIsInvalid_ShouldReturnError(string? name)
     {
         // Arrange
         var validator = new CreateCategoryCommandValidator(_categoryRepositoryMock);
-        var command = new CreateCategoryCommand { Name = name!, ImageFile = CreateImageFile() };
+        var command = new CreateCategoryCommand
+        {
+            Name = name!,
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _categoryRepositoryMock.AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
@@ -52,12 +45,16 @@ public class CreateCategoryCommandValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateCategoryValidationTestCases.InvalidImageFileCases), MemberType = typeof(CreateCategoryValidationTestCases))]
-    public async Task CategoryValidator_WhenImageIsInvalid_ShouldReturnError(IFormFile? image)
+    [MemberData(nameof(CreateCategoryValidationTestCases.InvalidImageUrlCases), MemberType = typeof(CreateCategoryValidationTestCases))]
+    public async Task CategoryValidator_WhenImageIsInvalid_ShouldReturnError(string? imageUrl)
     {
         // Arrange
         var validator = new CreateCategoryCommandValidator(_categoryRepositoryMock);
-        var command = new CreateCategoryCommand { Name = "Nike", ImageFile = image! };
+        var command = new CreateCategoryCommand
+        {
+            Name = "Nike",
+            ImageUrl = imageUrl!
+        };
 
         _categoryRepositoryMock.AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
@@ -68,7 +65,7 @@ public class CreateCategoryCommandValidatorTest
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "ImageFile").ShouldBeTrue();
+        result.Errors.All(e => e.PropertyName == "ImageUrl").ShouldBeTrue();
         await _categoryRepositoryMock.Received(1)
             .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>());
     }
@@ -78,7 +75,11 @@ public class CreateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new CreateCategoryCommandValidator(_categoryRepositoryMock);
-        var command = new CreateCategoryCommand { Name = "Nike", ImageFile = CreateImageFile() };
+        var command = new CreateCategoryCommand
+        {
+            Name = "Nike",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _categoryRepositoryMock.AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
