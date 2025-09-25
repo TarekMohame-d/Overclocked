@@ -1,15 +1,13 @@
 using System.Net;
-using Domain.Exceptions;
 using Application.Common.Results;
 using Application.Features.Brand.Commands.DeleteBrand;
 using ArchitectureTests.FakeData;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
-using BrandEntity = Domain.Entities.Brand;
 using Domain.Repositories;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Services;
+using Domain.Entities;
 
 namespace Unit.Tests.BrandTests.Commands;
 
@@ -38,7 +36,7 @@ public class DeleteBrandCommandHandlerTest
         var command = new DeleteBrandCommand();
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<BrandEntity?>(null));
+            .Returns(Task.FromResult<Brand?>(null));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -64,7 +62,7 @@ public class DeleteBrandCommandHandlerTest
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
-        _brandRepositoryMock.Delete(Arg.Any<BrandEntity>());
+        _brandRepositoryMock.Delete(Arg.Any<Brand>());
 
         _mediatorMock.Publish(Arg.Any<INotification>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
@@ -90,6 +88,6 @@ public class DeleteBrandCommandHandlerTest
             .Publish(Arg.Any<INotification>(), Arg.Any<CancellationToken>());
 
         _brandRepositoryMock.Received(1)
-            .Delete(Arg.Any<BrandEntity>());
+            .Delete(Arg.Any<Brand>());
     }
 }

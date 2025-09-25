@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using NSubstitute;
-
-namespace Unit.Tests.Validations.Brand.TestCases;
+﻿namespace Unit.Tests.Validations.Brand.TestCases;
 
 public static class UpdateBrandValidationTestCases
 {

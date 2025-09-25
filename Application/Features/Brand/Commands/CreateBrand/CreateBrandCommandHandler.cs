@@ -24,9 +24,9 @@ public class CreateBrandCommandHandler : ICommandHandler<CreateBrandCommand, Res
         _mediator = mediator;
     }
 
-    public async Task<Result> Handle(CreateBrandCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CreateBrandCommand command, CancellationToken cancellationToken)
     {
-        var brand = request.ToEntity();
+        var brand = command.ToEntity();
 
         await _brandRepository.AddAsync(brand, cancellationToken);
 
