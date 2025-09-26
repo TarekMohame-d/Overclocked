@@ -22,25 +22,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync<TKey>(
-        int skip,
-        int take,
-        Expression<Func<T, TKey>> orderBy,
-        bool ascending = true,
-        bool asNoTracking = true,
-        CancellationToken cancellationToken = default)
-    {
-        IQueryable<T> query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
-
-        query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
-
-        var items = await query.Skip(skip).Take(take).ToListAsync(cancellationToken);
-
-        var totalCount = await CountAsync(cancellationToken);
-
-        return (items, totalCount);
-    }
-
     public IQueryable<T> Query(bool asNoTracking = true)
     {
         return asNoTracking ? _dbSet.AsNoTracking() : _dbSet;

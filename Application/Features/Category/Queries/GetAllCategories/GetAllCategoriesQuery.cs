@@ -6,5 +6,6 @@ namespace Application.Features.Category.Queries.GetAllCategories;
 public class GetAllCategoriesQuery() : ICachedQuery<Result<IEnumerable<CategoryListDto>>>
 {
     public string CacheKey => CacheKeys.AllCategories;
+    public string? CacheSetKey => null;
     public bool BypassCache => false;
 }

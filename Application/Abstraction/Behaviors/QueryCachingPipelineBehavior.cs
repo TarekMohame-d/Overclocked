@@ -33,7 +33,7 @@ public sealed class QueryCachingPipelineBehavior<TRequest, TResponse>
 
         string cacheKey = request.CacheKey;
 
-        TResponse? cached = await _cacheService.GetAsync<TResponse>(cacheKey);
+        TResponse? cached = await _cacheService.GetAsync<TResponse>(cacheKey, cancellationToken);
 
         if (cached is not null)
         {
@@ -48,6 +48,11 @@ public sealed class QueryCachingPipelineBehavior<TRequest, TResponse>
         if (response.IsSuccess)
         {
             await _cacheService.SetAsync(cacheKey, response, request.SlidingExpiration, cancellationToken);
+
+            if (!string.IsNullOrWhiteSpace(request.CacheSetKey))
+            {
+                await _cacheService.AddToSetAsync(request.CacheSetKey, cacheKey);
+            }
         }
 
         return response;

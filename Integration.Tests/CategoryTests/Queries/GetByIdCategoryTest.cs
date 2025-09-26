@@ -1,9 +1,8 @@
 ﻿using Api.Common.Routing;
 using Application.Abstraction.Services;
 using Application.Common.Constants;
-using Application.Common.Results;
-using Application.Features.Brand.Mapping;
-using Application.Features.Brand.Queries.GetBrandById;
+using Application.Features.Category.Mapping;
+using Application.Features.Category.Queries.GetCategoryById;
 using ArchitectureTests.FakeData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
@@ -12,16 +11,17 @@ using Shouldly;
 using System.Net;
 using System.Net.Http.Json;
 using Domain.Entities;
+using Application.Common.Results;
 
-namespace Integration.Tests.BrandTests.Queries;
+namespace Integration.Tests.CategoryTests.Queries;
 
 [Collection(nameof(SharedTestCollection))]
-public class GetByIdBrandTests : IAsyncLifetime
+public class GetByIdCategoryTest : IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
-    public GetByIdBrandTests(CustomWebApplicationFactory factory)
+    public GetByIdCategoryTest(CustomWebApplicationFactory factory)
     {
         _client = factory.HttpClient;
         _factory = factory;
@@ -37,12 +37,12 @@ public class GetByIdBrandTests : IAsyncLifetime
         Guid id = Guid.CreateVersion7();
 
         // Act
-        var response = await _client.GetAsync(BrandRoutes.GetById.Replace("{id:guid}", id.ToString()));
+        var response = await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<BrandDto>>();
+        var result = await response.Content.ReadFromJsonAsync<Result<CategoryDto>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeFalse();
@@ -59,62 +59,64 @@ public class GetByIdBrandTests : IAsyncLifetime
         var wrongId = "abc";
 
         // Act
-        var response = await _client.GetAsync(BrandRoutes.GetById.Replace("{id:guid}", wrongId.ToString()));
+        var response = await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", wrongId.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact]
-    public async Task GetById_WhenCacheMiss_ShouldReturnBrandFromDatabase()
+    public async Task GetById_WhenCacheMiss_ShouldReturnCategoryFromDatabase()
     {
         // Arrange
-        var brand = await SeedDatabaseAsync();
+        var category = await SeedDatabaseAsync();
 
         // Act
-        var response = await _client.GetAsync(BrandRoutes.GetById.Replace("{id:guid}", brand.Id.ToString()));
+        var response = await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", category.Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<BrandDto>>();
+        var result = await response.Content.ReadFromJsonAsync<Result<CategoryDto>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Data.ShouldNotBeNull();
-        result.Data.Id.ShouldBe(brand.Id);
-        result.Data.Name.ShouldBe(brand.Name);
+        result.Error.ShouldBeNull();
+        result.Data.Name.ShouldBe(category.Name);
+        result.Data.ImageUrl.ShouldBe(category.Image);
     }
 
     [Fact]
-    public async Task GetById_WhenCacheHit_ShouldReturnBrandFromCache()
+    public async Task GetById_WhenCacheHit_ShouldReturnCategoryFromCache()
     {
         // Arrange
-        var brandDto = await SeedCacheAsync();
+        var categoryDto = await SeedCacheAsync();
 
         // Act
-        var response = await _client.GetAsync(BrandRoutes.GetById.Replace("{id:guid}", brandDto.Id.ToString()));
+        var response = await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", categoryDto.Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<BrandDto>>();
+        var result = await response.Content.ReadFromJsonAsync<Result<CategoryDto>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Data.ShouldNotBeNull();
-        result.Data.Name.ShouldBe(brandDto.Name);
-        result.Data.ImageUrl.ShouldBe(brandDto.ImageUrl);
+        result.Error.ShouldBeNull();
+        result.Data.Name.ShouldBe(categoryDto.Name);
+        result.Data.ImageUrl.ShouldBe(categoryDto.ImageUrl);
     }
 
     [Fact]
     public async Task GetById_WhenCalledConcurrently_ShouldReturnConsistentResults()
     {
         // Arrange
-        var brands = await SeedDatabaseRangeAsync(10);
-        var ids = brands.Select(x => x.Id).ToList();
+        var categories = await SeedDatabaseRangeAsync(10);
+        var ids = categories.Select(x => x.Id).ToList();
         int concurrentCalls = 10;
         var rnd = new Random();
         var tasks = new List<Task<HttpResponseMessage>>();
@@ -123,7 +125,7 @@ public class GetByIdBrandTests : IAsyncLifetime
         for (int i = 0; i < concurrentCalls; i++)
         {
             var randomId = ids[rnd.Next(ids.Count)];
-            var task = _client.GetAsync(BrandRoutes.GetById.Replace("{id:guid}", randomId.ToString()));
+            var task = _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", randomId.ToString()));
             tasks.Add(task);
         }
 
@@ -135,7 +137,7 @@ public class GetByIdBrandTests : IAsyncLifetime
             var response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var result = await response.Content.ReadFromJsonAsync<Result<BrandDto>>();
+            var result = await response.Content.ReadFromJsonAsync<Result<CategoryDto>>();
 
             result.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();
@@ -144,44 +146,45 @@ public class GetByIdBrandTests : IAsyncLifetime
         }
     }
 
-    private async Task<Brand> SeedDatabaseAsync()
+    private async Task<Category> SeedDatabaseAsync()
     {
         using var scope = _factory.Services.CreateScope();
 
-        var brand = new BrandFaker().Generate();
+        var category = new CategoryFaker().Generate();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        dbContext.Brands.Add(brand);
+        dbContext.Categories.Add(category);
         await dbContext.SaveChangesAsync();
 
-        return brand;
+        return category;
     }
 
-    private async Task<IEnumerable<Brand>> SeedDatabaseRangeAsync(int count = 10)
+    private async Task<IEnumerable<Category>> SeedDatabaseRangeAsync(int count = 10)
     {
         using var scope = _factory.Services.CreateScope();
 
-        var brands = new BrandFaker().Generate(count);
+        var categories = new CategoryFaker().Generate(count);
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        await dbContext.Brands.AddRangeAsync(brands);
+        await dbContext.Categories.AddRangeAsync(categories);
         await dbContext.SaveChangesAsync();
 
-        return brands;
+        return categories;
     }
 
-    private async Task<BrandDto> SeedCacheAsync()
+    private async Task<CategoryDto> SeedCacheAsync()
     {
         using var scope = _factory.Services.CreateScope();
 
-        var brand = new BrandFaker().Generate();
+        var category = new CategoryFaker().Generate();
+        // category.Id = Guid.NewGuid();
 
         var cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
-        var key = CacheKeys.Brand(brand.Id.ToString());
-        var brandDto = brand.ToDto();
-        var result = Result<BrandDto>.Success(brandDto);
-        await cache.SetAsync(key, result);
+        var key = CacheKeys.Category(category.Id.ToString());
+        var categoryDto = category.ToDto();
+        var result = Result<CategoryDto>.Success(categoryDto);
+        await cache.SetAsync(key, result, TimeSpan.FromMinutes(5));
 
-        return brandDto;
+        return categoryDto;
     }
 }

@@ -1,27 +1,28 @@
-﻿using Api.Common.Routing;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Api.Common.Routing;
+using Application.Common.Results;
+using ArchitectureTests.FakeData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using Domain.Entities;
-using Application.Common.Results;
-using ArchitectureTests.FakeData;
 using System.Text.Json;
 using System.Text;
 
 namespace Integration.Tests.BrandTests.Commands;
 
 [Collection(nameof(SharedTestCollection))]
-public class UpdateBrandTests : IAsyncLifetime
+public class CreateBrandTest : IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
-    public UpdateBrandTests(CustomWebApplicationFactory factory)
+    public CreateBrandTest(CustomWebApplicationFactory factory)
     {
         _factory = factory;
         _client = factory.HttpClient;
@@ -38,61 +39,59 @@ public class UpdateBrandTests : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task Update_WhenIdNotValid_ShouldReturnFailure()
+    public async Task Create_WhenDataIsValid_ShouldCreateAndReturnSuccess()
     {
         // Arrange
         var name = "NVIDIA";
-        var id = Guid.NewGuid().ToString();
+
         var form = CreateJsonContent(name);
 
         // Act
-        var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", id), form);
+        var response = await _client.PostAsync(BrandRoutes.Create, form);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
-
-        var result = await response.Content.ReadFromJsonAsync<Result>();
-
-        result.ShouldNotBeNull();
-        result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
-        result.IsSuccess.ShouldBeFalse();
-        result.Error.ShouldNotBeNull();
-        result.Error.Type.ShouldBe(ErrorType.NotFound);
-        result.Error.Description.ShouldBe("Brand not found.");
-    }
-
-    [Fact]
-    public async Task Update_WhenIdValidAndOldImageUrlIsProvided_ShouldReturnSuccess()
-    {
-        // Arrange
-        var brand = await SeedDatabaseAsync();
-        var form = CreateJsonContent("New Name", brand.Image);
-
-        // Act
-        var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
-
-        // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
         var result = await response.Content.ReadFromJsonAsync<Result>();
 
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        Brand? updatedBrand = await dbContext.Brands.FindAsync(brand.Id);
-        updatedBrand.ShouldNotBeNull();
-        updatedBrand.Name.ShouldBe("New Name");
+        var brand = await dbContext.Brands.SingleOrDefaultAsync(x => x.NormalizedName == name.ToUpper());
+        brand.ShouldNotBeNull();
+
+        brand.Name.ShouldBe(name);
 
         result.ShouldNotBeNull();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.StatusCode.ShouldBe(HttpStatusCode.Created);
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
     }
 
+    [Fact]
+    public async Task Create_WhenNameAlreadyExists_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var brand = await SeedDatabaseAsync();
+        var form = CreateJsonContent(brand.Name);
+
+        // Act
+        var response = await _client.PostAsync(BrandRoutes.Create, form);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+        var result = await response.Content.ReadFromJsonAsync<Result>();
+
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        result.IsSuccess.ShouldBeFalse();
+        result.Error.ShouldNotBeNull();
+    }
+
     private async Task<Brand> SeedDatabaseAsync()
     {
-        Brand brand = new BrandFaker().Generate();
-        brand.Image = "https://res.cloudinary.com/over-clocked/image.jpg";
+        var brand = new BrandFaker().Generate();
 
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

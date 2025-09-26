@@ -1,7 +1,7 @@
 using Api.Common.Routing;
-using ArchitectureTests.FakeData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Net;
@@ -9,16 +9,19 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Domain.Entities;
 using Application.Common.Results;
+using ArchitectureTests.FakeData;
+using System.Text.Json;
+using System.Text;
 
 namespace Integration.Tests.CategoryTests.Commands;
 
 [Collection(nameof(SharedTestCollection))]
-public class DeleteCategoryTests : IAsyncLifetime
+public class UpdateCategoryTest : IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
-    public DeleteCategoryTests(CustomWebApplicationFactory factory)
+    public UpdateCategoryTest(CustomWebApplicationFactory factory)
     {
         _factory = factory;
         _client = factory.HttpClient;
@@ -35,13 +38,15 @@ public class DeleteCategoryTests : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task Delete_WhenIdNotValid_ShouldReturnFailure()
+    public async Task Update_WhenIdNotValid_ShouldReturnFailure()
     {
         // Arrange
-        var categoryId = Guid.NewGuid().ToString();
+        var name = "NVIDIA";
+        var id = Guid.NewGuid().ToString();
+        var form = CreateJsonContent(name);
 
         // Act
-        var response = await _client.DeleteAsync(CategoryRoutes.Delete.Replace("{id:guid}", categoryId));
+        var response = await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", id), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -57,13 +62,14 @@ public class DeleteCategoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Delete_WhenIdIsValid_ShouldReturnSuccess()
+    public async Task Update_WhenIdValidAndOldImageUrlIsProvided_ShouldReturnSuccess()
     {
         // Arrange
         var category = await SeedDatabaseAsync();
+        var form = CreateJsonContent("New Name", category.Image);
 
         // Act
-        var response = await _client.DeleteAsync(CategoryRoutes.Delete.Replace("{id:guid}", category.Id.ToString()));
+        var response = await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", category.Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -73,9 +79,9 @@ public class DeleteCategoryTests : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        Category? deletedCategory = await dbContext.Categories.FindAsync(category.Id);
-
-        deletedCategory.ShouldBeNull();
+        Category? updatedCategory = await dbContext.Categories.FindAsync(category.Id);
+        updatedCategory.ShouldNotBeNull();
+        updatedCategory.Name.ShouldBe("New Name");
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -85,7 +91,8 @@ public class DeleteCategoryTests : IAsyncLifetime
 
     private async Task<Category> SeedDatabaseAsync()
     {
-        var category = new CategoryFaker().Generate();
+        Category category = new CategoryFaker().Generate();
+        category.Image = "https://res.cloudinary.com/over-clocked/image.jpg";
 
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -94,5 +101,18 @@ public class DeleteCategoryTests : IAsyncLifetime
         await dbContext.SaveChangesAsync();
 
         return category;
+    }
+
+    private StringContent CreateJsonContent(string name, string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
+    {
+        var payload = new
+        {
+            Name = name,
+            ImageUrl = imageUrl
+        };
+
+        string json = JsonSerializer.Serialize(payload);
+
+        return new StringContent(json, Encoding.UTF8, "application/json");
     }
 }

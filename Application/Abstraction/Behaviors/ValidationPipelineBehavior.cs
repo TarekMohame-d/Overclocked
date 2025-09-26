@@ -8,7 +8,7 @@ namespace Application.Abstraction.Behaviors;
 
 public sealed class ValidationPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : ICommand<TResponse>
+    where TRequest : IValidation
     where TResponse : Result
 {
 

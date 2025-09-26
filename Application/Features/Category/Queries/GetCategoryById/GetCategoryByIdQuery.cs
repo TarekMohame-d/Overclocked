@@ -8,5 +8,6 @@ public record GetCategoryByIdQuery : ICachedQuery<Result<CategoryDto>>
 {
     public Guid Id { get; init; }
     public string CacheKey => CacheKeys.Category(Id.ToString());
+    public string? CacheSetKey => null;
     public bool BypassCache => false;
 }

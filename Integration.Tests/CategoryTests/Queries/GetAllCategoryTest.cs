@@ -2,8 +2,8 @@
 using Application.Abstraction.Services;
 using Application.Common.Constants;
 using Application.Common.Results;
-using Application.Features.Brand.Mapping;
-using Application.Features.Brand.Queries.GetAllBrands;
+using Application.Features.Category.Mapping;
+using Application.Features.Category.Queries.GetAllCategories;
 using ArchitectureTests.FakeData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
@@ -11,17 +11,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Net;
 using System.Net.Http.Json;
-using Domain.Entities;
+using CategoryEntity = Domain.Entities.Category;
 
-namespace Integration.Tests.BrandTests.Queries;
+namespace Integration.Tests.CategoryTests.Queries;
 
 [Collection(nameof(SharedTestCollection))]
-public class GetAllBrandTests : IAsyncLifetime
+public class GetAllCategoryTest : IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
-    public GetAllBrandTests(CustomWebApplicationFactory factory)
+    public GetAllCategoryTest(CustomWebApplicationFactory factory)
     {
         _client = factory.HttpClient;
         _factory = factory;
@@ -31,76 +31,76 @@ public class GetAllBrandTests : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task GetAll_WhenThereIsDataAndCacheMiss_ShouldReturnFromDatabase()
+    public async Task GetAll_WhenThereIsDataAndCacheMiss_ShouldReturnAllFromDatabase()
     {
         // Arrange
-        var brands = await SeedDatabaseAsync();
+        var categories = await SeedDatabaseAsync();
 
         // Act
-        var response = await _client.GetAsync(BrandRoutes.GetAll);
+        var response = await _client.GetAsync(CategoryRoutes.GetAll);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<BrandListDto>>>();
+        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListDto>>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Data.ShouldNotBeNull();
         result.Data.ShouldNotBeEmpty();
-        result.Data.Count().ShouldBe(brands.Count());
+        result.Data.Count().ShouldBe(categories.Count());
     }
 
     [Fact]
-    public async Task GetAll_WhenThereIsDataAndCacheHit_ShouldReturnFromCache()
+    public async Task GetAll_WhenThereIsDataAndCacheHit_ShouldReturnAllFromCache()
     {
         // Arrange
-        var brandListDtos = await SeedCacheAsync();
+        var categoryListDtos = await SeedCacheAsync();
 
         // Act
-        var response = await _client.GetAsync(BrandRoutes.GetAll);
+        var response = await _client.GetAsync(CategoryRoutes.GetAll);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<BrandListDto>>>();
+        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListDto>>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Data.ShouldNotBeNull();
         result.Data.ShouldNotBeEmpty();
-        result.Data.Count().ShouldBe(brandListDtos.Count());
+        result.Data.Count().ShouldBe(categoryListDtos.Count());
     }
 
     [Fact]
     public async Task GetAll_WhenThereIsNoData_ShouldReturnEmptyList()
     {
         // Arrange
-        IEnumerable<Brand> brands = [];
+        IEnumerable<CategoryEntity> categories = [];
 
         // Act
-        var response = await _client.GetAsync(BrandRoutes.GetAll);
+        var response = await _client.GetAsync(CategoryRoutes.GetAll);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<BrandListDto>>>();
+        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListDto>>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Data.ShouldNotBeNull();
         result.Data.ShouldBeEmpty();
-        result.Data.Count().ShouldBe(brands.Count());
+        result.Data.Count().ShouldBe(categories.Count());
     }
 
     [Fact]
     public async Task GetAll_WhenCalledConcurrently_ShouldReturnConsistentResults()
     {
         // Arrange
-        var brands = await SeedDatabaseAsync();
+        var categories = await SeedDatabaseAsync();
 
         int concurrentCalls = 10;
         var tasks = new List<Task<HttpResponseMessage>>();
@@ -108,7 +108,7 @@ public class GetAllBrandTests : IAsyncLifetime
         // Act
         for (int i = 0; i < concurrentCalls; i++)
         {
-            tasks.Add(_client.GetAsync(BrandRoutes.GetAll));
+            tasks.Add(_client.GetAsync(CategoryRoutes.GetAll));
         }
 
         await Task.WhenAll(tasks);
@@ -119,42 +119,43 @@ public class GetAllBrandTests : IAsyncLifetime
             var response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<BrandListDto>>>();
+            var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListDto>>>();
 
             result.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();
             result.StatusCode.ShouldBe(HttpStatusCode.OK);
             result.Data.ShouldNotBeNull();
             result.Data.ShouldNotBeEmpty();
-            result.Data.Count().ShouldBe(brands.Count());
+            result.Data.Count().ShouldBe(categories.Count());
         }
     }
 
-    private async Task<IEnumerable<Brand>> SeedDatabaseAsync()
+    private async Task<IEnumerable<CategoryEntity>> SeedDatabaseAsync()
     {
         using var scope = _factory.Services.CreateScope();
 
-        var brands = new BrandFaker().Generate(10);
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        await dbContext.Brands.AddRangeAsync(brands);
+        var categories = new CategoryFaker().Generate(10);
+
+        await dbContext.Categories.AddRangeAsync(categories);
         await dbContext.SaveChangesAsync();
 
-        return brands;
+        return categories;
     }
 
-    private async Task<IEnumerable<BrandListDto>> SeedCacheAsync()
+    private async Task<IEnumerable<CategoryListDto>> SeedCacheAsync()
     {
         using var scope = _factory.Services.CreateScope();
 
-        var brands = new BrandFaker().Generate(10);
+        var categories = new CategoryFaker().Generate(10);
 
         var cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
-        var key = CacheKeys.AllBrands;
-        var brandListDtos = brands.ToDto();
-        var result = Result<IEnumerable<BrandListDto>>.Success(brandListDtos);
-        await cache.SetAsync(key, result);
+        var key = CacheKeys.AllCategories;
+        var categoryListDtos = categories.ToDto();
+        var result = Result<IEnumerable<CategoryListDto>>.Success(categoryListDtos);
+        await cache.SetAsync(key, result, TimeSpan.FromMinutes(5));
 
-        return brandListDtos;
+        return categoryListDtos;
     }
 }
