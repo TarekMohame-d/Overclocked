@@ -16,12 +16,12 @@ using Shouldly;
 namespace Integration.Tests.CategoryTests.Commands;
 
 [Collection(nameof(SharedTestCollection))]
-public class CreateCategoryTests : IAsyncLifetime
+public class CreateCategoryTest : IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
-    public CreateCategoryTests(CustomWebApplicationFactory factory)
+    public CreateCategoryTest(CustomWebApplicationFactory factory)
     {
         _factory = factory;
         _client = factory.HttpClient;

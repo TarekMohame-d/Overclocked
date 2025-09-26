@@ -1,7 +1,7 @@
 ﻿using Api.Common.Routing;
-using ArchitectureTests.FakeData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Net;
@@ -9,16 +9,19 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Domain.Entities;
 using Application.Common.Results;
+using ArchitectureTests.FakeData;
+using System.Text.Json;
+using System.Text;
 
 namespace Integration.Tests.BrandTests.Commands;
 
 [Collection(nameof(SharedTestCollection))]
-public class DeleteBrandTests : IAsyncLifetime
+public class UpdateBrandTest : IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
-    public DeleteBrandTests(CustomWebApplicationFactory factory)
+    public UpdateBrandTest(CustomWebApplicationFactory factory)
     {
         _factory = factory;
         _client = factory.HttpClient;
@@ -35,13 +38,15 @@ public class DeleteBrandTests : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task Delete_WhenIdNotValid_ShouldReturnFailure()
+    public async Task Update_WhenIdNotValid_ShouldReturnFailure()
     {
         // Arrange
-        var brandId = Guid.NewGuid().ToString();
+        var name = "NVIDIA";
+        var id = Guid.NewGuid().ToString();
+        var form = CreateJsonContent(name);
 
         // Act
-        var response = await _client.DeleteAsync(BrandRoutes.Delete.Replace("{id:guid}", brandId));
+        var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", id), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -57,13 +62,14 @@ public class DeleteBrandTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Delete_WhenIdIsValid_ShouldReturnSuccess()
+    public async Task Update_WhenIdValidAndOldImageUrlIsProvided_ShouldReturnSuccess()
     {
         // Arrange
         var brand = await SeedDatabaseAsync();
+        var form = CreateJsonContent("New Name", brand.Image);
 
         // Act
-        var response = await _client.DeleteAsync(BrandRoutes.Delete.Replace("{id:guid}", brand.Id.ToString()));
+        var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -73,9 +79,9 @@ public class DeleteBrandTests : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        Brand? deletedBrand = await dbContext.Brands.FindAsync(brand.Id);
-
-        deletedBrand.ShouldBeNull();
+        Brand? updatedBrand = await dbContext.Brands.FindAsync(brand.Id);
+        updatedBrand.ShouldNotBeNull();
+        updatedBrand.Name.ShouldBe("New Name");
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -85,7 +91,8 @@ public class DeleteBrandTests : IAsyncLifetime
 
     private async Task<Brand> SeedDatabaseAsync()
     {
-        var brand = new BrandFaker().Generate();
+        Brand brand = new BrandFaker().Generate();
+        brand.Image = "https://res.cloudinary.com/over-clocked/image.jpg";
 
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -94,5 +101,18 @@ public class DeleteBrandTests : IAsyncLifetime
         await dbContext.SaveChangesAsync();
 
         return brand;
+    }
+
+    private StringContent CreateJsonContent(string name, string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
+    {
+        var payload = new
+        {
+            Name = name,
+            ImageUrl = imageUrl
+        };
+
+        string json = JsonSerializer.Serialize(payload);
+
+        return new StringContent(json, Encoding.UTF8, "application/json");
     }
 }

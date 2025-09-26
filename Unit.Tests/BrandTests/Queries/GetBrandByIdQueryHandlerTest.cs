@@ -3,19 +3,19 @@ using Application.Common.Results;
 using Application.Features.Brand.Mapping;
 using Application.Features.Brand.Queries.GetBrandById;
 using ArchitectureTests.FakeData;
+using Domain.Entities;
 using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
-using BrandEntity = Domain.Entities.Brand;
 
 namespace Unit.Tests.BrandTests.Queries;
 
-public class GetBrandByIdQueryHandlerTests
+public class GetBrandByIdQueryHandlerTest
 {
     private readonly IBrandRepository _brandRepositoryMock;
     private readonly GetBrandByIdQueryHandler _handler;
 
-    public GetBrandByIdQueryHandlerTests()
+    public GetBrandByIdQueryHandlerTest()
     {
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
         _handler = new GetBrandByIdQueryHandler(_brandRepositoryMock);
@@ -56,7 +56,7 @@ public class GetBrandByIdQueryHandlerTests
         var query = new GetBrandByIdQuery { Id = brandId };
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns((BrandEntity)null!);
+            .Returns((Brand)null!);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

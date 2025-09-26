@@ -106,6 +106,7 @@ public class QueryCachingPipelineBehaviorTests
     public class TestQuery : ICachedQuery<Result<string>>
     {
         public string CacheKey => "TestCacheKey";
+        public string? CacheSetKey => null;
         public bool BypassCache { get; set; }
         public TimeSpan SlidingExpiration => TimeSpan.FromMinutes(5);
     }

@@ -21,6 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NSubstitute" />
+    <PackageReference Include="MockQueryable.NSubstitute" />
     <PackageReference Include="Bogus" />
   </ItemGroup>
 
