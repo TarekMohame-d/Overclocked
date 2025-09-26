@@ -7,5 +7,6 @@ public record GetBrandByIdQuery : ICachedQuery<Result<BrandDto>>
 {
     public Guid Id { get; init; }
     public string CacheKey => CacheKeys.Brand(Id.ToString());
+    public string? CacheSetKey => null;
     public bool BypassCache => false;
 }

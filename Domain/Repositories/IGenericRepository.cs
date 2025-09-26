@@ -5,13 +5,6 @@ namespace Domain.Repositories;
 public interface IGenericRepository<T> where T : class
 {
     Task<IEnumerable<T>> GetAllAsync(bool asNoTracking = true, CancellationToken cancellationToken = default);
-    Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync<TKey>(
-        int skip,
-        int take,
-        Expression<Func<T, TKey>> orderBy,
-        bool ascending = true,
-        bool asNoTracking = true,
-        CancellationToken cancellationToken = default);
     IQueryable<T> Query(bool asNoTracking = true);
     Task<T?> GetByIdAsync(object[] keyValues, CancellationToken cancellationToken = default);
     Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default);

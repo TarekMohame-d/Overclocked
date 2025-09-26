@@ -24,9 +24,6 @@ public class CacheService : ICacheService
 
     public async Task SetAsync<T>(string key, T value, TimeSpan expiration = default, CancellationToken cancellationToken = default)
     {
-        if (expiration == default)
-            expiration = TimeSpan.FromMinutes(5);
-
         var json = JsonSerializer.Serialize(value);
         var options = new DistributedCacheEntryOptions
         {

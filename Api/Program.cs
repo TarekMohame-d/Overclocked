@@ -37,8 +37,6 @@ builder.Services.Configure<JwtSettings>(jwtSettingsSection);
 var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
-var cloudinarySettingsSection = builder.Configuration.GetSection("CloudinarySettings");
-var cloudinarySettings = cloudinarySettingsSection.Get<CloudinarySettings>();
 
 builder.Services.AddAuthentication(options =>
 {

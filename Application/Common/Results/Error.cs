@@ -36,4 +36,8 @@ public static class Errors
     // Category errors
     public static readonly Error CategoryNotFound = new(nameof(CategoryNotFound), ErrorType.NotFound, "Category not found.");
     public static readonly Error CategoryNameAlreadyExists = new(nameof(CategoryNameAlreadyExists), ErrorType.Conflict, "Category name already exists.");
+
+    // Tag errors
+    public static readonly Error TagNotFound = new(nameof(TagNotFound), ErrorType.NotFound, "Tag not found.");
+    public static readonly Error TagNameAlreadyExists = new(nameof(TagNameAlreadyExists), ErrorType.Conflict, "Tag name already exists.");
 }
