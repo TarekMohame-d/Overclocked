@@ -15,6 +15,6 @@ public class BrandUpdatedCacheInvalidationHandler : INotificationHandler<BrandUp
     public async Task Handle(BrandUpdatedNotification notification, CancellationToken cancellationToken)
     {
         await _cache.RemoveAsync(CacheKeys.AllBrands, cancellationToken);
-        await _cache.RemoveAsync(CacheKeys.Brand(notification.id.ToString()), cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.Brand(notification.Id.ToString()), cancellationToken);
     }
 }
