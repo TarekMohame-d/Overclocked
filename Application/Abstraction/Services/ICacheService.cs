@@ -11,5 +11,5 @@ public interface ICacheService
     Task AddToSetAsync(string setKey, string value);
     Task<IEnumerable<string>> GetSetMembersAsync(string setKey);
     Task RemoveSetAsync(string setKey);
-    Task RemoveKeysInSetAsync(string setKey);
+    Task RemoveKeysInSetAsync(string setKey, CancellationToken cancellationToken = default);
 }

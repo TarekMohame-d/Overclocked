@@ -1,4 +1,6 @@
+using Application.Features.Brand.Commands.UpdateBrand;
 using Application.Features.Tag.Commands.CreateTag;
+using Application.Features.Tag.Commands.UpdateTag;
 using Application.Features.Tag.Queries.GetAllTags;
 using Application.Features.Tag.Queries.GetTagById;
 using TagEntity = Domain.Entities.Tag;
@@ -15,13 +17,11 @@ public static class TagMapping
         };
     }
 
-    // public static TagEntity ToEntity(this UpdateTagCommand command)
-    // {
-    //     return new TagEntity
-    //     {
-    //         Name = command.Name
-    //     };
-    // }
+    public static void UpdateFrom(this TagEntity entity, UpdateTagWithIdCommand command)
+    {
+        entity.Name = command.Name;
+        entity.UpdatedAt = DateTime.UtcNow;
+    }
 
     public static TagDto ToDto(this TagEntity entity)
     {

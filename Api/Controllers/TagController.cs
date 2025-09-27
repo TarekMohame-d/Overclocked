@@ -1,6 +1,9 @@
 using Api.Common.Routing;
 using Api.Extensions;
 using Application.Abstraction.Messaging;
+using Application.Features.Tag.Commands.CreateTag;
+using Application.Features.Tag.Commands.DeleteTag;
+using Application.Features.Tag.Commands.UpdateTag;
 using Application.Features.Tag.Queries.GetPagedTags;
 using Application.Features.Tag.Queries.GetTagById;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +45,46 @@ public class TagController : ControllerBase
         };
 
         var response = await _mediator.Send(query, cancellationToken);
+
+        return response.ToActionResult();
+    }
+
+    //[Authorize]
+    [HttpPost]
+    [Route(TagRoutes.Create)]
+    public async Task<IActionResult> Create([FromBody] CreateTagCommand command, CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return response.ToActionResult();
+    }
+
+    //[Authorize]
+    [HttpPut]
+    [Route(TagRoutes.Update)]
+    public async Task<IActionResult> Put(
+        [FromRoute] Guid id,
+        [FromBody] UpdateTagCommand request,
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateTagWithIdCommand
+        {
+            Id = id,
+            Name = request.Name
+        };
+
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return response.ToActionResult();
+    }
+
+    //[Authorize]
+    [HttpDelete]
+    [Route(TagRoutes.Delete)]
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var command = new DeleteTagCommand { Id = id };
+        var response = await _mediator.Send(command, cancellationToken);
 
         return response.ToActionResult();
     }

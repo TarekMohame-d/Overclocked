@@ -55,14 +55,14 @@ public class CacheService : ICacheService
         await _redisDb.KeyDeleteAsync(setKey);
     }
 
-    public async Task RemoveKeysInSetAsync(string setKey)
+    public async Task RemoveKeysInSetAsync(string setKey, CancellationToken cancellationToken = default)
     {
         var keys = await GetSetMembersAsync(setKey);
 
         if (!keys.Any())
             return;
 
-        var removalTasks = keys.Select(x => RemoveAsync(x));
+        var removalTasks = keys.Select(x => RemoveAsync(x, cancellationToken));
 
         await Task.WhenAll(removalTasks);
 
