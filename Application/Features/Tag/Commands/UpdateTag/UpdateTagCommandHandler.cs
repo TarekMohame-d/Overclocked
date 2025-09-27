@@ -1,0 +1,53 @@
+using System.Net;
+using Application.Abstraction.Messaging;
+using Application.Abstraction.Services;
+using Application.Common.Results;
+using Application.Features.Tag.Commands.UpdateTag.Notifications;
+using Application.Features.Tag.Mapping;
+using Domain.Repositories;
+
+namespace Application.Features.Tag.Commands.UpdateTag;
+
+public class UpdateTagCommandHandler : ICommandHandler<UpdateTagWithIdCommand, Result>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITagRepository _tagRepository;
+    private readonly IMediator _mediator;
+
+    public UpdateTagCommandHandler(
+        IUnitOfWork unitOfWork,
+        ITagRepository tagRepository,
+        IMediator mediator)
+    {
+        _unitOfWork = unitOfWork;
+        _tagRepository = tagRepository;
+        _mediator = mediator;
+    }
+
+    public async Task<Result> Handle(UpdateTagWithIdCommand request, CancellationToken cancellationToken)
+    {
+        var tag = await _tagRepository.GetByIdAsync([request.Id], cancellationToken);
+
+        if (tag is null)
+            return Result.Failure(Errors.TagNotFound, HttpStatusCode.NotFound);
+
+        if (tag.Name != request.Name)
+        {
+            bool exist = await _tagRepository
+                .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
+
+            if (exist)
+                return Result.Failure(Errors.TagNameAlreadyExists, HttpStatusCode.Conflict);
+        }
+
+        tag.UpdateFrom(request);
+
+        _tagRepository.Update(tag);
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
+
+        await _mediator.Publish(new TagUpdatedNotification(request.Id), cancellationToken);
+
+        return Result.Success();
+    }
+}
