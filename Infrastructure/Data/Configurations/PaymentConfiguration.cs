@@ -14,7 +14,6 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.MethodId).IsRequired();
         builder.Property(p => p.StatusId).IsRequired();
         builder.Property(p => p.OrderId).IsRequired();
-        builder.Property(p => p.UserId).IsRequired();
         builder.Property(p => p.Amount).HasColumnType("decimal(10,2)").IsRequired();
         builder.Property(p => p.TransactionId).IsRequired(false);
         builder.Property(p => p.CreatedAt).HasColumnType("timestamptz")
@@ -36,18 +35,12 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
             .HasForeignKey(p => p.StatusId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(p => p.User)
-            .WithMany(c => c.Payments)
-            .HasForeignKey(p => p.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.HasOne(p => p.Order)
             .WithOne(o => o.Payment)
             .HasForeignKey<Payment>(p => p.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(p => p.UserId);
         builder.HasIndex(p => p.OrderId);
         builder.HasIndex(p => p.MethodId);
         builder.HasIndex(p => p.StatusId);

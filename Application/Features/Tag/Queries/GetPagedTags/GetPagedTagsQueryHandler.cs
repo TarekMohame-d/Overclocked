@@ -1,8 +1,8 @@
 using Application.Abstraction.Messaging;
+using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Features.Tag.Mapping;
 using Application.Features.Tag.Queries.GetAllTags;
-using Domain.Repositories;
 
 namespace Application.Features.Tag.Queries.GetPagedTags;
 

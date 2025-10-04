@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
+using Application.Abstraction.Repositories;
 using Application.Features.Category.Commands.CreateCategory;
-using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
 using Unit.Tests.Validations.Category.TestCases;

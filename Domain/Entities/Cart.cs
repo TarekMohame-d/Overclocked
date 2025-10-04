@@ -2,12 +2,16 @@
 
 public class Cart
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; protected set; }
     public Guid UserId { get; set; }
-    public DateTime CreatedAt { get; set; }
 
     // Navigation Properties
     public User? User { get; set; }
     public ICollection<CartItem>? CartItems { get; set; }
+
+    public Cart()
+    {
+        Id = Guid.CreateVersion7();
+    }
 }
 

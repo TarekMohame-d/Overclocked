@@ -14,6 +14,7 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.Property(oi => oi.OrderId).IsRequired();
         builder.Property(oi => oi.ProductId).IsRequired();
         builder.Property(oi => oi.ShipmentId).IsRequired(false);
+        builder.Property(oi => oi.Shipped).HasDefaultValue(false);
         builder.Property(oi => oi.Quantity).IsRequired();
         builder.Property(oi => oi.UnitPrice).HasColumnType("decimal(8,2)").IsRequired();
         builder.Property(oi => oi.CreatedAt).HasColumnType("timestamptz")
@@ -33,7 +34,7 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(oi => oi.Shipment)
-            .WithMany(p => p.ShipmentItems)
+            .WithMany(s => s.ShipmentItems)
             .HasForeignKey(oi => oi.ShipmentId)
             .OnDelete(DeleteBehavior.SetNull);
 

@@ -2,11 +2,11 @@ using System.Net;
 using Application.Abstraction.Messaging;
 using Application.Features.Brand.Commands.CreateBrand;
 using ArchitectureTests.FakeData;
-using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
 using Domain.Entities;
 using Application.Abstraction.Services;
+using Application.Abstraction.Repositories;
 
 namespace Unit.Tests.BrandTests.Commands;
 

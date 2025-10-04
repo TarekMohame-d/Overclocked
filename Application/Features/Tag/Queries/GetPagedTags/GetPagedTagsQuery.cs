@@ -16,5 +16,5 @@ public record GetPagedTagsRequest
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
-    public string SortBy { get; set; } = "name_asc";
+    public string SortBy { get; set; } = "id_asc";
 }

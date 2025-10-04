@@ -30,10 +30,6 @@ public class RefundItemConfiguration : IEntityTypeConfiguration<RefundItem>
             .WithOne()
             .HasForeignKey<RefundItem>(ri => ri.OrderItemId);
 
-        builder.HasOne(ri => ri.InvoiceItem)
-            .WithOne()
-            .HasForeignKey<RefundItem>(ri => ri.InvoiceItemId);
-
         // Indexes
         builder.HasIndex(ri => ri.RefundId);
     }

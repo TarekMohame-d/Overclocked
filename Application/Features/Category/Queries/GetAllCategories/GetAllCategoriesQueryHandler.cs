@@ -1,7 +1,7 @@
 ﻿using Application.Abstraction.Messaging;
+using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Features.Category.Mapping;
-using Domain.Repositories;
 namespace Application.Features.Category.Queries.GetAllCategories;
 
 public class GetAllCategoriesQueryHandler : IQueryHandler<GetAllCategoriesQuery, Result<IEnumerable<CategoryListDto>>>

@@ -26,7 +26,7 @@ public class ReviewReplyConfiguration : IEntityTypeConfiguration<ReviewReply>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(rr => rr.Employee)
-            .WithMany(e => e.ReviewReplies)
+            .WithMany(u => u.ReviewReplies)
             .HasForeignKey(rr => rr.EmployeeId)
             .OnDelete(DeleteBehavior.Restrict);
 

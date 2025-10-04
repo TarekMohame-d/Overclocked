@@ -9,6 +9,6 @@ public class ReviewReply : BaseEntity
     public required string Reply { get; set; }
 
     // Navigation Properties
-    public Employee? Employee { get; set; }
+    public User? Employee { get; set; }
     public Review? Review { get; set; }
 }

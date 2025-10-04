@@ -12,8 +12,6 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Id).ValueGeneratedNever().IsRequired();
         builder.Property(c => c.UserId).IsRequired();
-        builder.Property(c => c.CreatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
 
         // Relationships
         builder.HasOne(c => c.User)

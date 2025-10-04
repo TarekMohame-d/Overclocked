@@ -3,10 +3,10 @@ using Application.Features.Tag.Mapping;
 using Application.Features.Tag.Queries.GetPagedTags;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
-using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
 using MockQueryable;
+using Application.Abstraction.Repositories;
 
 namespace Unit.Tests.TagTests.Queries;
 

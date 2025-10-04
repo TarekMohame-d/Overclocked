@@ -1,7 +1,7 @@
 using Application.Abstraction.Messaging;
+using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Features.Tag.Mapping;
-using Domain.Repositories;
 using System.Net;
 
 namespace Application.Features.Tag.Queries.GetTagById;

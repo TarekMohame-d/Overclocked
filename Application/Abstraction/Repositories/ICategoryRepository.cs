@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 
-namespace Domain.Repositories;
+namespace Application.Abstraction.Repositories;
 
 public interface ICategoryRepository : IGenericRepository<Category>
 {

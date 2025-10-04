@@ -4,10 +4,10 @@ using Application.Features.Tag.Commands.DeleteTag;
 using ArchitectureTests.FakeData;
 using NSubstitute;
 using Shouldly;
-using Domain.Repositories;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Services;
 using Domain.Entities;
+using Application.Abstraction.Repositories;
 
 namespace Unit.Tests.TagTests.Commands;
 

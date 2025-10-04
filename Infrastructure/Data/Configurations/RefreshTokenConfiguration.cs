@@ -11,10 +11,8 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         // Attributes
         builder.HasKey(rt => rt.Id);
         builder.Property(rt => rt.Id).ValueGeneratedNever().IsRequired();
+        builder.Property(rt => rt.UserId).IsRequired();
         builder.Property(rt => rt.DeviceId).IsRequired();
-        builder.Property(rt => rt.DeviceType).HasMaxLength(20).IsRequired();
-        builder.Property(rt => rt.UserId).IsRequired(false);
-        builder.Property(rt => rt.EmployeeId).IsRequired(false);
         builder.Property(rt => rt.TokenHash).IsRequired();
         builder.Property(rt => rt.ExpiredAt).HasColumnType("timestamptz").IsRequired();
         builder.Property(c => c.CreatedAt).HasColumnType("timestamptz")
@@ -28,12 +26,8 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
             .HasForeignKey(rt => rt.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(rt => rt.Employee)
-            .WithMany(e => e.RefreshTokens)
-            .HasForeignKey(rt => rt.EmployeeId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         // Indexes
+        builder.HasIndex(rt => rt.UserId);
         builder.HasIndex(rt => new { rt.UserId, rt.DeviceId })
             .IsUnique();
         builder.HasIndex(rt => rt.DeviceId);

@@ -1,17 +1,26 @@
 ﻿using Domain.Entities.Common;
+using Domain.StaticData;
 
 namespace Domain.Entities;
 
 public class User : BaseEntity
 {
+    public int RoleId { get; set; }
+    public RoleType RoleType
+    {
+        get => (RoleType)RoleId;
+        set => RoleId = (int)value;
+    }
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public required string Email { get; set; }
     public bool EmailConfirmed { get; set; }
     public required string PasswordHash { get; set; }
     public required string Phone { get; set; }
+    public bool IsActive { get; set; }
 
     // Navigation properties
+    public Role? Role { get; set; }
     public ICollection<Address>? Addresses { get; set; }
     public ICollection<Order>? Orders { get; set; }
     public ICollection<RefreshToken>? RefreshTokens { get; set; }
@@ -19,6 +28,8 @@ public class User : BaseEntity
     public Cart? Cart { get; set; }
     public Wishlist? Wishlist { get; set; }
     public ICollection<Review>? Reviews { get; set; }
-    public ICollection<Shipment>? Shipments { get; set; }
-    public ICollection<Payment>? Payments { get; set; }
+
+    // Employee navigation property
+    public ICollection<EmployeeActivityLog>? ActivityLogs { get; set; }
+    public ICollection<ReviewReply>? ReviewReplies { get; set; }
 }

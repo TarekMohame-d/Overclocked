@@ -21,7 +21,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Description).HasMaxLength(500).IsRequired();
         builder.Property(p => p.Price).HasColumnType("decimal(8,2)").IsRequired();
         builder.Property(p => p.Discount).HasColumnType("decimal(2,2)").IsRequired();
-        builder.Property(p => p.Rating).HasColumnType("decimal(2,1)").IsRequired();
+        builder.Property(p => p.Rating).HasColumnType("double precision").HasDefaultValue(0.0);
         builder.Property(p => p.StockQuantity).IsRequired();
         builder.Property(p => p.IsDeleted).HasDefaultValue(false);
         builder.Property(c => c.CreatedAt).HasColumnType("timestamptz")

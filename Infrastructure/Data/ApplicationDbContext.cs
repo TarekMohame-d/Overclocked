@@ -1,19 +1,16 @@
-﻿using Domain.Entities;
+﻿using Application.Abstraction.Data;
+using Domain.Entities;
 using Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
-    public DbSet<EmployeeRole> EmployeeRoles { get; set; }
+    public DbSet<Role> Roles { get; set; }
     public DbSet<EmployeeActivityLog> EmployeeActivityLogs { get; set; }
-    public DbSet<Employee> Employees { get; set; }
-    public DbSet<Invoice> Invoices { get; set; }
-    public DbSet<InvoiceItem> InvoiceItems { get; set; }
-    public DbSet<InvoiceStatus> InvoiceStatuses { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<EmailConfirmationCode> EmailConfirmationCodes { get; set; }
     public DbSet<User> Users { get; set; }
@@ -51,6 +48,5 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(UserConfiguration).Assembly);
-
     }
 }

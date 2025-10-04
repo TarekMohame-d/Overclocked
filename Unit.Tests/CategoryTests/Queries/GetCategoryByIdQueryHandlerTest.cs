@@ -1,8 +1,8 @@
+using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Features.Category.Mapping;
 using Application.Features.Category.Queries.GetCategoryById;
 using ArchitectureTests.FakeData;
-using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
 using System.Net;

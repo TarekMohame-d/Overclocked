@@ -12,5 +12,4 @@ public class RefundItem : BaseEntity
     // Navigation properties
     public Refund? Refund { get; set; }
     public OrderItem? OrderItem { get; set; }
-    public InvoiceItem? InvoiceItem { get; set; }
 }

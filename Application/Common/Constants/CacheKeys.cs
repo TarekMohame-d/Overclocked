@@ -14,8 +14,7 @@ public static class CacheKeys
     public static string TagSet => "tags:pages";
 
     public static string Product(string id) => $"product-{id}";
-    public static string ProductPaged(int page, int pageSize, string orderByColumn, bool asc)
-        => $"products:page={page}:size={pageSize}:order={orderByColumn.ToLower()}:{(asc ? "asc" : "desc")}";
-    public static string TotalProductsCount => "products:count";
+    public static string ProductPaged(int page, int pageSize, string sortBy)
+        => $"products:page={page}:size={pageSize}:sortBy={sortBy}";
     public static string ProductSet => "products:pages";
 }

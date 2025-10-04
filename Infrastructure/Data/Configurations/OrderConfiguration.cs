@@ -13,6 +13,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Id).ValueGeneratedNever().IsRequired();
         builder.Property(o => o.UserId).IsRequired();
         builder.Property(o => o.StatusId).IsRequired();
+        builder.Property(o => o.ShippingCost).HasColumnType("decimal(5,2)").IsRequired();
         builder.Property(o => o.TotalPrice).HasColumnType("decimal(10,2)").IsRequired();
         builder.Property(o => o.CreatedAt).HasColumnType("timestamptz")
             .HasDefaultValueSql("NOW()");

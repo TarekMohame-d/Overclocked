@@ -6,6 +6,6 @@ public class TagProduct
     public Guid ProductId { get; set; }
 
     // Navigation Properties
-    public Tag? Tag { get; set; }
-    public Product? Product { get; set; }
+    public Tag Tag { get; set; } = null!;
+    public Product Product { get; set; } = null!;
 }
