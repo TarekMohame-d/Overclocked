@@ -5,15 +5,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Abstraction.Behaviors;
 
-public sealed class QueryCachingPipelineBehavior<TRequest, TResponse>
+public sealed class CachingPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : ICachedQuery<TResponse>
+    where TRequest : ICachedRequest<TResponse>
     where TResponse : Result
 {
     private readonly ICacheService _cacheService;
-    private readonly ILogger<QueryCachingPipelineBehavior<TRequest, TResponse>> _logger;
+    private readonly ILogger<CachingPipelineBehavior<TRequest, TResponse>> _logger;
 
-    public QueryCachingPipelineBehavior(ICacheService cacheService, ILogger<QueryCachingPipelineBehavior<TRequest, TResponse>> logger)
+    public CachingPipelineBehavior(ICacheService cacheService, ILogger<CachingPipelineBehavior<TRequest, TResponse>> logger)
     {
         _cacheService = cacheService;
         _logger = logger;

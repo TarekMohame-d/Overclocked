@@ -5,14 +5,14 @@ using Serilog.Context;
 
 namespace Application.Abstraction.Behaviors;
 
-public sealed class RequestLoggingPipelineBehavior<TRequest, TResponse>
+public sealed class LoggingPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest
     where TResponse : Result
 {
-    private readonly ILogger<RequestLoggingPipelineBehavior<TRequest, TResponse>> _logger;
+    private readonly ILogger<LoggingPipelineBehavior<TRequest, TResponse>> _logger;
 
-    public RequestLoggingPipelineBehavior(ILogger<RequestLoggingPipelineBehavior<TRequest, TResponse>> logger)
+    public LoggingPipelineBehavior(ILogger<LoggingPipelineBehavior<TRequest, TResponse>> logger)
     {
         _logger = logger;
     }

@@ -1,13 +1,15 @@
 using System.Data;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Services;
+using Application.Common.Results;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Abstraction.Behaviors;
 
 public sealed class TransactionalPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : ITransaction
+    where TRequest : ITransactionalRequest
+    where TResponse : Result
 {
     private readonly ILogger<TransactionalPipelineBehavior<TRequest, TResponse>> _logger;
     private readonly IUnitOfWork _unitOfWork;
@@ -28,7 +30,7 @@ public sealed class TransactionalPipelineBehavior<TRequest, TResponse>
         _logger.LogInformation("Beginning transaction for {RequestName}", requestName);
 
         IsolationLevel isolationLevel = request.IsolationLevel;
-        using IDbTransaction transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
+        using IDbTransaction transaction = await _unitOfWork.BeginTransactionAsync(isolationLevel, cancellationToken: cancellationToken);
 
         TResponse response = await next(cancellationToken);
 

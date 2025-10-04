@@ -9,13 +9,13 @@ namespace Unit.Tests.Behaviors;
 
 public class RequestLoggingPipelineBehaviorTests
 {
-    private readonly ILogger<RequestLoggingPipelineBehavior<TestRequest, Result<string>>> _loggerMock;
-    private readonly RequestLoggingPipelineBehavior<TestRequest, Result<string>> _behavior;
+    private readonly ILogger<LoggingPipelineBehavior<TestRequest, Result<string>>> _loggerMock;
+    private readonly LoggingPipelineBehavior<TestRequest, Result<string>> _behavior;
 
     public RequestLoggingPipelineBehaviorTests()
     {
-        _loggerMock = Substitute.For<ILogger<RequestLoggingPipelineBehavior<TestRequest, Result<string>>>>();
-        _behavior = new RequestLoggingPipelineBehavior<TestRequest, Result<string>>(_loggerMock);
+        _loggerMock = Substitute.For<ILogger<LoggingPipelineBehavior<TestRequest, Result<string>>>>();
+        _behavior = new LoggingPipelineBehavior<TestRequest, Result<string>>(_loggerMock);
     }
 
     [Fact]

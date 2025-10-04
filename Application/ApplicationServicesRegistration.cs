@@ -12,10 +12,10 @@ public static class ApplicationServicesRegistration
     {
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), includeInternalTypes: true);
 
-        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestLoggingPipelineBehavior<,>));
-        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingPipelineBehavior<,>));
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationalPipelineBehavior<,>));
         services.AddScoped(typeof(IPipelineBehavior<,>), typeof(TransactionalPipelineBehavior<,>));
-        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(QueryCachingPipelineBehavior<,>));
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(CachingPipelineBehavior<,>));
 
         services.AddScoped<IMediator, Mediator>();
         Assembly assemblyToScan = typeof(ApplicationServicesRegistration).Assembly;

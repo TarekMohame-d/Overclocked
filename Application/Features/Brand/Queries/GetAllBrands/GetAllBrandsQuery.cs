@@ -4,7 +4,7 @@ using Application.Common.Results;
 
 namespace Application.Features.Brand.Queries.GetAllBrands;
 
-public record GetAllBrandsQuery : ICachedQuery<Result<IEnumerable<BrandListDto>>>
+public record GetAllBrandsQuery : ICachedRequest<Result<IEnumerable<BrandListDto>>>
 {
     public string CacheKey => CacheKeys.AllBrands;
     public string? CacheSetKey => null;

@@ -3,7 +3,7 @@ using Application.Common.Constants;
 using Application.Common.Results;
 namespace Application.Features.Brand.Queries.GetBrandById;
 
-public record GetBrandByIdQuery : ICachedQuery<Result<BrandDto>>
+public record GetBrandByIdQuery : ICachedRequest<Result<BrandDto>>
 {
     public Guid Id { get; init; }
     public string CacheKey => CacheKeys.Brand(Id.ToString());
