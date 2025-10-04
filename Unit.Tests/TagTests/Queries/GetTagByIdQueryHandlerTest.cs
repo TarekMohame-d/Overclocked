@@ -1,10 +1,10 @@
 using System.Net;
+using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Features.Tag.Mapping;
 using Application.Features.Tag.Queries.GetTagById;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
-using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
 

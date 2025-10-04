@@ -116,11 +116,6 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasDefaultValueSql("NOW()");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
@@ -243,78 +238,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("EmailConfirmationCodes");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Employee", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("NormalizedUsername")
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasComputedColumnSql("UPPER(\"Username\")", true);
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("NormalizedUsername")
-                        .IsUnique();
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("Employees");
-                });
-
             modelBuilder.Entity("Domain.Entities.EmployeeActivityLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -341,171 +264,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("EmployeeActivityLogs");
                 });
 
-            modelBuilder.Entity("Domain.Entities.EmployeeRole", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("EmployeeRoles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "SuperAdmin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Admin"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "DataEntry"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Manager"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Employee"
-                        });
-                });
-
-            modelBuilder.Entity("Domain.Entities.Invoice", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)");
-
-                    b.Property<Guid>("EmployeeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("StatusId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("CustomerName");
-
-                    b.HasIndex("CustomerPhone");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("StatusId");
-
-                    b.ToTable("Invoices");
-                });
-
-            modelBuilder.Entity("Domain.Entities.InvoiceItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<Guid>("InvoiceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(8,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InvoiceId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("InvoiceItems");
-                });
-
-            modelBuilder.Entity("Domain.Entities.InvoiceStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("InvoiceStatuses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Paid"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Refunded"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "PartiallyRefunded"
-                        });
-                });
-
             modelBuilder.Entity("Domain.Entities.Order", b =>
                 {
                     b.Property<Guid>("Id")
@@ -515,6 +273,9 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamptz")
                         .HasDefaultValueSql("NOW()");
+
+                    b.Property<decimal>("ShippingCost")
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("StatusId")
                         .HasColumnType("integer");
@@ -560,6 +321,11 @@ namespace Infrastructure.Migrations
 
                     b.Property<Guid?>("ShipmentId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("Shipped")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(8,2)");
@@ -703,9 +469,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Amount");
@@ -716,8 +479,6 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.HasIndex("StatusId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Payments");
                 });
@@ -833,102 +594,62 @@ namespace Infrastructure.Migrations
                         new
                         {
                             Id = 2,
-                            Name = "ManageOrders"
+                            Name = "ManageUsers"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "ManageShipments"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "ManagePayments"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "SeeStatistics"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "CreateReports"
-                        },
-                        new
-                        {
-                            Id = 7,
                             Name = "ManageRolePermissions"
                         },
                         new
                         {
-                            Id = 8,
-                            Name = "ManageUserRoles"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "ManageCustomers"
-                        },
-                        new
-                        {
-                            Id = 10,
+                            Id = 4,
                             Name = "DeactivateUsers"
                         },
                         new
                         {
-                            Id = 11,
+                            Id = 5,
+                            Name = "ManageOrders"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "ManageShipments"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "ManagePayments"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "SeeStatistics"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "CreateReports"
+                        },
+                        new
+                        {
+                            Id = 10,
                             Name = "ManageReviews"
                         },
                         new
                         {
-                            Id = 12,
+                            Id = 11,
                             Name = "ReplyToReview"
                         },
                         new
                         {
-                            Id = 13,
+                            Id = 12,
                             Name = "RefundOrder"
                         },
                         new
                         {
-                            Id = 14,
-                            Name = "DeleteInvoices"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            Name = "AddEditDeleteProducts"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            Name = "AddEditDeleteBrands"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            Name = "AddEditDeleteCategories"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            Name = "AddEditDeleteTags"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            Name = "RefundInvoices"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            Name = "AddEditInvoices"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            Name = "ViewProducts"
+                            Id = 13,
+                            Name = "AddEditDelete"
                         });
                 });
 
@@ -976,8 +697,10 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(8,2)");
 
-                    b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(2,1)");
+                    b.Property<double>("Rating")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(0.0);
 
                     b.Property<int>("StockQuantity")
                         .HasColumnType("integer");
@@ -1057,14 +780,6 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("DeviceType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<Guid?>("EmployeeId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("timestamptz");
 
@@ -1077,14 +792,14 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DeviceId");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("UserId");
 
                     b.HasIndex("UserId", "DeviceId")
                         .IsUnique();
@@ -1102,13 +817,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<Guid>("EmployeeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("InvoiceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("OrderId")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("RefundAmount")
@@ -1132,9 +841,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("InvoiceId");
+                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("OrderId")
                         .IsUnique();
@@ -1172,9 +879,6 @@ namespace Infrastructure.Migrations
                         .HasDefaultValueSql("NOW()");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("InvoiceItemId")
-                        .IsUnique();
 
                     b.HasIndex("OrderItemId")
                         .IsUnique();
@@ -1308,6 +1012,46 @@ namespace Infrastructure.Migrations
                     b.ToTable("ReviewReplies");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "SuperAdmin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "DataEntry"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Customer"
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
                 {
                     b.Property<int>("RoleId")
@@ -1392,61 +1136,6 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            RoleId = 1,
-                            PermissionId = 14
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 15
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 16
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 17
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 18
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 19
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 20
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 21
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 2
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 3
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 4
-                        },
-                        new
-                        {
                             RoleId = 2,
                             PermissionId = 5
                         },
@@ -1492,88 +1181,8 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            RoleId = 2,
-                            PermissionId = 14
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 15
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 16
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 17
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 18
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 19
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 20
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 21
-                        },
-                        new
-                        {
                             RoleId = 3,
-                            PermissionId = 15
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 16
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 17
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 18
-                        },
-                        new
-                        {
-                            RoleId = 4,
-                            PermissionId = 19
-                        },
-                        new
-                        {
-                            RoleId = 4,
-                            PermissionId = 20
-                        },
-                        new
-                        {
-                            RoleId = 4,
-                            PermissionId = 21
-                        },
-                        new
-                        {
-                            RoleId = 5,
-                            PermissionId = 20
-                        },
-                        new
-                        {
-                            RoleId = 5,
-                            PermissionId = 21
+                            PermissionId = 13
                         });
                 });
 
@@ -1601,6 +1210,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("EstimatedDeliveryDate")
                         .HasColumnType("timestamptz");
 
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime?>("ShippedAt")
                         .HasColumnType("timestamptz");
 
@@ -1616,18 +1228,15 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
 
                     b.HasIndex("CarrierName");
 
-                    b.HasIndex("StatusId");
+                    b.HasIndex("OrderId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("StatusId");
 
                     b.ToTable("Shipments");
                 });
@@ -1820,6 +1429,11 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -1834,6 +1448,9 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(25)
                         .HasColumnType("character varying(25)");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamptz")
@@ -1846,6 +1463,8 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("Phone")
                         .IsUnique();
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
@@ -1953,64 +1572,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Employee", b =>
-                {
-                    b.HasOne("Domain.Entities.EmployeeRole", "Role")
-                        .WithMany("Employees")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("Domain.Entities.EmployeeActivityLog", b =>
                 {
-                    b.HasOne("Domain.Entities.Employee", "Employee")
+                    b.HasOne("Domain.Entities.User", "Employee")
                         .WithMany("ActivityLogs")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Employee");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Invoice", b =>
-                {
-                    b.HasOne("Domain.Entities.Employee", "Employee")
-                        .WithMany("Invoices")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.InvoiceStatus", "InvoiceStatus")
-                        .WithMany("Invoices")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("InvoiceStatus");
-                });
-
-            modelBuilder.Entity("Domain.Entities.InvoiceItem", b =>
-                {
-                    b.HasOne("Domain.Entities.Invoice", "Invoice")
-                        .WithMany("InvoiceItems")
-                        .HasForeignKey("InvoiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("InvoiceItems")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Invoice");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Domain.Entities.Order", b =>
@@ -2078,19 +1648,11 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("Payments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Order");
 
                     b.Navigation("PaymentMethod");
 
                     b.Navigation("PaymentStatus");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
@@ -2125,48 +1687,28 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
-                    b.HasOne("Domain.Entities.Employee", "Employee")
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("Employee");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Refund", b =>
                 {
-                    b.HasOne("Domain.Entities.Employee", "Employee")
-                        .WithMany("Refunds")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Invoice", "Invoice")
-                        .WithMany("Refunds")
-                        .HasForeignKey("InvoiceId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Domain.Entities.Order", "Order")
                         .WithOne("Refund")
                         .HasForeignKey("Domain.Entities.Refund", "OrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.RefundStatus", "RefundStatus")
                         .WithMany("Refunds")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Invoice");
 
                     b.Navigation("Order");
 
@@ -2175,10 +1717,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.RefundItem", b =>
                 {
-                    b.HasOne("Domain.Entities.InvoiceItem", "InvoiceItem")
-                        .WithOne()
-                        .HasForeignKey("Domain.Entities.RefundItem", "InvoiceItemId");
-
                     b.HasOne("Domain.Entities.OrderItem", "OrderItem")
                         .WithOne()
                         .HasForeignKey("Domain.Entities.RefundItem", "OrderItemId");
@@ -2188,8 +1726,6 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("RefundId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("InvoiceItem");
 
                     b.Navigation("OrderItem");
 
@@ -2217,7 +1753,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.ReviewReply", b =>
                 {
-                    b.HasOne("Domain.Entities.Employee", "Employee")
+                    b.HasOne("Domain.Entities.User", "Employee")
                         .WithMany("ReviewReplies")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2242,15 +1778,15 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.EmployeeRole", "EmployeeRole")
+                    b.HasOne("Domain.Entities.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("EmployeeRole");
-
                     b.Navigation("Permission");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Domain.Entities.Shipment", b =>
@@ -2261,23 +1797,23 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.Order", "Order")
+                        .WithMany("Shipments")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.ShipmentStatus", "ShipmentStatus")
                         .WithMany("Shipments")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("Shipments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Address");
 
-                    b.Navigation("ShipmentStatus");
+                    b.Navigation("Order");
 
-                    b.Navigation("User");
+                    b.Navigation("ShipmentStatus");
                 });
 
             modelBuilder.Entity("Domain.Entities.Specification", b =>
@@ -2308,6 +1844,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("Domain.Entities.User", b =>
+                {
+                    b.HasOne("Domain.Entities.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Domain.Entities.Wishlist", b =>
@@ -2360,38 +1907,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Employee", b =>
-                {
-                    b.Navigation("ActivityLogs");
-
-                    b.Navigation("Invoices");
-
-                    b.Navigation("RefreshTokens");
-
-                    b.Navigation("Refunds");
-
-                    b.Navigation("ReviewReplies");
-                });
-
-            modelBuilder.Entity("Domain.Entities.EmployeeRole", b =>
-                {
-                    b.Navigation("Employees");
-
-                    b.Navigation("RolePermissions");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Invoice", b =>
-                {
-                    b.Navigation("InvoiceItems");
-
-                    b.Navigation("Refunds");
-                });
-
-            modelBuilder.Entity("Domain.Entities.InvoiceStatus", b =>
-                {
-                    b.Navigation("Invoices");
-                });
-
             modelBuilder.Entity("Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
@@ -2399,6 +1914,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("Payment");
 
                     b.Navigation("Refund");
+
+                    b.Navigation("Shipments");
                 });
 
             modelBuilder.Entity("Domain.Entities.OrderStatus", b =>
@@ -2425,8 +1942,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("CartItems");
 
-                    b.Navigation("InvoiceItems");
-
                     b.Navigation("OrderItems");
 
                     b.Navigation("ProductImages");
@@ -2452,7 +1967,15 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Review", b =>
                 {
-                    b.Navigation("ReviewReply");
+                    b.Navigation("ReviewReply")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entities.Role", b =>
+                {
+                    b.Navigation("RolePermissions");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Domain.Entities.Shipment", b =>
@@ -2472,6 +1995,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
+                    b.Navigation("ActivityLogs");
+
                     b.Navigation("Addresses");
 
                     b.Navigation("Cart");
@@ -2480,13 +2005,11 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("Orders");
 
-                    b.Navigation("Payments");
-
                     b.Navigation("RefreshTokens");
 
-                    b.Navigation("Reviews");
+                    b.Navigation("ReviewReplies");
 
-                    b.Navigation("Shipments");
+                    b.Navigation("Reviews");
 
                     b.Navigation("Wishlist");
                 });

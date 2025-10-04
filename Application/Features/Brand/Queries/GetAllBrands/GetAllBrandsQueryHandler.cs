@@ -1,7 +1,7 @@
 ﻿using Application.Abstraction.Messaging;
+using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Features.Brand.Mapping;
-using Domain.Repositories;
 
 namespace Application.Features.Brand.Queries.GetAllBrands;
 

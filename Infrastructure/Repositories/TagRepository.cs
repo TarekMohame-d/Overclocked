@@ -1,7 +1,7 @@
-using System.Linq.Expressions;
+using Application.Abstraction.Repositories;
 using Domain.Entities;
-using Domain.Repositories;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
@@ -16,15 +16,31 @@ public class TagRepository : GenericRepository<Tag>, ITagRepository
 
     public IQueryable<Tag> GetTagsQuery(string? sortBy)
     {
-        IQueryable<Tag> query = _context.Tags.AsQueryable();
+        IQueryable<Tag> query = _context.Tags.AsNoTracking();
 
-        query = sortBy switch
+        if (string.IsNullOrWhiteSpace(sortBy))
+            return query.OrderBy(p => p.Id);
+
+        var parts = sortBy.Split('_');
+        if (parts.Length != 2)
+            return query.OrderBy(p => p.Id);
+
+        var field = parts[0].ToLowerInvariant();
+        var direction = parts[1].ToLowerInvariant();
+        bool isDescending = direction == "desc";
+
+        switch (field)
         {
-            "name_asc" => query.OrderBy(t => t.Name),
-            "name_desc" => query.OrderByDescending(t => t.Name),
-            null => query.OrderBy(t => t.Id),
-            _ => query,
-        };
+            case "name":
+                query = isDescending
+                    ? query.OrderByDescending(p => p.Name)
+                    : query.OrderBy(p => p.Name);
+                break;
+
+            default:
+                query = query.OrderBy(p => p.Id);
+                break;
+        }
 
         return query;
     }

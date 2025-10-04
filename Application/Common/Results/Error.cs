@@ -40,4 +40,8 @@ public static class Errors
     // Tag errors
     public static readonly Error TagNotFound = new(nameof(TagNotFound), ErrorType.NotFound, "Tag not found.");
     public static readonly Error TagNameAlreadyExists = new(nameof(TagNameAlreadyExists), ErrorType.Conflict, "Tag name already exists.");
+
+    // Product errors
+    public static readonly Error ProductNotFound = new(nameof(ProductNotFound), ErrorType.NotFound, "Product not found.");
+    public static readonly Error ProductNameAlreadyExists = new(nameof(ProductNameAlreadyExists), ErrorType.Conflict, "Product name already exists.");
 }

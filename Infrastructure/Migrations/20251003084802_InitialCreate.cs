@@ -47,30 +47,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EmployeeRoles",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmployeeRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "InvoiceStatuses",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_InvoiceStatuses", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "OrderStatuses",
                 columns: table => new
                 {
@@ -133,6 +109,18 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ShipmentStatuses",
                 columns: table => new
                 {
@@ -160,25 +148,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FirstName = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    LastName = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: false),
-                    Phone = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
@@ -191,7 +160,7 @@ namespace Infrastructure.Migrations
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Price = table.Column<decimal>(type: "numeric(8,2)", nullable: false),
                     Discount = table.Column<decimal>(type: "numeric(2,2)", nullable: false),
-                    Rating = table.Column<decimal>(type: "numeric(2,1)", nullable: false),
+                    Rating = table.Column<double>(type: "double precision", nullable: false, defaultValue: 0.0),
                     StockQuantity = table.Column<int>(type: "integer", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
@@ -215,34 +184,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Employees",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false),
-                    Username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    NormalizedUsername = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, computedColumnSql: "UPPER(\"Username\")", stored: true),
-                    FirstName = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    LastName = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: false),
-                    Phone = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: true),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Employees", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Employees_EmployeeRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "EmployeeRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RolePermissions",
                 columns: table => new
                 {
@@ -253,129 +194,44 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_RolePermissions", x => new { x.RoleId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_RolePermissions_EmployeeRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "EmployeeRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_RolePermissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
                         principalTable: "Permissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Addresses",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    City = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
-                    Street = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Addresses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Addresses_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Carts",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Carts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Carts_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        name: "FK_RolePermissions_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "EmailConfirmationCodes",
+                name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CodeHash = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: false),
-                    IsUsed = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    ExpiredAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    Phone = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmailConfirmationCodes", x => x.UserId);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EmailConfirmationCodes_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Orders",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    StatusId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Orders_OrderStatuses_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "OrderStatuses",
+                        name: "FK_Users_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Orders_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Wishlists",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Wishlists", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Wishlists_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -397,35 +253,6 @@ namespace Infrastructure.Migrations
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Reviews",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    Rating = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reviews", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Reviews_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Reviews_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -476,6 +303,70 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Addresses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    City = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    Street = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Addresses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Addresses_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Carts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Carts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Carts_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmailConfirmationCodes",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CodeHash = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: false),
+                    IsUsed = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    ExpiredAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailConfirmationCodes", x => x.UserId);
+                    table.ForeignKey(
+                        name: "FK_EmailConfirmationCodes_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EmployeeActivityLogs",
                 columns: table => new
                 {
@@ -488,39 +379,38 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_EmployeeActivityLogs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EmployeeActivityLogs_Employees_EmployeeId",
+                        name: "FK_EmployeeActivityLogs_Users_EmployeeId",
                         column: x => x.EmployeeId,
-                        principalTable: "Employees",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Invoices",
+                name: "Orders",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StatusId = table.Column<int>(type: "integer", nullable: false),
-                    CustomerName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    CustomerPhone = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ShippingCost = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     TotalPrice = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    StatusId = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Invoices", x => x.Id);
+                    table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Invoices_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
+                        name: "FK_Orders_OrderStatuses_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "OrderStatuses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Invoices_InvoiceStatuses_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "InvoiceStatuses",
+                        name: "FK_Orders_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -530,10 +420,8 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
-                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     DeviceId = table.Column<string>(type: "text", nullable: false),
-                    DeviceType = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     TokenHash = table.Column<string>(type: "text", nullable: false),
                     ExpiredAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
@@ -543,12 +431,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_RefreshTokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RefreshTokens_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_RefreshTokens_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
@@ -557,42 +439,51 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Shipments",
+                name: "Reviews",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AddressId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StatusId = table.Column<int>(type: "integer", nullable: false),
-                    CarrierName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    TrackingNumber = table.Column<string>(type: "text", nullable: false),
-                    ShippedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    EstimatedDeliveryDate = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    DeliveredAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Rating = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
                     UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Shipments", x => x.Id);
+                    table.PrimaryKey("PK_Reviews", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Shipments_Addresses_AddressId",
-                        column: x => x.AddressId,
-                        principalTable: "Addresses",
+                        name: "FK_Reviews_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Shipments_ShipmentStatuses_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "ShipmentStatuses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Shipments_Users_UserId",
+                        name: "FK_Reviews_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Wishlists",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wishlists", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Wishlists_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -629,7 +520,6 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     StatusId = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     OrderId = table.Column<Guid>(type: "uuid", nullable: false),
                     MethodId = table.Column<int>(type: "integer", nullable: false),
                     TransactionId = table.Column<string>(type: "text", nullable: true),
@@ -658,9 +548,100 @@ namespace Infrastructure.Migrations
                         principalTable: "PaymentStatuses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Refunds",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StatusId = table.Column<int>(type: "integer", nullable: false),
+                    RefundStatusType = table.Column<int>(type: "integer", nullable: false),
+                    RefundAmount = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    RefundReason = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Refunds", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Payments_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Refunds_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Refunds_RefundStatuses_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "RefundStatuses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Shipments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AddressId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StatusId = table.Column<int>(type: "integer", nullable: false),
+                    CarrierName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    TrackingNumber = table.Column<string>(type: "text", nullable: false),
+                    ShippedAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    EstimatedDeliveryDate = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    DeliveredAt = table.Column<DateTime>(type: "timestamptz", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Shipments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Shipments_Addresses_AddressId",
+                        column: x => x.AddressId,
+                        principalTable: "Addresses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Shipments_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Shipments_ShipmentStatuses_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "ShipmentStatuses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReviewReplies",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReviewId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Reply = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReviewReplies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReviewReplies_Reviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "Reviews",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ReviewReplies_Users_EmployeeId",
+                        column: x => x.EmployeeId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -694,107 +675,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ReviewReplies",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ReviewId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Reply = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ReviewReplies", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ReviewReplies_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ReviewReplies_Reviews_ReviewId",
-                        column: x => x.ReviewId,
-                        principalTable: "Reviews",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "InvoiceItems",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    InvoiceId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Quantity = table.Column<int>(type: "integer", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "numeric(8,2)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_InvoiceItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_InvoiceItems_Invoices_InvoiceId",
-                        column: x => x.InvoiceId,
-                        principalTable: "Invoices",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_InvoiceItems_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Refunds",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uuid", nullable: true),
-                    InvoiceId = table.Column<Guid>(type: "uuid", nullable: true),
-                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StatusId = table.Column<int>(type: "integer", nullable: false),
-                    RefundStatusType = table.Column<int>(type: "integer", nullable: false),
-                    RefundAmount = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    RefundReason = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Refunds", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Refunds_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Refunds_Invoices_InvoiceId",
-                        column: x => x.InvoiceId,
-                        principalTable: "Invoices",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Refunds_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Refunds_RefundStatuses_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "RefundStatuses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "OrderItems",
                 columns: table => new
                 {
@@ -802,6 +682,7 @@ namespace Infrastructure.Migrations
                     OrderId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     ShipmentId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Shipped = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "numeric(8,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
@@ -846,11 +727,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_RefundItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RefundItems_InvoiceItems_InvoiceItemId",
-                        column: x => x.InvoiceItemId,
-                        principalTable: "InvoiceItems",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_RefundItems_OrderItems_OrderItemId",
                         column: x => x.OrderItemId,
                         principalTable: "OrderItems",
@@ -861,28 +737,6 @@ namespace Infrastructure.Migrations
                         principalTable: "Refunds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "EmployeeRoles",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 1, "SuperAdmin" },
-                    { 2, "Admin" },
-                    { 3, "DataEntry" },
-                    { 4, "Manager" },
-                    { 5, "Employee" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "InvoiceStatuses",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 1, "Paid" },
-                    { 2, "Refunded" },
-                    { 3, "PartiallyRefunded" }
                 });
 
             migrationBuilder.InsertData(
@@ -935,26 +789,18 @@ namespace Infrastructure.Migrations
                 values: new object[,]
                 {
                     { 1, "SuperAdmin" },
-                    { 2, "ManageOrders" },
-                    { 3, "ManageShipments" },
-                    { 4, "ManagePayments" },
-                    { 5, "SeeStatistics" },
-                    { 6, "CreateReports" },
-                    { 7, "ManageRolePermissions" },
-                    { 8, "ManageUserRoles" },
-                    { 9, "ManageCustomers" },
-                    { 10, "DeactivateUsers" },
-                    { 11, "ManageReviews" },
-                    { 12, "ReplyToReview" },
-                    { 13, "RefundOrder" },
-                    { 14, "DeleteInvoices" },
-                    { 15, "AddEditDeleteProducts" },
-                    { 16, "AddEditDeleteBrands" },
-                    { 17, "AddEditDeleteCategories" },
-                    { 18, "AddEditDeleteTags" },
-                    { 19, "RefundInvoices" },
-                    { 20, "AddEditInvoices" },
-                    { 21, "ViewProducts" }
+                    { 2, "ManageUsers" },
+                    { 3, "ManageRolePermissions" },
+                    { 4, "DeactivateUsers" },
+                    { 5, "ManageOrders" },
+                    { 6, "ManageShipments" },
+                    { 7, "ManagePayments" },
+                    { 8, "SeeStatistics" },
+                    { 9, "CreateReports" },
+                    { 10, "ManageReviews" },
+                    { 11, "ReplyToReview" },
+                    { 12, "RefundOrder" },
+                    { 13, "AddEditDelete" }
                 });
 
             migrationBuilder.InsertData(
@@ -967,6 +813,17 @@ namespace Infrastructure.Migrations
                     { 3, "CanNotBeRefunded" },
                     { 4, "Failed" },
                     { 5, "Cancelled" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "SuperAdmin" },
+                    { 2, "Admin" },
+                    { 3, "DataEntry" },
+                    { 4, "Customer" }
                 });
 
             migrationBuilder.InsertData(
@@ -1002,17 +859,6 @@ namespace Infrastructure.Migrations
                     { 11, 1 },
                     { 12, 1 },
                     { 13, 1 },
-                    { 14, 1 },
-                    { 15, 1 },
-                    { 16, 1 },
-                    { 17, 1 },
-                    { 18, 1 },
-                    { 19, 1 },
-                    { 20, 1 },
-                    { 21, 1 },
-                    { 2, 2 },
-                    { 3, 2 },
-                    { 4, 2 },
                     { 5, 2 },
                     { 6, 2 },
                     { 7, 2 },
@@ -1022,23 +868,7 @@ namespace Infrastructure.Migrations
                     { 11, 2 },
                     { 12, 2 },
                     { 13, 2 },
-                    { 14, 2 },
-                    { 15, 2 },
-                    { 16, 2 },
-                    { 17, 2 },
-                    { 18, 2 },
-                    { 19, 2 },
-                    { 20, 2 },
-                    { 21, 2 },
-                    { 15, 3 },
-                    { 16, 3 },
-                    { 17, 3 },
-                    { 18, 3 },
-                    { 19, 4 },
-                    { 20, 4 },
-                    { 21, 4 },
-                    { 20, 5 },
-                    { 21, 5 }
+                    { 13, 3 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1108,75 +938,6 @@ namespace Infrastructure.Migrations
                 column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmployeeRoles_Name",
-                table: "EmployeeRoles",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Employees_IsActive",
-                table: "Employees",
-                column: "IsActive");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Employees_NormalizedUsername",
-                table: "Employees",
-                column: "NormalizedUsername",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Employees_RoleId",
-                table: "Employees",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Employees_Username",
-                table: "Employees",
-                column: "Username",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_InvoiceItems_InvoiceId",
-                table: "InvoiceItems",
-                column: "InvoiceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_InvoiceItems_ProductId",
-                table: "InvoiceItems",
-                column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoices_CreatedAt",
-                table: "Invoices",
-                column: "CreatedAt");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoices_CustomerName",
-                table: "Invoices",
-                column: "CustomerName");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoices_CustomerPhone",
-                table: "Invoices",
-                column: "CustomerPhone");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoices_EmployeeId",
-                table: "Invoices",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoices_StatusId",
-                table: "Invoices",
-                column: "StatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_InvoiceStatuses_Name",
-                table: "InvoiceStatuses",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId",
                 table: "OrderItems",
                 column: "OrderId");
@@ -1233,11 +994,6 @@ namespace Infrastructure.Migrations
                 name: "IX_Payments_StatusId",
                 table: "Payments",
                 column: "StatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Payments_UserId",
-                table: "Payments",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentStatuses_Name",
@@ -1304,20 +1060,14 @@ namespace Infrastructure.Migrations
                 column: "DeviceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RefreshTokens_EmployeeId",
+                name: "IX_RefreshTokens_UserId",
                 table: "RefreshTokens",
-                column: "EmployeeId");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_UserId_DeviceId",
                 table: "RefreshTokens",
                 columns: new[] { "UserId", "DeviceId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RefundItems_InvoiceItemId",
-                table: "RefundItems",
-                column: "InvoiceItemId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -1332,14 +1082,9 @@ namespace Infrastructure.Migrations
                 column: "RefundId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Refunds_EmployeeId",
+                name: "IX_Refunds_CreatedAt",
                 table: "Refunds",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Refunds_InvoiceId",
-                table: "Refunds",
-                column: "InvoiceId");
+                column: "CreatedAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Refunds_OrderId",
@@ -1395,6 +1140,12 @@ namespace Infrastructure.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Roles_Name",
+                table: "Roles",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Shipments_AddressId",
                 table: "Shipments",
                 column: "AddressId");
@@ -1405,14 +1156,14 @@ namespace Infrastructure.Migrations
                 column: "CarrierName");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Shipments_OrderId",
+                table: "Shipments",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Shipments_StatusId",
                 table: "Shipments",
                 column: "StatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Shipments_UserId",
-                table: "Shipments",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ShipmentStatuses_Name",
@@ -1470,6 +1221,11 @@ namespace Infrastructure.Migrations
                 table: "Users",
                 column: "Phone",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_RoleId",
+                table: "Users",
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_WishlistItems_ProductId",
@@ -1537,9 +1293,6 @@ namespace Infrastructure.Migrations
                 name: "PaymentStatuses");
 
             migrationBuilder.DropTable(
-                name: "InvoiceItems");
-
-            migrationBuilder.DropTable(
                 name: "OrderItems");
 
             migrationBuilder.DropTable(
@@ -1561,12 +1314,6 @@ namespace Infrastructure.Migrations
                 name: "Shipments");
 
             migrationBuilder.DropTable(
-                name: "Invoices");
-
-            migrationBuilder.DropTable(
-                name: "Orders");
-
-            migrationBuilder.DropTable(
                 name: "RefundStatuses");
 
             migrationBuilder.DropTable(
@@ -1576,16 +1323,10 @@ namespace Infrastructure.Migrations
                 name: "Addresses");
 
             migrationBuilder.DropTable(
+                name: "Orders");
+
+            migrationBuilder.DropTable(
                 name: "ShipmentStatuses");
-
-            migrationBuilder.DropTable(
-                name: "Employees");
-
-            migrationBuilder.DropTable(
-                name: "InvoiceStatuses");
-
-            migrationBuilder.DropTable(
-                name: "OrderStatuses");
 
             migrationBuilder.DropTable(
                 name: "Brands");
@@ -1594,10 +1335,13 @@ namespace Infrastructure.Migrations
                 name: "Categories");
 
             migrationBuilder.DropTable(
+                name: "OrderStatuses");
+
+            migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "EmployeeRoles");
+                name: "Roles");
         }
     }
 }

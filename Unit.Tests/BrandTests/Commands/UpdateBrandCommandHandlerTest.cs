@@ -4,10 +4,10 @@ using Application.Features.Brand.Commands.UpdateBrand;
 using ArchitectureTests.FakeData;
 using NSubstitute;
 using Shouldly;
-using Domain.Repositories;
 using Application.Abstraction.Messaging;
 using Domain.Entities;
 using Application.Abstraction.Services;
+using Application.Abstraction.Repositories;
 
 namespace Unit.Tests.BrandTests.Commands;
 

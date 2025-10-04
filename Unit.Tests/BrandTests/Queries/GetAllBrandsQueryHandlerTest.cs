@@ -1,8 +1,8 @@
 using System.Net;
+using Application.Abstraction.Repositories;
 using Application.Features.Brand.Mapping;
 using Application.Features.Brand.Queries.GetAllBrands;
 using ArchitectureTests.FakeData;
-using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
 

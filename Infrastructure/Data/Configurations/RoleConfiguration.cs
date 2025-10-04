@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations;
 
-public class EmployeeRoleConfiguration : IEntityTypeConfiguration<EmployeeRole>
+public class RoleConfiguration : IEntityTypeConfiguration<Role>
 {
-    public void Configure(EntityTypeBuilder<EmployeeRole> builder)
+    public void Configure(EntityTypeBuilder<Role> builder)
     {
         // Attributes
         builder.HasKey(r => r.Id);
@@ -24,9 +24,9 @@ public class EmployeeRoleConfiguration : IEntityTypeConfiguration<EmployeeRole>
         builder.HasData(GenerateRoles());
     }
 
-    private static IEnumerable<EmployeeRole> GenerateRoles()
+    private static IEnumerable<Role> GenerateRoles()
     {
-        return Enum.GetValues<EmployeeRoleType>().Select(role => new EmployeeRole
+        return Enum.GetValues<RoleType>().Select(role => new Role
         {
             Id = (int)role,
             Name = role.ToString()

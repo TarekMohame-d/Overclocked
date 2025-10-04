@@ -1,10 +1,10 @@
 using System.Net;
+using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Features.Brand.Mapping;
 using Application.Features.Brand.Queries.GetBrandById;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
-using Domain.Repositories;
 using NSubstitute;
 using Shouldly;
 

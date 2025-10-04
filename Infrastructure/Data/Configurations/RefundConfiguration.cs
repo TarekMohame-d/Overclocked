@@ -11,10 +11,8 @@ public class RefundConfiguration : IEntityTypeConfiguration<Refund>
         // Attributes
         builder.HasKey(r => r.Id);
         builder.Property(r => r.Id).ValueGeneratedNever().IsRequired();
-        builder.Property(r => r.EmployeeId).IsRequired();
         builder.Property(r => r.StatusId).IsRequired();
-        builder.Property(r => r.InvoiceId).IsRequired(false);
-        builder.Property(r => r.OrderId).IsRequired(false);
+        builder.Property(r => r.OrderId).IsRequired();
         builder.Property(r => r.RefundAmount).HasColumnType("decimal(10,2)").IsRequired();
         builder.Property(r => r.RefundReason).HasMaxLength(100).IsRequired();
         builder.Property(r => r.CreatedAt).HasColumnType("timestamptz")
@@ -25,19 +23,9 @@ public class RefundConfiguration : IEntityTypeConfiguration<Refund>
         builder.Ignore(r => r.RefundStatus);
 
         // Relationships
-        builder.HasOne(r => r.Employee)
-            .WithMany(e => e.Refunds)
-            .HasForeignKey(r => r.EmployeeId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.HasOne(r => r.Order)
             .WithOne(o => o.Refund)
             .HasForeignKey<Refund>(r => r.OrderId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(r => r.Invoice)
-            .WithMany(i => i.Refunds)
-            .HasForeignKey(r => r.InvoiceId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(r => r.RefundStatus)
@@ -46,8 +34,8 @@ public class RefundConfiguration : IEntityTypeConfiguration<Refund>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
-        builder.HasIndex(r => r.EmployeeId);
         builder.HasIndex(r => r.StatusId);
         builder.HasIndex(r => r.OrderId);
+        builder.HasIndex(r => r.CreatedAt);
     }
 }

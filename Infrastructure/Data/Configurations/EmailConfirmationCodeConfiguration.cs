@@ -21,7 +21,7 @@ public class EmailConfirmationCodeConfiguration : IEntityTypeConfiguration<Email
 
         // Relationships
         builder.HasOne(ecc => ecc.User)
-            .WithOne(c => c.EmailConfirmationCode)
+            .WithOne(u => u.EmailConfirmationCode)
             .HasForeignKey<EmailConfirmationCode>(ecc => ecc.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 

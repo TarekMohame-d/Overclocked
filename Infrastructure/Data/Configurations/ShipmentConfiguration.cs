@@ -11,7 +11,7 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
         // Attributes
         builder.HasKey(s => s.Id);
         builder.Property(s => s.Id).ValueGeneratedNever().IsRequired();
-        builder.Property(s => s.UserId).IsRequired();
+        builder.Property(s => s.OrderId).IsRequired();
         builder.Property(s => s.AddressId).IsRequired();
         builder.Property(s => s.StatusId).IsRequired();
         builder.Property(s => s.CarrierName).HasMaxLength(50).IsRequired();
@@ -35,9 +35,9 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
             .HasForeignKey(s => s.AddressId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(s => s.User)
-            .WithMany(u => u.Shipments)
-            .HasForeignKey(s => s.UserId)
+        builder.HasOne(s => s.Order)
+            .WithMany(o => o.Shipments)
+            .HasForeignKey(s => s.OrderId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(s => s.ShipmentStatus)
@@ -46,7 +46,7 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
-        builder.HasIndex(s => s.UserId);
+        builder.HasIndex(s => s.OrderId);
         builder.HasIndex(s => s.AddressId);
         builder.HasIndex(s => s.CarrierName);
         builder.HasIndex(s => s.StatusId);

@@ -7,7 +7,7 @@ namespace Application.Abstraction.Behaviors;
 
 public sealed class TransactionalPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : ITransactionalCommand<TResponse>
+    where TRequest : ITransaction
 {
     private readonly ILogger<TransactionalPipelineBehavior<TRequest, TResponse>> _logger;
     private readonly IUnitOfWork _unitOfWork;
@@ -27,6 +27,7 @@ public sealed class TransactionalPipelineBehavior<TRequest, TResponse>
 
         _logger.LogInformation("Beginning transaction for {RequestName}", requestName);
 
+        IsolationLevel isolationLevel = request.IsolationLevel;
         using IDbTransaction transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
 
         TResponse response = await next(cancellationToken);

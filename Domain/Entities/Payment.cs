@@ -11,7 +11,6 @@ public class Payment : BaseEntity
         get => (PaymentStatusType)StatusId;
         set => StatusId = (int)value;
     }
-    public Guid UserId { get; set; }
     public Guid OrderId { get; set; }
     public int MethodId { get; set; }
     public PaymentMethodType PaymentMethodType
@@ -26,5 +25,4 @@ public class Payment : BaseEntity
     public PaymentMethod? PaymentMethod { get; set; }
     public PaymentStatus? PaymentStatus { get; set; }
     public Order? Order { get; set; }
-    public User? User { get; set; }
 }

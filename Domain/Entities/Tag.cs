@@ -8,5 +8,5 @@ public class Tag : BaseEntity
     public string NormalizedName { get; set; } = default!;
 
     // Navigation Properties
-    public ICollection<TagProduct>? TagProducts { get; set; }
+    public ICollection<TagProduct> TagProducts { get; set; } = [];
 }

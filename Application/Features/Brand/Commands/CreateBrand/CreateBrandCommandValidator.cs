@@ -1,4 +1,4 @@
-﻿using Domain.Repositories;
+﻿using Application.Abstraction.Repositories;
 using FluentValidation;
 
 namespace Application.Features.Brand.Commands.CreateBrand;

@@ -69,7 +69,7 @@ public class GetPagedTagsQueryValidationTest
     }
 
     [Fact]
-    public async Task TagValidator_WhenSortByIsNoValid_ShouldReturnError()
+    public async Task ProductValidator_WhenFieldSortByIsNotValid_ShouldReturnError()
     {
         // Arrange
         var validator = new GetPagedTagsQueryValidation();
@@ -77,7 +77,28 @@ public class GetPagedTagsQueryValidationTest
         {
             Page = 1,
             PageSize = 10,
-            SortBy = "wrong"
+            SortBy = "wrong_asc"
+        };
+
+        // Act
+        var result = await validator.ValidateAsync(query);
+
+        // Assert
+        result.IsValid.ShouldBeFalse();
+        result.Errors.ShouldNotBeEmpty();
+        result.Errors.Count().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task ProductValidator_WhenDirectionSortByIsNotValid_ShouldReturnError()
+    {
+        // Arrange
+        var validator = new GetPagedTagsQueryValidation();
+        var query = new GetPagedTagsQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            SortBy = "name_wrong"
         };
 
         // Act

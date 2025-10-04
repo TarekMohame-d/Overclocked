@@ -6,8 +6,6 @@ namespace Domain.Entities;
 public class Refund : BaseEntity
 {
     public Guid? OrderId { get; set; }
-    public Guid? InvoiceId { get; set; }
-    public Guid EmployeeId { get; set; }
     public int StatusId { get; set; }
     public RefundStatusType RefundStatusType
     {
@@ -19,8 +17,6 @@ public class Refund : BaseEntity
 
     // Navigation properties
     public Order? Order { get; set; }
-    public Invoice? Invoice { get; set; }
-    public Employee? Employee { get; set; }
     public RefundStatus? RefundStatus { get; set; }
     public ICollection<RefundItem>? RefundItems { get; set; }
 }

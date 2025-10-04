@@ -3,7 +3,10 @@
 public enum PermissionType
 {
     // === Super Admin ===
-    SuperAdmin = 1, // + all below
+    SuperAdmin = 1,
+    ManageUsers,
+    ManageRolePermissions,
+    DeactivateUsers, // + all below
 
     // === Admin ===
     ManageOrders,
@@ -11,25 +14,10 @@ public enum PermissionType
     ManagePayments,
     SeeStatistics,
     CreateReports,
-    ManageRolePermissions,
-    ManageUserRoles,
-    ManageCustomers,
-    DeactivateUsers,
     ManageReviews,
     ReplyToReview,
-    RefundOrder,
-    DeleteInvoices, // + all below
+    RefundOrder, // + all below
 
     // === Data Entry ===
-    AddEditDeleteProducts,
-    AddEditDeleteBrands,
-    AddEditDeleteCategories,
-    AddEditDeleteTags,
-
-    // === Manager ===
-    RefundInvoices, // + all below
-
-    // === Employee ===
-    AddEditInvoices,
-    ViewProducts
+    AddEditDelete
 }

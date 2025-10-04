@@ -1,9 +1,9 @@
 using Application.Abstraction.Messaging;
+using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
 using Application.Common.Results;
 using Application.Features.Tag.Commands.CreateTag.Notifications;
 using Application.Features.Tag.Mapping;
-using Domain.Repositories;
 using System.Net;
 
 namespace Application.Features.Tag.Commands.CreateTag;

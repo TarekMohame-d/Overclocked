@@ -1,7 +1,8 @@
-﻿using Application.Abstraction.Services;
+﻿using Application.Abstraction.Data;
+using Application.Abstraction.Repositories;
+using Application.Abstraction.Services;
 using Application.Features.CloudinarySignature;
 using Application.Interfaces;
-using Domain.Repositories;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
@@ -20,6 +21,8 @@ public static class InfrastructureServicesRegistration
         {
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
         });
+
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         services.AddStackExchangeRedisCache(options =>
         {
@@ -41,6 +44,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<ICloudinaryService, CloudinaryService>();
         services.AddScoped<IBrandRepository, BrandRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
 
         return services;

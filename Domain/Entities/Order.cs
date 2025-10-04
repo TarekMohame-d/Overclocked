@@ -6,6 +6,7 @@ namespace Domain.Entities;
 public class Order : BaseEntity
 {
     public Guid UserId { get; set; }
+    public decimal ShippingCost { get; set; }
     public decimal TotalPrice { get; set; }
     public int StatusId { get; set; }
     public OrderStatusType OrderStatusType
@@ -19,5 +20,6 @@ public class Order : BaseEntity
     public Payment? Payment { get; set; }
     public OrderStatus? OrderStatus { get; set; }
     public ICollection<OrderItem>? OrderItems { get; set; }
+    public ICollection<Shipment>? Shipments { get; set; }
     public Refund? Refund { get; set; }
 }

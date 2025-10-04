@@ -6,6 +6,6 @@ public class RolePermission
     public int PermissionId { get; set; }
 
     // Navigation Properties
-    public EmployeeRole? EmployeeRole { get; set; }
+    public Role? Role { get; set; }
     public Permission? Permission { get; set; }
 }

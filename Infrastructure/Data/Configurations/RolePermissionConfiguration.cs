@@ -20,7 +20,7 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(rp => rp.EmployeeRole)
+        builder.HasOne(rp => rp.Role)
             .WithMany(r => r.RolePermissions)
             .HasForeignKey(rp => rp.RoleId)
             .OnDelete(DeleteBehavior.Cascade);
@@ -41,8 +41,6 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
         const int SuperAdmin = 1;
         const int Admin = 2;
         const int DataEntry = 3;
-        const int Manager = 4;
-        const int Employee = 5;
 
         var list = new List<RolePermission>();
 
@@ -55,7 +53,7 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
 
         // Admin
         list.AddRange(allPermissions
-            .Where(p => p > PermissionType.SuperAdmin)
+            .Where(p => p > PermissionType.DeactivateUsers)
             .Select(p => new RolePermission
             {
                 RoleId = Admin,
@@ -63,31 +61,12 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
             }));
 
         // DataEntry
-        list.AddRange(allPermissions
-            .Where(p => p >= PermissionType.AddEditDeleteProducts && p <= PermissionType.AddEditDeleteTags)
-            .Select(p => new RolePermission
+        list.Add(
+            new RolePermission
             {
                 RoleId = DataEntry,
-                PermissionId = (int)p
-            }));
-
-        // Manager
-        list.AddRange(allPermissions
-            .Where(p => p >= PermissionType.RefundInvoices)
-            .Select(p => new RolePermission
-            {
-                RoleId = Manager,
-                PermissionId = (int)p
-            }));
-
-        // Employee
-        list.AddRange(allPermissions
-            .Where(p => p >= PermissionType.AddEditInvoices)
-            .Select(p => new RolePermission
-            {
-                RoleId = Employee,
-                PermissionId = (int)p
-            }));
+                PermissionId = (int)PermissionType.AddEditDelete
+            });
 
         return list;
     }

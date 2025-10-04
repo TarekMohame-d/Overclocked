@@ -1,10 +1,10 @@
 using System.Net;
 using Application.Abstraction.Messaging;
+using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
 using Application.Common.Results;
 using Application.Features.Tag.Commands.UpdateTag.Notifications;
 using Application.Features.Tag.Mapping;
-using Domain.Repositories;
 
 namespace Application.Features.Tag.Commands.UpdateTag;
 

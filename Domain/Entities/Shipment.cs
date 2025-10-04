@@ -5,7 +5,7 @@ namespace Domain.Entities;
 
 public class Shipment : BaseEntity
 {
-    public Guid UserId { get; set; }
+    public Guid OrderId { get; set; }
     public Guid AddressId { get; set; }
     public int StatusId { get; set; }
     public ShipmentStatusType ShipmentStatusType
@@ -21,7 +21,7 @@ public class Shipment : BaseEntity
 
     // Navigation Properties
     public Address? Address { get; set; }
-    public User? User { get; set; }
+    public Order? Order { get; set; }
     public ShipmentStatus? ShipmentStatus { get; set; }
     public ICollection<OrderItem>? ShipmentItems { get; set; }
 }

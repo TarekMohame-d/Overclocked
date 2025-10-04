@@ -18,9 +18,9 @@ public class EmployeeActivityLogConfigurations : IEntityTypeConfiguration<Employ
 
         // Relationships
         builder.HasOne(eal => eal.Employee)
-               .WithMany(e => e.ActivityLogs)
-               .HasForeignKey(eal => eal.EmployeeId)
-               .OnDelete(DeleteBehavior.Restrict);
+            .WithMany(u => u.ActivityLogs)
+            .HasForeignKey(eal => eal.EmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
         builder.HasIndex(eal => eal.EmployeeId);

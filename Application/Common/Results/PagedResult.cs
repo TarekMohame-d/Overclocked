@@ -24,8 +24,12 @@ public class PagedResult<T>
     public static async Task<PagedResult<T>> CreateAsync(IQueryable<T> source, int pageNumber = 1, int pageSize = 10)
     {
         var count = await source.CountAsync();
-        pageSize = Math.Min(pageSize, 100);
-        var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-        return new PagedResult<T>(items, pageNumber, pageSize, count);
+        var actualPageSize = Math.Min(pageSize, 100);
+
+        var items = await source.Skip((pageNumber - 1) * actualPageSize)
+                                .Take(actualPageSize)
+                                .ToListAsync();
+
+        return new PagedResult<T>(items, pageNumber, actualPageSize, count);
     }
 }
