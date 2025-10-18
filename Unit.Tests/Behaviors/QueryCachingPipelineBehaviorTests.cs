@@ -12,14 +12,14 @@ namespace Unit.Tests.Behaviors;
 public class QueryCachingPipelineBehaviorTests
 {
     private readonly ICacheService _cacheServiceMock;
-    private readonly ILogger<QueryCachingPipelineBehavior<TestQuery, Result<string>>> _loggerMock;
-    private readonly QueryCachingPipelineBehavior<TestQuery, Result<string>> _behavior;
+    private readonly ILogger<CachingPipelineBehavior<TestQuery, Result<string>>> _loggerMock;
+    private readonly CachingPipelineBehavior<TestQuery, Result<string>> _behavior;
 
     public QueryCachingPipelineBehaviorTests()
     {
         _cacheServiceMock = Substitute.For<ICacheService>();
-        _loggerMock = Substitute.For<ILogger<QueryCachingPipelineBehavior<TestQuery, Result<string>>>>();
-        _behavior = new QueryCachingPipelineBehavior<TestQuery, Result<string>>(_cacheServiceMock, _loggerMock);
+        _loggerMock = Substitute.For<ILogger<CachingPipelineBehavior<TestQuery, Result<string>>>>();
+        _behavior = new CachingPipelineBehavior<TestQuery, Result<string>>(_cacheServiceMock, _loggerMock);
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class QueryCachingPipelineBehaviorTests
     }
 
     // Helper test query
-    public class TestQuery : ICachedQuery<Result<string>>
+    public class TestQuery : ICachedRequest<Result<string>>
     {
         public string CacheKey => "TestCacheKey";
         public string? CacheSetKey => null;

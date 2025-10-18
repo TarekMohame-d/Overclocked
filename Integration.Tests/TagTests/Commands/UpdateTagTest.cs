@@ -62,7 +62,7 @@ public class UpdateTagTest : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Update_WhenIdValidAndOldImageUrlIsProvided_ShouldReturnSuccess()
+    public async Task Update_WhenDataIsValid_ShouldReturnSuccess()
     {
         // Arrange
         var tag = await SeedDatabaseAsync();

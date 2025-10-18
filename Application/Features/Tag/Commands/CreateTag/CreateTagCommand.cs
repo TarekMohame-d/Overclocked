@@ -5,5 +5,5 @@ namespace Application.Features.Tag.Commands.CreateTag;
 
 public record CreateTagCommand : ICommand<Result>
 {
-    public string Name { get; init; } = string.Empty;
+    public required string Name { get; init; }
 }

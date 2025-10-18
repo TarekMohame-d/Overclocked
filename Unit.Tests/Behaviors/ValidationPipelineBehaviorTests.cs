@@ -13,7 +13,7 @@ public class ValidationPipelineBehaviorTests
     public async Task Handle_ShouldCallNext_WhenNoValidators()
     {
         // Arrange
-        var behavior = new ValidationPipelineBehavior<TestCommand, Result<string>>(Array.Empty<IValidator<TestCommand>>());
+        var behavior = new ValidationalPipelineBehavior<TestCommand, Result<string>>(Array.Empty<IValidator<TestCommand>>());
         var expected = Result<string>.Success("ok");
 
         // Act
@@ -30,7 +30,7 @@ public class ValidationPipelineBehaviorTests
     {
         // Arrange
         var validator = new AlwaysValidValidator();
-        var behavior = new ValidationPipelineBehavior<TestCommand, Result<string>>(new[] { validator });
+        var behavior = new ValidationalPipelineBehavior<TestCommand, Result<string>>(new[] { validator });
         var expected = Result<string>.Success("valid");
 
         // Act
@@ -47,7 +47,7 @@ public class ValidationPipelineBehaviorTests
     {
         // Arrange
         var validator = new AlwaysFailValidator();
-        var behavior = new ValidationPipelineBehavior<TestCommand, Result<string>>(new[] { validator });
+        var behavior = new ValidationalPipelineBehavior<TestCommand, Result<string>>(new[] { validator });
 
         // Act
         var result = await behavior.Handle(new TestCommand(),
@@ -68,7 +68,7 @@ public class ValidationPipelineBehaviorTests
         // Arrange
         var validator1 = new AlwaysFailValidator();
         var validator2 = new AnotherFailValidator();
-        var behavior = new ValidationPipelineBehavior<TestCommand, Result<string>>(new IValidator<TestCommand>[] { validator1, validator2 });
+        var behavior = new ValidationalPipelineBehavior<TestCommand, Result<string>>(new IValidator<TestCommand>[] { validator1, validator2 });
 
         // Act
         var result = await behavior.Handle(new TestCommand(),

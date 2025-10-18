@@ -4,6 +4,8 @@ using Application.Abstraction.Messaging;
 using Application.Common.Results;
 using Application.Features.Brand.Commands.CreateBrand;
 using Application.Features.Product.Commands.CreateProduct;
+using Application.Features.Product.Commands.DeleteProduct;
+using Application.Features.Product.Commands.UpdateProduct;
 using Application.Features.Product.Queries.GetPagedProducts;
 using Application.Features.Product.Queries.GetProductById;
 using Microsoft.AspNetCore.Mvc;
@@ -52,6 +54,46 @@ public class ProductController : ControllerBase
     [Route(ProductRoutes.Create)]
     public async Task<IActionResult> Create([FromBody] CreateProductCommand command, CancellationToken cancellationToken)
     {
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return response.ToActionResult();
+    }
+
+    //[Authorize]
+    [HttpPut]
+    [Route(ProductRoutes.Update)]
+    public async Task<IActionResult> Put(
+        [FromRoute] Guid id,
+        [FromBody] UpdateProductCommand request,
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateProductWithIdCommand
+        {
+            Id = id,
+            BrandId = request.BrandId,
+            CategoryId = request.CategoryId,
+            Name = request.Name,
+            Thumbnail = request.Thumbnail,
+            Description = request.Description,
+            Price = request.Price,
+            Stock = request.Stock,
+            Discount = request.Discount,
+            Tags = request.Tags,
+            Images = request.Images,
+            Specification = request.Specification
+        };
+
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return response.ToActionResult();
+    }
+
+    //[Authorize]
+    [HttpDelete]
+    [Route(ProductRoutes.Delete)]
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var command = new DeleteProductCommand { Id = id };
         var response = await _mediator.Send(command, cancellationToken);
 
         return response.ToActionResult();

@@ -5,7 +5,7 @@ using Application.Features.Tag.Queries.GetAllTags;
 
 namespace Application.Features.Tag.Queries.GetPagedTags;
 
-public record GetPagedTagsQuery : GetPagedTagsRequest, ICachedQuery<Result<PagedResult<TagListDto>>>, IValidation
+public record GetPagedTagsQuery : GetPagedTagsRequest, ICachedRequest<Result<PagedResult<TagListDto>>>, IValidationalRequest
 {
     public string CacheKey => CacheKeys.TagPaged(Page, PageSize, SortBy);
     public string CacheSetKey => CacheKeys.TagSet;

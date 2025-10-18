@@ -1,5 +1,5 @@
 services:
-  devcontainer:
+  app:
     command: sleep infinity
     build:
       context: .
@@ -14,7 +14,7 @@ services:
     networks:
       - overclocked-net
     depends_on:
-      - postgres
+      - db
       - redis
       - seq
     environment:
@@ -22,7 +22,7 @@ services:
     ports:
       - "5105:5105"
 
-  postgres:
+  db:
     image: postgres:latest
     container_name: overclocked-db
     restart: unless-stopped

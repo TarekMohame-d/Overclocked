@@ -4,7 +4,7 @@ using Application.Common.Results;
 
 namespace Application.Features.Product.Queries.GetPagedProducts;
 
-public record GetPagedProductsQuery : GetPagedProductsRequest, ICachedQuery<Result<PagedResult<ProductListDto>>>, IValidation
+public record GetPagedProductsQuery : GetPagedProductsRequest, ICachedRequest<Result<PagedResult<ProductListDto>>>, IValidationalRequest
 {
     public string CacheKey => CacheKeys.ProductPaged(Page, PageSize, SortBy);
     public string CacheSetKey => CacheKeys.ProductSet;

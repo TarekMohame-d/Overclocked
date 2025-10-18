@@ -10,7 +10,7 @@ public record UpdateCategoryWithIdCommand : UpdateCategoryCommand, ICommand<Resu
 
 public record UpdateCategoryCommand
 {
-    public string Name { get; init; } = default!;
-    public string ImageUrl { get; init; } = default!;
+    public required string Name { get; init; }
+    public required string ImageUrl { get; init; }
 }
 

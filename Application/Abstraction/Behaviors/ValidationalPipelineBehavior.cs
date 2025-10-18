@@ -6,15 +6,15 @@ using System.Net;
 
 namespace Application.Abstraction.Behaviors;
 
-public sealed class ValidationPipelineBehavior<TRequest, TResponse>
+public sealed class ValidationalPipelineBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IValidation
+    where TRequest : IValidationalRequest
     where TResponse : Result
 {
 
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
-    public ValidationPipelineBehavior(IEnumerable<IValidator<TRequest>> validators)
+    public ValidationalPipelineBehavior(IEnumerable<IValidator<TRequest>> validators)
     {
         _validators = validators;
     }

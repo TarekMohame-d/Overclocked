@@ -4,7 +4,7 @@ using Application.Common.Results;
 
 namespace Application.Features.Product.Queries.GetProductById;
 
-public record GetProductByIdQuery : ICachedQuery<Result<ProductDto>>
+public record GetProductByIdQuery : ICachedRequest<Result<ProductDto>>
 {
     public Guid Id { get; init; }
     public string CacheKey => CacheKeys.Product(Id.ToString());
