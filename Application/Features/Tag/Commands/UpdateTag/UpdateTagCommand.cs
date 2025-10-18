@@ -10,5 +10,5 @@ public record UpdateTagWithIdCommand : UpdateTagCommand, ICommand<Result>
 
 public record UpdateTagCommand
 {
-    public string Name { get; init; } = string.Empty;
+    public required string Name { get; init; }
 }

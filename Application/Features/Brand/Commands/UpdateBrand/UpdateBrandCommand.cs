@@ -10,6 +10,6 @@ public record UpdateBrandWithIdCommand : UpdateBrandCommand, ICommand<Result>
 
 public record UpdateBrandCommand
 {
-    public string Name { get; init; } = default!;
-    public string ImageUrl { get; init; } = default!;
+    public required string Name { get; init; }
+    public required string ImageUrl { get; init; }
 }

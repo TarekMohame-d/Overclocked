@@ -1,7 +1,9 @@
+using System.Net;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
 using Application.Common.Results;
+using Application.Features.Product.Commands.CreateProduct.Notifications;
 using Application.Features.Product.Mapping;
 using Domain.Entities;
 
@@ -27,31 +29,12 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand,
     {
         var product = command.ToEntity();
 
-        product.TagProducts = command.Tags.Select(t => new TagProduct
-        {
-            ProductId = product.Id,
-            TagId = t
-        }).ToList();
-
-        product.ProductImages = command.Images is not null
-            ? command.Images.Select(url => new ProductImage
-            {
-                ProductId = product.Id,
-                Image = url
-            }).ToList()
-            : [];
-
-        product.Specifications = command.Specification.Select(s => new Specification
-        {
-            ProductId = product.Id,
-            Name = s.Name,
-            Value = s.Value
-        }).ToList();
-
         await _productRepository.AddAsync(product);
+
+        await _mediator.Publish(new ProductCreatedNotification(), cancellationToken);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        return Result.Success();
+        return Result.Success(HttpStatusCode.Created);
     }
 }

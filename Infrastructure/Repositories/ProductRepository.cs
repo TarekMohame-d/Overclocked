@@ -1,7 +1,7 @@
 using Application.Abstraction.Repositories;
 using Application.Features.Brand.Queries.GetBrandById;
 using Application.Features.Category.Queries.GetCategoryById;
-using Application.Features.Product.Common.DTOs;
+using Application.Features.Product.Commands.Common.DTOs;
 using Application.Features.Product.Queries.GetProductById;
 using Application.Features.Tag.Queries.GetTagById;
 using Domain.Entities;

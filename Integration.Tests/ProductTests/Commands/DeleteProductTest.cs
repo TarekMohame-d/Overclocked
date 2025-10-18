@@ -1,7 +1,6 @@
-using Api.Common.Routing;
+using ArchitectureTests.FakeData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Net;
@@ -9,19 +8,17 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Domain.Entities;
 using Application.Common.Results;
-using ArchitectureTests.FakeData;
-using System.Text.Json;
-using System.Text;
+using Api.Routing;
 
-namespace Integration.Tests.TagTests.Commands;
+namespace Integration.Tests.ProductTests.Commands;
 
 [Collection(nameof(SharedTestCollection))]
-public class UpdateTagTest : IAsyncLifetime
+public class DeleteProductTest : IAsyncLifetime
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
-    public UpdateTagTest(CustomWebApplicationFactory factory)
+    public DeleteProductTest(CustomWebApplicationFactory factory)
     {
         _factory = factory;
         _client = factory.HttpClient;
@@ -38,15 +35,13 @@ public class UpdateTagTest : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task Update_WhenIdNotValid_ShouldReturnFailure()
+    public async Task Delete_Should_ReturnFailure_When_ProductNotFound()
     {
         // Arrange
-        var name = "AMD";
-        var id = Guid.NewGuid().ToString();
-        var form = CreateJsonContent(name);
+        var productId = Guid.NewGuid().ToString();
 
         // Act
-        var response = await _client.PutAsync(TagRoutes.Update.Replace("{id:guid}", id), form);
+        var response = await _client.DeleteAsync(ProductRoutes.Delete.Replace("{id:guid}", productId));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -58,18 +53,17 @@ public class UpdateTagTest : IAsyncLifetime
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.NotFound);
-        result.Error.Description.ShouldBe("Tag not found.");
+        result.Error.Description.ShouldBe("Product not found.");
     }
 
     [Fact]
-    public async Task Update_WhenDataIsValid_ShouldReturnSuccess()
+    public async Task Delete_Should_ReturnSuccess_When_ProductExists()
     {
         // Arrange
-        var tag = await SeedDatabaseAsync();
-        var form = CreateJsonContent("New Name");
+        var product = await SeedDatabaseAsync();
 
         // Act
-        var response = await _client.PutAsync(TagRoutes.Update.Replace("{id:guid}", tag.Id.ToString()), form);
+        var response = await _client.DeleteAsync(ProductRoutes.Delete.Replace("{id:guid}", product.Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -79,9 +73,9 @@ public class UpdateTagTest : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        Tag? updatedTag = await dbContext.Tags.FindAsync(tag.Id);
-        updatedTag.ShouldNotBeNull();
-        updatedTag.Name.ShouldBe("New Name");
+        Product? deletedProduct = await dbContext.Products.FindAsync(product.Id);
+
+        deletedProduct.ShouldBeNull();
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -89,28 +83,25 @@ public class UpdateTagTest : IAsyncLifetime
         result.Error.ShouldBeNull();
     }
 
-    private async Task<Tag> SeedDatabaseAsync()
+    private async Task<Product> SeedDatabaseAsync()
     {
-        Tag tag = new TagFaker().Generate();
+        var product = new ProductFaker().Generate();
+
+        var brand = new BrandFaker().Generate();
+        product.BrandId = brand.Id;
+
+        var Category = new CategoryFaker().Generate();
+        product.CategoryId = Category.Id;
 
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        dbContext.Tags.Add(tag);
+        dbContext.Brands.Add(brand);
+        dbContext.Categories.Add(Category);
+
+        dbContext.Products.Add(product);
         await dbContext.SaveChangesAsync();
 
-        return tag;
-    }
-
-    private StringContent CreateJsonContent(string name)
-    {
-        var payload = new
-        {
-            Name = name
-        };
-
-        string json = JsonSerializer.Serialize(payload);
-
-        return new StringContent(json, Encoding.UTF8, "application/json");
+        return product;
     }
 }

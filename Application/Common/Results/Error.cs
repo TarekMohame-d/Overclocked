@@ -7,7 +7,7 @@ public sealed record Error
     public string Id { get; init; }
     public ErrorType Type { get; init; }
     public string Description { get; init; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, string[]>? ValidationErrors { get; init; }
 
     public Error(string id, ErrorType type, string description, Dictionary<string, string[]>? validationErrors = default)

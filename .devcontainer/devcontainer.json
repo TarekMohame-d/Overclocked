@@ -1,7 +1,7 @@
 {
     "name": "Dotnet Dev Container",
     "dockerComposeFile": ["./docker-compose.yml"],
-    "service": "devcontainer",
+    "service": "app",
     "workspaceFolder": "/workspace",
     "overrideCommand": true,
     "remoteUser": "root",

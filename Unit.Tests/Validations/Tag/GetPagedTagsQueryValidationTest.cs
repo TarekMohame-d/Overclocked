@@ -6,7 +6,7 @@ namespace Unit.Tests.Validations.Tag;
 public class GetPagedTagsQueryValidationTest
 {
     [Fact]
-    public async Task TagValidator_WhenWhenAllParametersAreValid_ShouldReturnSuccess()
+    public async Task TagValidator_WhenAllParametersAreValid_ShouldReturnSuccess()
     {
         // Arrange
         var validator = new GetPagedTagsQueryValidation();

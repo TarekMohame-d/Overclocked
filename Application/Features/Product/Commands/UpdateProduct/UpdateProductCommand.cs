@@ -1,16 +1,14 @@
-using System.Data;
 using Application.Abstraction.Messaging;
 using Application.Common.Results;
 
-namespace Application.Features.Product.Commands.CreateProduct;
+namespace Application.Features.Product.Commands.UpdateProduct;
 
-public record CreateProductCommand : CreateProductRequest, ICommand<Result>, ITransactionalRequest
+public record UpdateProductWithIdCommand : UpdateProductCommand, ICommand<Result>
 {
-    public IsolationLevel IsolationLevel => IsolationLevel.ReadCommitted;
+    public Guid Id { get; init; }
 }
 
-
-public record CreateProductRequest
+public record UpdateProductCommand
 {
     public Guid BrandId { get; init; }
     public Guid CategoryId { get; init; }
@@ -21,7 +19,7 @@ public record CreateProductRequest
     public int Stock { get; init; }
     public decimal Discount { get; init; }
     public IEnumerable<Guid> Tags { get; init; } = [];
-    public IEnumerable<string>? Images { get; init; }
+    public IEnumerable<string> Images { get; init; } = [];
     public IEnumerable<Specs> Specification { get; init; } = [];
 }
 

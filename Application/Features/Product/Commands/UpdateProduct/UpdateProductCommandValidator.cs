@@ -1,25 +1,31 @@
 using Application.Abstraction.Repositories;
 using FluentValidation;
 
-namespace Application.Features.Product.Commands.CreateProduct;
+namespace Application.Features.Product.Commands.UpdateProduct;
 
-public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+public class UpdateProductCommandValidator : AbstractValidator<UpdateProductWithIdCommand>
 {
     private readonly IBrandRepository _brandRepository;
     private readonly ICategoryRepository _categoryRepository;
-    private readonly IProductRepository _productRepository;
     private readonly ITagRepository _tagRepository;
 
-    public CreateProductCommandValidator(
+    public UpdateProductCommandValidator(
         IBrandRepository brandRepository,
         ICategoryRepository categoryRepository,
-        IProductRepository productRepository,
         ITagRepository tagRepository)
     {
         _brandRepository = brandRepository;
         _categoryRepository = categoryRepository;
-        _productRepository = productRepository;
         _tagRepository = tagRepository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty()
+            .WithMessage("{PropertyName} is required.");
+
+        RuleFor(x => x.Name)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty().WithMessage("{PropertyName} is required.")
+            .MaximumLength(50).WithMessage("{PropertyName} must not exceed 50 characters.");
 
         RuleFor(x => x.BrandId)
             .Cascade(CascadeMode.Stop)
@@ -40,16 +46,6 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
                 return await _categoryRepository.GetByIdAsync([id]) is not null;
             })
             .WithMessage("{PropertyName}: {PropertyValue} does not exist.");
-
-        RuleFor(x => x.Name)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("{PropertyName} is required.")
-            .MaximumLength(50).WithMessage("{PropertyName} must not exceed 50 characters.")
-            .MustAsync(async (name, cancellation) =>
-            {
-                return !await _productRepository.AnyAsync(p => p.NormalizedName == name.ToUpper(), cancellation);
-            })
-            .WithMessage("A product with the same name already exists.");
 
         RuleFor(x => x.Thumbnail)
             .Cascade(CascadeMode.Stop)

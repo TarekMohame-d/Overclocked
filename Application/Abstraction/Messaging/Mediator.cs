@@ -73,6 +73,9 @@ public class Mediator : IMediator
         var handlerType = typeof(INotificationHandler<>).MakeGenericType(notification.GetType());
         var handlers = _serviceProvider.GetServices(handlerType);
 
+        if (handlers is null || !handlers.Any())
+            throw new InvalidOperationException($"No handler registered for {handlerType.Name}");
+
         var tasks = handlers.Select(handler =>
         {
             return (Task)((dynamic)handler!).Handle((dynamic)notification, cancellationToken);
