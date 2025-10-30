@@ -1,13 +1,8 @@
+using Api.ActionFilters;
 using Api.Extensions;
 using Api.Routing;
-using Application.Abstraction.Messaging;
-using Application.Common.Results;
-using Application.Features.Brand.Commands.CreateBrand;
-using Application.Features.Product.Commands.CreateProduct;
-using Application.Features.Product.Commands.DeleteProduct;
-using Application.Features.Product.Commands.UpdateProduct;
-using Application.Features.Product.Queries.GetPagedProducts;
-using Application.Features.Product.Queries.GetProductById;
+using Application.Abstraction.Services;
+using Application.Services.Product.DTOs.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -15,75 +10,58 @@ namespace Api.Controllers;
 [ApiController]
 public class ProductController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IProductService _productService;
 
-    public ProductController(IMediator mediator)
+    public ProductController(IProductService productService)
     {
-        _mediator = mediator;
+        _productService = productService;
     }
 
     [HttpGet]
     [Route(ProductRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetProductByIdQuery { Id = id };
-        Result<ProductDto> response = await _mediator.Send(query, cancellationToken);
+        var request = new GetProductByIdRequest { Id = id };
+        var response = await _productService.GetProductByIdAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
     [HttpGet]
+    [ServiceFilter(typeof(ValidationActionAttribute<GetPagedProductsRequest>))]
     [Route(ProductRoutes.GetAll)]
     public async Task<IActionResult> GetAll(
         [FromQuery] GetPagedProductsRequest request,
         CancellationToken cancellationToken)
     {
-        var query = new GetPagedProductsQuery
-        {
-            Page = request.Page,
-            PageSize = request.PageSize,
-            SortBy = request.SortBy
-        };
-
-        var response = await _mediator.Send(query, cancellationToken);
+        var query = GetPagedProductsQuery.FromRequest(request);
+        var response = await _productService.GetPagedProductsAsync(query, cancellationToken);
 
         return response.ToActionResult();
     }
 
     [HttpPost]
+    [ServiceFilter(typeof(ValidationActionAttribute<CreateProductRequest>))]
     [Route(ProductRoutes.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateProductCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateProductRequest request, CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(command, cancellationToken);
+        var response = await _productService.CreateProductAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
     //[Authorize]
     [HttpPut]
+    [ServiceFilter(typeof(ValidationActionAttribute<UpdateProductRequest>))]
     [Route(ProductRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromBody] UpdateProductCommand request,
+        [FromBody] UpdateProductRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateProductWithIdCommand
-        {
-            Id = id,
-            BrandId = request.BrandId,
-            CategoryId = request.CategoryId,
-            Name = request.Name,
-            Thumbnail = request.Thumbnail,
-            Description = request.Description,
-            Price = request.Price,
-            Stock = request.Stock,
-            Discount = request.Discount,
-            Tags = request.Tags,
-            Images = request.Images,
-            Specification = request.Specification
-        };
+        request = request with { Id = id };
 
-        var response = await _mediator.Send(command, cancellationToken);
+        var response = await _productService.UpdateProductAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -93,8 +71,8 @@ public class ProductController : ControllerBase
     [Route(ProductRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var command = new DeleteProductCommand { Id = id };
-        var response = await _mediator.Send(command, cancellationToken);
+        var request = new DeleteProductRequest { Id = id };
+        var response = await _productService.DeleteProductAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }

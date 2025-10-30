@@ -1,5 +1,5 @@
+using Application.Abstraction.Services;
 using Application.Features.CloudinarySignature;
-using Application.Interfaces;
 using CloudinaryDotNet;
 using Domain.Configurations;
 using Microsoft.Extensions.Options;

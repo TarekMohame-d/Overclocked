@@ -9,9 +9,4 @@ public class UpdateTagValidationTestCases
         yield return new object[] { "   " };
         yield return new object[] { new string('a', 55) };
     }
-
-    public static IEnumerable<object[]> InvalidIdCases()
-    {
-        yield return new object[] { Guid.Empty };
-    }
 }

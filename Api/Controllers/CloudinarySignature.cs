@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Api.Routing;
-using Application.Interfaces;
+using Application.Abstraction.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;

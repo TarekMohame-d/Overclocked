@@ -1,5 +1,5 @@
 using System.Net;
-using Application.Abstraction.Services;
+using Application.Services;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Domain.Configurations;

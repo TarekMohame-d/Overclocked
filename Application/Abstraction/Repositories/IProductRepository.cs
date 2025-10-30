@@ -1,10 +1,18 @@
-using Application.Features.Product.Queries.GetProductById;
+using Application.Common.Enums;
+using Application.Services.Product.DTOs.Response;
 using Domain.Entities;
 
 namespace Application.Abstraction.Repositories;
 
 public interface IProductRepository : IGenericRepository<Product>
 {
-    Task<ProductDto?> GetProductAsync(Guid id, CancellationToken cancellationToken = default);
-    IQueryable<Product> GetProductsQuery(string? sortBy);
+    Task<ProductResponse?> GetProductAsync(Guid id, CancellationToken cancellationToken = default);
+    IQueryable<Product> GetProductsQuery(
+        ProductSortField sortBy,
+        SortDirection direction,
+        string? search = null,
+        string? category = null,
+        string? brand = null,
+        Guid? tagId = null);
+    Task<Product?> GetByIdWithImagesAsync(Guid id, CancellationToken cancellationToken = default);
 }

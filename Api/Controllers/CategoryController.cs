@@ -1,11 +1,8 @@
-﻿using Api.Common.Routing;
+﻿using Api.ActionFilters;
+using Api.Common.Routing;
 using Api.Extensions;
-using Application.Abstraction.Messaging;
-using Application.Features.Category.Commands.CreateCategory;
-using Application.Features.Category.Commands.DeleteCategory;
-using Application.Features.Category.Commands.UpdateCategory;
-using Application.Features.Category.Queries.GetAllCategories;
-using Application.Features.Category.Queries.GetCategoryById;
+using Application.Abstraction.Services;
+using Application.Services.Category.DTOs.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -13,70 +10,66 @@ namespace Api.Controllers;
 [ApiController]
 public class CategoryController : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public CategoryController(IMediator mediator)
+    private readonly ICategoryService _categoryServices;
+    public CategoryController(ICategoryService categoryServices)
     {
-        _mediator = mediator;
-    }
-
-    [HttpGet]
-    [Route(CategoryRoutes.GetAll)]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
-    {
-        var query = new GetAllCategoriesQuery();
-        var response = await _mediator.Send(query, cancellationToken);
-
-        return response.ToActionResult();
+        _categoryServices = categoryServices;
     }
 
     [HttpGet]
     [Route(CategoryRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetCategoryByIdQuery { Id = id };
-        var response = await _mediator.Send(query, cancellationToken);
+        var request = new GetCategoryByIdRequest { Id = id };
+        var response = await _categoryServices.GetCategoryByIdAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    // [Authorize]
-    [HttpPost]
-    [Route(CategoryRoutes.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command, CancellationToken cancellationToken)
+    [HttpGet]
+    [Route(CategoryRoutes.GetAll)]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(command, cancellationToken);
+        var request = new GetAllCategoriesRequest();
+        var response = await _categoryServices.GetAllCategoriesAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    // [Authorize]
+    //[Authorize]
+    [HttpPost]
+    [ServiceFilter(typeof(ValidationActionAttribute<CreateCategoryRequest>))]
+    [Route(CategoryRoutes.Create)]
+    public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _categoryServices.CreateCategoryAsync(request, cancellationToken);
+
+        return response.ToActionResult();
+    }
+
+    //[Authorize]
     [HttpPut]
+    [ServiceFilter(typeof(ValidationActionAttribute<UpdateCategoryRequest>))]
     [Route(CategoryRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromBody] UpdateCategoryCommand request,
+        [FromBody] UpdateCategoryRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateCategoryWithIdCommand
-        {
-            Id = id,
-            Name = request.Name,
-            ImageUrl = request.ImageUrl
-        };
+        request = request with { Id = id };
 
-        var response = await _mediator.Send(command, cancellationToken);
+        var response = await _categoryServices.UpdateCategoryAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    // [Authorize]
+    //[Authorize]
     [HttpDelete]
     [Route(CategoryRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var command = new DeleteCategoryCommand { Id = id };
-        var response = await _mediator.Send(command, cancellationToken);
+        var request = new DeleteCategoryRequest { Id = id };
+        var response = await _categoryServices.DeleteCategoryAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }

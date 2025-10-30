@@ -28,6 +28,10 @@ public record Result
     public static Result Failure(Error error, HttpStatusCode statusCode = HttpStatusCode.BadRequest) =>
         new(false, error, statusCode);
 
+    public static Result ValidationError<T>(Dictionary<string, string[]> errors) =>
+        new(false, new Error(typeof(T).Name, ErrorType.Validation, "Validation error", errors), HttpStatusCode.BadRequest);
+
+
     public static implicit operator Result(Error error) => Failure(error);
 }
 

@@ -24,7 +24,7 @@ public class Product : BaseEntity
     public ICollection<Review> Reviews { get; set; } = [];
     public ICollection<OrderItem> OrderItems { get; set; } = [];
     public ICollection<TagProduct> TagProducts { get; set; } = [];
-    public ICollection<ProductImage> ProductImages { get; set; } = [];
+    public ICollection<ProductImage>? ProductImages { get; set; }
     public ICollection<Specification> Specifications { get; set; } = [];
 
     public double CalculateRating()
