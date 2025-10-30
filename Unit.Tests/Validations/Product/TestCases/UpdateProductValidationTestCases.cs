@@ -1,4 +1,4 @@
-using Application.Features.Product.Commands.UpdateProduct;
+using Application.Services.Product.DTOs.Request;
 
 namespace Unit.Tests.Validations.Product.TestCases;
 
@@ -10,11 +10,6 @@ public class UpdateProductValidationTestCases
         yield return new object[] { "" };
         yield return new object[] { "   " };
         yield return new object[] { new string('a', 55) }; // exceeds 50 chars
-    }
-
-    public static IEnumerable<object[]> InvalidIdCases()
-    {
-        yield return new object[] { Guid.Empty };
     }
 
     public static IEnumerable<object[]> InvalidThumbnailCases()
@@ -75,7 +70,7 @@ public class UpdateProductValidationTestCases
         // Empty or invalid
         yield return new object[]
         {
-                new List<Specs>
+                new List<UpdateProductRequest.Specs>
                 {
                     new() { Name = null!, Value = null! },
                 }
@@ -84,7 +79,7 @@ public class UpdateProductValidationTestCases
         // Too long name and value
         yield return new object[]
         {
-                new List<Specs>
+                new List<UpdateProductRequest.Specs>
                 {
                     new() { Name = new string('N', 55), Value = new string('V', 350) },
                 }
@@ -93,7 +88,7 @@ public class UpdateProductValidationTestCases
         // Duplicate names
         yield return new object[]
         {
-                new List<Specs>
+                new List<UpdateProductRequest.Specs>
                 {
                     new() { Name = "CPU", Value = "Intel i7" },
                     new() { Name = "CPU", Value = "Intel i9" }
@@ -101,6 +96,6 @@ public class UpdateProductValidationTestCases
         };
 
         // Empty list
-        yield return new object[] { new List<Specs>() };
+        yield return new object[] { new List<UpdateProductRequest.Specs>() };
     }
 }

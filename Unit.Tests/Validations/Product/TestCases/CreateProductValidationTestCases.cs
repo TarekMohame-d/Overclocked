@@ -1,4 +1,4 @@
-using Application.Features.Product.Commands.CreateProduct;
+using Application.Services.Product.DTOs.Request;
 
 namespace Unit.Tests.Validations.Product.TestCases;
 
@@ -70,7 +70,7 @@ public class CreateProductValidationTestCases
         // Empty or invalid
         yield return new object[]
         {
-                new List<Specs>
+                new List<CreateProductRequest.Specs>
                 {
                     new() { Name = null!, Value = null! },
                 }
@@ -79,7 +79,7 @@ public class CreateProductValidationTestCases
         // Too long name and value
         yield return new object[]
         {
-                new List<Specs>
+                new List<CreateProductRequest.Specs>
                 {
                     new() { Name = new string('N', 55), Value = new string('V', 350) },
                 }
@@ -88,7 +88,7 @@ public class CreateProductValidationTestCases
         // Duplicate names
         yield return new object[]
         {
-                new List<Specs>
+                new List<CreateProductRequest.Specs>
                 {
                     new() { Name = "CPU", Value = "Intel i7" },
                     new() { Name = "CPU", Value = "Intel i9" }
@@ -96,6 +96,6 @@ public class CreateProductValidationTestCases
         };
 
         // Empty list
-        yield return new object[] { new List<Specs>() };
+        yield return new object[] { new List<CreateProductRequest.Specs>() };
     }
 }

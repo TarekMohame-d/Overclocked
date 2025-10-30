@@ -1,18 +1,16 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Application.Common.Results;
+﻿namespace Application.Common.Results;
 
 public sealed record Error
 {
-    public string Id { get; init; }
+    public string Code { get; init; }
     public ErrorType Type { get; init; }
     public string Description { get; init; }
     // [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, string[]>? ValidationErrors { get; init; }
 
-    public Error(string id, ErrorType type, string description, Dictionary<string, string[]>? validationErrors = default)
+    public Error(string code, ErrorType type, string description, Dictionary<string, string[]>? validationErrors = default)
     {
-        Id = id;
+        Code = code;
         Type = type;
         Description = description;
         ValidationErrors = validationErrors;

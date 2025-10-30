@@ -10,11 +10,6 @@ public static class UpdateCategoryValidationTestCases
         yield return new object[] { new string('a', 55) }; // name too long
     }
 
-    public static IEnumerable<object[]> InvalidIdCases()
-    {
-        yield return new object[] { Guid.Empty };
-    }
-
     public static IEnumerable<object[]> InvalidImageUrlCases()
     {
         yield return new object[] { null! };

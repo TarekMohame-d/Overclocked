@@ -1,11 +1,8 @@
+using Api.ActionFilters;
 using Api.Common.Routing;
 using Api.Extensions;
-using Application.Abstraction.Messaging;
-using Application.Features.Tag.Commands.CreateTag;
-using Application.Features.Tag.Commands.DeleteTag;
-using Application.Features.Tag.Commands.UpdateTag;
-using Application.Features.Tag.Queries.GetPagedTags;
-using Application.Features.Tag.Queries.GetTagById;
+using Application.Abstraction.Services;
+using Application.Services.Tag.DTOs.Request;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -14,66 +11,58 @@ namespace Api.Controllers;
 [ApiController]
 public class TagController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly ITagService _tagService;
 
-    public TagController(IMediator mediator)
+    public TagController(ITagService tagService)
     {
-        _mediator = mediator;
+        _tagService = tagService;
     }
 
     [HttpGet]
     [Route(TagRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetTagByIdQuery { Id = id };
-        var response = await _mediator.Send(query, cancellationToken);
+        var request = new GetTagByIdRequest { Id = id };
+        var response = await _tagService.GetTagByIdAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
     [HttpGet]
+    [ServiceFilter(typeof(ValidationActionAttribute<GetPagedTagsRequest>))]
     [Route(TagRoutes.GetAll)]
     public async Task<IActionResult> GetAll(
         [FromQuery] GetPagedTagsRequest request,
         CancellationToken cancellationToken)
     {
-        var query = new GetPagedTagsQuery
-        {
-            Page = request.Page,
-            PageSize = request.PageSize,
-            SortBy = request.SortBy
-        };
-
-        var response = await _mediator.Send(query, cancellationToken);
+        var query = GetPagedTagsQuery.FromRequest(request);
+        var response = await _tagService.GetPagedTagsAsync(query, cancellationToken);
 
         return response.ToActionResult();
     }
 
     //[Authorize]
     [HttpPost]
+    [ServiceFilter(typeof(ValidationActionAttribute<CreateTagRequest>))]
     [Route(TagRoutes.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateTagCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateTagRequest request, CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(command, cancellationToken);
+        var response = await _tagService.CreateTagAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
     //[Authorize]
     [HttpPut]
+    [ServiceFilter(typeof(ValidationActionAttribute<UpdateTagRequest>))]
     [Route(TagRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromBody] UpdateTagCommand request,
+        [FromBody] UpdateTagRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateTagWithIdCommand
-        {
-            Id = id,
-            Name = request.Name
-        };
-
-        var response = await _mediator.Send(command, cancellationToken);
+        request = request with { Id = id };
+        var response = await _tagService.UpdateTagAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -83,8 +72,8 @@ public class TagController : ControllerBase
     [Route(TagRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var command = new DeleteTagCommand { Id = id };
-        var response = await _mediator.Send(command, cancellationToken);
+        var request = new DeleteTagRequest { Id = id };
+        var response = await _tagService.DeleteTagAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
