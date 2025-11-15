@@ -6,22 +6,27 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Infrastructure;
 
-public class UnitOfWork : IUnitOfWork, IAsyncDisposable
+public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork, IAsyncDisposable
 {
-    private readonly ApplicationDbContext _dbContext;
     private IDbContextTransaction? _transaction;
 
-    public UnitOfWork(ApplicationDbContext context)
+    public async ValueTask DisposeAsync()
     {
-        _dbContext = context;
+        if (this._transaction is not null)
+            await this._transaction.DisposeAsync();
+
+        await context.DisposeAsync();
+
+        GC.SuppressFinalize(this);
     }
 
     public async Task<IDbTransaction> BeginTransactionAsync(
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
     {
-        var transaction = await _dbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
-        _transaction = transaction;
+        IDbContextTransaction transaction =
+            await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+        this._transaction = transaction;
 
         return transaction.GetDbTransaction();
     }
@@ -30,14 +35,14 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
     {
         try
         {
-            if (_transaction is not null)
-                await _transaction.CommitAsync(cancellationToken);
+            if (this._transaction is not null)
+                await this._transaction.CommitAsync(cancellationToken);
         }
         finally
         {
-            if (_transaction is not null)
-                await _transaction.DisposeAsync();
-            _transaction = null;
+            if (this._transaction is not null)
+                await this._transaction.DisposeAsync();
+            this._transaction = null;
         }
     }
 
@@ -45,29 +50,17 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
     {
         try
         {
-            if (_transaction is not null)
-                await _transaction.RollbackAsync(cancellationToken);
+            if (this._transaction is not null)
+                await this._transaction.RollbackAsync(cancellationToken);
         }
         finally
         {
-            if (_transaction is not null)
-                await _transaction.DisposeAsync();
-            _transaction = null;
+            if (this._transaction is not null)
+                await this._transaction.DisposeAsync();
+            this._transaction = null;
         }
     }
 
-    public async Task<int> CompleteAsync(CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_transaction is not null)
-            await _transaction.DisposeAsync();
-
-        await _dbContext.DisposeAsync();
-
-        GC.SuppressFinalize(this);
-    }
+    public async Task<int> CompleteAsync(CancellationToken cancellationToken = default) =>
+        await context.SaveChangesAsync(cancellationToken);
 }

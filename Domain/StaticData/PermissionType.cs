@@ -3,8 +3,7 @@
 public enum PermissionType
 {
     // === Super Admin ===
-    SuperAdmin = 1,
-    ManageUsers,
+    ManageUsers = 1,
     ManageRolePermissions,
     DeactivateUsers, // + all below
 

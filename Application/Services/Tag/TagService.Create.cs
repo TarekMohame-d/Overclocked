@@ -1,8 +1,7 @@
 using System.Net;
 using Application.Common.Results;
-using Application.Features.Brand.Mapping;
-using Application.Features.Tag.Mapping;
 using Application.Services.Tag.DTOs.Request;
+using Application.Services.Tag.Mapping;
 
 namespace Application.Services.Tag;
 
@@ -10,11 +9,11 @@ public sealed partial class TagService
 {
     public async Task<Result> CreateTagAsync(CreateTagRequest request, CancellationToken cancellationToken)
     {
-        var tag = request.ToEntity();
+        Domain.Entities.Tag tag = request.ToEntity();
 
-        await _tagRepository.AddAsync(tag, cancellationToken);
+        await tagRepository.AddAsync(tag, cancellationToken);
 
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success(HttpStatusCode.Created);
     }

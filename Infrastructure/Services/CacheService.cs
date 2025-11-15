@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Application.Services;
+using Application.Abstraction.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using StackExchange.Redis;
 
@@ -22,7 +22,8 @@ public class CacheService : ICacheService
         return cachedData is not null ? JsonSerializer.Deserialize<T>(cachedData) : default;
     }
 
-    public async Task SetAsync<T>(string key, T value, TimeSpan expiration = default, CancellationToken cancellationToken = default)
+    public async Task SetAsync<T>(string key, T value, TimeSpan expiration = default,
+        CancellationToken cancellationToken = default)
     {
         var json = JsonSerializer.Serialize(value);
         var options = new DistributedCacheEntryOptions
@@ -33,36 +34,28 @@ public class CacheService : ICacheService
         await _cache.SetStringAsync(key, json, options, cancellationToken);
     }
 
-    public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
-    {
+    public async Task RemoveAsync(string key, CancellationToken cancellationToken = default) =>
         await _cache.RemoveAsync(key, cancellationToken);
-    }
 
     // Works only with Redis
-    public async Task AddToSetAsync(string setKey, string value)
-    {
-        await _redisDb.SetAddAsync(setKey, value);
-    }
+    public async Task AddToSetAsync(string setKey, string value) => await _redisDb.SetAddAsync(setKey, value);
 
     public async Task<IEnumerable<string>> GetSetMembersAsync(string setKey)
     {
-        var members = await _redisDb.SetMembersAsync(setKey);
+        RedisValue[] members = await _redisDb.SetMembersAsync(setKey);
         return members.Select(m => m.ToString());
     }
 
-    public async Task RemoveSetAsync(string setKey)
-    {
-        await _redisDb.KeyDeleteAsync(setKey);
-    }
+    public async Task RemoveSetAsync(string setKey) => await _redisDb.KeyDeleteAsync(setKey);
 
     public async Task RemoveKeysInSetAsync(string setKey, CancellationToken cancellationToken = default)
     {
-        var keys = await GetSetMembersAsync(setKey);
+        IEnumerable<string> keys = await GetSetMembersAsync(setKey);
 
         if (!keys.Any())
             return;
 
-        var removalTasks = keys.Select(x => RemoveAsync(x, cancellationToken));
+        IEnumerable<Task> removalTasks = keys.Select(x => RemoveAsync(x, cancellationToken));
 
         await Task.WhenAll(removalTasks);
 

@@ -2,7 +2,7 @@
 
 namespace Domain.Entities;
 
-public class Address : BaseEntity
+public class Address : Entity
 {
     public Guid UserId { get; set; }
     public required string City { get; set; }

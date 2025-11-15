@@ -2,7 +2,7 @@
 
 namespace Domain.Entities;
 
-public class Review : BaseEntity
+public class Review : Entity
 {
     public Guid UserId { get; set; }
     public Guid ProductId { get; set; }

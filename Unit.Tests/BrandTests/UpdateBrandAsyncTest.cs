@@ -1,30 +1,30 @@
 using System.Net;
-using Application.Common.Results;
-using ArchitectureTests.FakeData;
-using NSubstitute;
-using Shouldly;
-using Domain.Entities;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
+using Application.Common.Results;
 using Application.Services.Brand;
 using Application.Services.Brand.DTOs.Request;
-using Application.Services;
+using Application.Services.Brand.Events;
+using ArchitectureTests.FakeData;
+using Domain.Entities;
+using NSubstitute;
+using Shouldly;
 
 namespace Unit.Tests.BrandTests;
 
 public class UpdateBrandAsyncTest
 {
-    private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IBrandRepository _brandRepositoryMock;
-    private readonly IBrandService _brandServices;
-    private readonly IFileStorageService _fileStorageServiceMock;
+    private readonly BrandService _brandServices;
+    private readonly IEventDispatcher _eventDispatcherMock;
+    private readonly IUnitOfWork _unitOfWorkMock;
 
     public UpdateBrandAsyncTest()
     {
-        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _brandServices = new BrandService(_brandRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+        _eventDispatcherMock = Substitute.For<IEventDispatcher>();
+        _brandServices = new BrandService(_brandRepositoryMock, _unitOfWorkMock, _eventDispatcherMock);
     }
 
     [Fact]
@@ -34,15 +34,18 @@ public class UpdateBrandAsyncTest
         var request = new UpdateBrandRequest
         {
             Id = Guid.CreateVersion7(),
-            Name = "Nike",
+            Name = "Brand Name",
             ImageUrl = "image.png"
         };
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns((Brand)null!);
 
+        _eventDispatcherMock.DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _brandServices.UpdateBrandAsync(request, CancellationToken.None);
+        Result result = await _brandServices.UpdateBrandAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -52,6 +55,9 @@ public class UpdateBrandAsyncTest
 
         await _brandRepositoryMock.Received(1)
             .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+
+        await _eventDispatcherMock.DidNotReceive()
+            .DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None);
     }
 
     [Fact]
@@ -61,11 +67,11 @@ public class UpdateBrandAsyncTest
         var request = new UpdateBrandRequest
         {
             Id = Guid.CreateVersion7(),
-            Name = "Nike",
+            Name = "Brand Name",
             ImageUrl = "image.png"
         };
 
-        var brand = new BrandFaker().Generate();
+        Brand brand = new BrandFaker().Generate();
 
         brand.Name = request.Name;
 
@@ -74,11 +80,14 @@ public class UpdateBrandAsyncTest
 
         _brandRepositoryMock.Update(Arg.Any<Brand>());
 
+        _eventDispatcherMock.DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None)
+            .Returns(Task.CompletedTask);
+
         _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
             .Returns(1);
 
         // Act
-        var result = await _brandServices.UpdateBrandAsync(request, CancellationToken.None);
+        Result result = await _brandServices.UpdateBrandAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -93,5 +102,8 @@ public class UpdateBrandAsyncTest
 
         _brandRepositoryMock.Received(1)
             .Update(Arg.Any<Brand>());
+
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None);
     }
 }

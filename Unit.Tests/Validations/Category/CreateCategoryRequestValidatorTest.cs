@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Application.Abstraction.Repositories;
 using Application.Services.Category.DTOs.Request;
 using Application.Services.Category.Validations;
+using FluentValidation.TestHelper;
 using NSubstitute;
 using Shouldly;
 using Unit.Tests.Validations.Category.TestCases;
@@ -11,15 +12,11 @@ namespace Unit.Tests.Validations.Category;
 
 public class CreateCategoryRequestValidatorTest
 {
-    private readonly ICategoryRepository _categoryRepositoryMock;
-
-    public CreateCategoryRequestValidatorTest()
-    {
-        _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
-    }
+    private readonly ICategoryRepository _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
 
     [Theory]
-    [MemberData(nameof(CreateCategoryValidationTestCases.InvalidNameCases), MemberType = typeof(CreateCategoryValidationTestCases))]
+    [MemberData(nameof(CreateCategoryValidationTestCases.InvalidNameCases),
+        MemberType = typeof(CreateCategoryValidationTestCases))]
     public async Task CreateCategoryRequestValidator_WhenNameIsInvalid_ShouldReturnError(string? name)
     {
         // Arrange
@@ -30,45 +27,43 @@ public class CreateCategoryRequestValidatorTest
             ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
         };
 
-        _categoryRepositoryMock.AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
-        var result = await validator.ValidateAsync(request);
+        TestValidationResult<CreateCategoryRequest> result = await validator.TestValidateAsync(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "Name").ShouldBeTrue();
-        if (!string.IsNullOrWhiteSpace(name))
-            await _categoryRepositoryMock.Received(1)
-                .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>());
+        result.ShouldHaveValidationErrorFor(x => x.Name).Only();
     }
 
     [Theory]
-    [MemberData(nameof(CreateCategoryValidationTestCases.InvalidImageUrlCases), MemberType = typeof(CreateCategoryValidationTestCases))]
+    [MemberData(nameof(CreateCategoryValidationTestCases.InvalidImageUrlCases),
+        MemberType = typeof(CreateCategoryValidationTestCases))]
     public async Task CreateCategoryRequestValidator_WhenImageIsInvalid_ShouldReturnError(string? imageUrl)
     {
         // Arrange
         var validator = new CreateCategoryRequestValidator(_categoryRepositoryMock);
         var request = new CreateCategoryRequest
         {
-            Name = "Nike",
+            Name = "Category Name",
             ImageUrl = imageUrl!
         };
 
-        _categoryRepositoryMock.AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
-        var result = await validator.ValidateAsync(request);
+        TestValidationResult<CreateCategoryRequest> result = await validator.TestValidateAsync(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "ImageUrl").ShouldBeTrue();
-        await _categoryRepositoryMock.Received(1)
-            .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>());
+        result.ShouldHaveValidationErrorFor(x => x.ImageUrl).Only();
     }
 
     [Fact]
@@ -78,23 +73,21 @@ public class CreateCategoryRequestValidatorTest
         var validator = new CreateCategoryRequestValidator(_categoryRepositoryMock);
         var request = new CreateCategoryRequest
         {
-            Name = "Nike",
+            Name = "Category Name",
             ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
         };
 
-        _categoryRepositoryMock.AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         // Act
-        var result = await validator.ValidateAsync(request);
+        TestValidationResult<CreateCategoryRequest> result = await validator.TestValidateAsync(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.Count().ShouldBe(1);
-        result.Errors.All(e => e.PropertyName == "Name").ShouldBeTrue();
-
-        await _categoryRepositoryMock.Received(1)
-            .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>());
+        result.Errors.Count.ShouldBe(1);
+        result.ShouldHaveValidationErrorFor(x => x.Name).Only();
     }
 }

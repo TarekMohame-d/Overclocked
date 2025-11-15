@@ -1,7 +1,8 @@
 using System.Net;
 using Application.Common.Results;
-using Application.Features.Brand.Mapping;
 using Application.Services.Brand.DTOs.Request;
+using Application.Services.Brand.Events;
+using Application.Services.Brand.Mapping;
 
 namespace Application.Services.Brand;
 
@@ -9,14 +10,14 @@ public sealed partial class BrandService
 {
     public async Task<Result> UpdateBrandAsync(UpdateBrandRequest request, CancellationToken cancellationToken)
     {
-        var brand = await _brandRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Brand? brand = await brandRepository.GetByIdAsync([request.Id], cancellationToken);
 
         if (brand is null)
             return Result.Failure(Errors.BrandNotFound, HttpStatusCode.NotFound);
 
         if (brand.Name != request.Name)
         {
-            bool exist = await _brandRepository
+            var exist = await brandRepository
                 .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
 
             if (exist)
@@ -25,14 +26,16 @@ public sealed partial class BrandService
 
         // Delete old image
         if (brand.Image != request.ImageUrl)
-            await _fileStorageService.DeleteFileAsync(brand.Image, cancellationToken);
-
+        {
+            BrandUpdatedEvent brandUpdatedEvent = new(brand.Image);
+            await eventDispatcher.DispatchAsync(brandUpdatedEvent, cancellationToken);
+        }
 
         brand.UpdateFrom(request);
 
-        _brandRepository.Update(brand);
+        brandRepository.Update(brand);
 
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
     }

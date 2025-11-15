@@ -1,10 +1,10 @@
 using System.Net;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
 using Application.Common.Results;
-using Application.Services;
 using Application.Services.Product;
 using Application.Services.Product.DTOs.Request;
+using Application.Services.Product.Events;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
 using NSubstitute;
@@ -14,17 +14,17 @@ namespace Unit.Tests.ProductTests;
 
 public class DeleteProductAsyncTest
 {
+    private readonly IEventDispatcher _eventDispatcherMock;
     private readonly IProductRepository _productRepositoryMock;
+    private readonly ProductService _productService;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IFileStorageService _fileStorageServiceMock;
-    private readonly IProductService _productService;
 
     public DeleteProductAsyncTest()
     {
         _productRepositoryMock = Substitute.For<IProductRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _productService = new ProductService(_productRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+        _eventDispatcherMock = Substitute.For<IEventDispatcher>();
+        _productService = new ProductService(_productRepositoryMock, _unitOfWorkMock, _eventDispatcherMock);
     }
 
     [Fact]
@@ -36,11 +36,11 @@ public class DeleteProductAsyncTest
             Id = Guid.CreateVersion7()
         };
 
-        _productRepositoryMock.GetByIdWithImagesAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Product?>(null));
+        _productRepositoryMock.GetProductWithImagesAsync(request.Id, CancellationToken.None)
+            .Returns((Product)null!);
 
         // Act
-        var result = await _productService.DeleteProductAsync(request, CancellationToken.None);
+        Result result = await _productService.DeleteProductAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -49,11 +49,11 @@ public class DeleteProductAsyncTest
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
         await _productRepositoryMock.Received(1)
-            .GetByIdWithImagesAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+            .GetProductWithImagesAsync(request.Id, CancellationToken.None);
     }
 
     [Fact]
-    public async Task DeleteProductAsync_Should_ReturnSuccess_When_ProductExists()
+    public async Task DeleteProductAsync_Should_ReturnSuccess_When_ProductExistsAndNoProductImages()
     {
         // Arrange
         var request = new DeleteProductRequest
@@ -61,10 +61,13 @@ public class DeleteProductAsyncTest
             Id = Guid.CreateVersion7()
         };
 
-        var product = new ProductFaker().Generate();
+        Product product = new ProductFaker().Generate();
 
-        _productRepositoryMock.GetByIdWithImagesAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock.GetProductWithImagesAsync(request.Id, CancellationToken.None)
             .Returns(product);
+
+        _eventDispatcherMock.DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
 
         _productRepositoryMock.Delete(Arg.Any<Product>());
 
@@ -72,7 +75,7 @@ public class DeleteProductAsyncTest
             .Returns(1);
 
         // Act
-        var result = await _productService.DeleteProductAsync(request, CancellationToken.None);
+        Result result = await _productService.DeleteProductAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -80,12 +83,67 @@ public class DeleteProductAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         await _productRepositoryMock.Received(1)
-            .GetByIdWithImagesAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+            .GetProductWithImagesAsync(request.Id, CancellationToken.None);
 
         await _unitOfWorkMock.Received(1)
             .CompleteAsync(Arg.Any<CancellationToken>());
 
         _productRepositoryMock.Received(1)
             .Delete(Arg.Any<Product>());
+
+        await _eventDispatcherMock.DidNotReceive()
+            .DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task DeleteProductAsync_Should_ReturnSuccess_When_ProductExistsAndHasProductImages()
+    {
+        // Arrange
+        var request = new DeleteProductRequest
+        {
+            Id = Guid.CreateVersion7()
+        };
+
+        Product product = new ProductFaker().Generate();
+        product.ProductImages =
+        [
+            new ProductImage
+            {
+                Id = Guid.CreateVersion7(),
+                Image = "image.png",
+                ProductId = product.Id
+            }
+        ];
+
+        _productRepositoryMock.GetProductWithImagesAsync(request.Id, CancellationToken.None)
+            .Returns(product);
+
+        _eventDispatcherMock.DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        _productRepositoryMock.Delete(Arg.Any<Product>());
+
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
+
+        // Act
+        Result result = await _productService.DeleteProductAsync(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Error.ShouldBeNull();
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        await _productRepositoryMock.Received(1)
+            .GetProductWithImagesAsync(request.Id, CancellationToken.None);
+
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
+
+        _productRepositoryMock.Received(1)
+            .Delete(Arg.Any<Product>());
+
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>());
     }
 }

@@ -1,11 +1,12 @@
-using System.Text.Json.Serialization;
-
 namespace Application.Services.Category.DTOs.Request;
 
-public record UpdateCategoryRequest
+public record UpdateCategoryRequestBody
 {
-    [JsonIgnore]
-    public Guid Id { get; set; }
     public required string Name { get; init; }
     public required string ImageUrl { get; init; }
+}
+
+public record UpdateCategoryRequest : UpdateCategoryRequestBody
+{
+    public required Guid Id { get; init; }
 }

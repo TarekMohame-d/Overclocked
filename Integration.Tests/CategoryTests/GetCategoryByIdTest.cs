@@ -1,48 +1,42 @@
-﻿using Api.Common.Routing;
+﻿using System.Net;
+using System.Net.Http.Json;
+using Api.Routing;
+using Application.Abstraction.Services;
 using Application.Common.Constants;
 using Application.Common.Results;
-using Application.Features.Category.Mapping;
+using Application.Services.Category.DTOs.Response;
+using Application.Services.Category.Mapping;
 using ArchitectureTests.FakeData;
+using Domain.Entities;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System.Net;
-using System.Net.Http.Json;
-using Domain.Entities;
-using Application.Services.Category.DTOs.Response;
-using Application.Services;
 
 namespace Integration.Tests.CategoryTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class GetCategoryByIdTest : IAsyncLifetime
+public class GetCategoryByIdTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public GetCategoryByIdTest(CustomWebApplicationFactory factory)
-    {
-        _client = factory.HttpClient;
-        _factory = factory;
-    }
-
-    public async Task InitializeAsync() => await _factory.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetById_Should_ReturnFailure_When_NotFound()
     {
         // Arrange
-        Guid id = Guid.CreateVersion7();
+        var id = Guid.CreateVersion7();
 
         // Act
-        var response = await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", id.ToString()));
+        HttpResponseMessage response =
+            await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<CategoryResponse>>();
+        Result<CategoryResponse>? result = await response.Content.ReadFromJsonAsync<Result<CategoryResponse>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeFalse();
@@ -56,10 +50,11 @@ public class GetCategoryByIdTest : IAsyncLifetime
     public async Task GetById_Should_ReturnNotFound_When_IdIsMalformedGuid()
     {
         // Arrange
-        var wrongId = "abc";
+        const string WrongId = "abc";
 
         // Act
-        var response = await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", wrongId.ToString()));
+        HttpResponseMessage response =
+            await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", WrongId));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -69,15 +64,16 @@ public class GetCategoryByIdTest : IAsyncLifetime
     public async Task GetById_Should_ReturnCategoryFromDatabase_When_CacheMiss()
     {
         // Arrange
-        var category = await SeedDatabaseAsync();
+        Category category = await SeedDatabaseAsync();
 
         // Act
-        var response = await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", category.Id.ToString()));
+        HttpResponseMessage response =
+            await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", category.Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<CategoryResponse>>();
+        Result<CategoryResponse>? result = await response.Content.ReadFromJsonAsync<Result<CategoryResponse>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -91,15 +87,16 @@ public class GetCategoryByIdTest : IAsyncLifetime
     public async Task GetById_Should_ReturnCategoryFromCache_When_CacheHit()
     {
         // Arrange
-        var categoryDto = await SeedCacheAsync();
+        CategoryResponse categoryDto = await SeedCacheAsync();
 
         // Act
-        var response = await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", categoryDto.Id.ToString()));
+        HttpResponseMessage response =
+            await _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", categoryDto.Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<CategoryResponse>>();
+        Result<CategoryResponse>? result = await response.Content.ReadFromJsonAsync<Result<CategoryResponse>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -113,29 +110,30 @@ public class GetCategoryByIdTest : IAsyncLifetime
     public async Task GetById_Should_ReturnConsistentResults_When_CalledConcurrently()
     {
         // Arrange
-        var categorys = await SeedDatabaseRangeAsync(10);
-        var ids = categorys.Select(x => x.Id).ToList();
-        int concurrentCalls = 10;
+        IEnumerable<Category> categories = await SeedDatabaseRangeAsync();
+        var ids = categories.Select(x => x.Id).ToList();
+        const int ConcurrentCalls = 10;
         var rnd = new Random();
         var tasks = new List<Task<HttpResponseMessage>>();
 
         // Act
-        for (int i = 0; i < concurrentCalls; i++)
+        for (var i = 0; i < ConcurrentCalls; i++)
         {
-            var randomId = ids[rnd.Next(ids.Count)];
-            var task = _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", randomId.ToString()));
+            Guid randomId = ids[rnd.Next(ids.Count)];
+            Task<HttpResponseMessage> task =
+                _client.GetAsync(CategoryRoutes.GetById.Replace("{id:guid}", randomId.ToString()));
             tasks.Add(task);
         }
 
         await Task.WhenAll(tasks);
 
         // Assert
-        foreach (var task in tasks)
+        foreach (Task<HttpResponseMessage> task in tasks)
         {
-            var response = await task;
+            HttpResponseMessage response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var result = await response.Content.ReadFromJsonAsync<Result<CategoryResponse>>();
+            Result<CategoryResponse>? result = await response.Content.ReadFromJsonAsync<Result<CategoryResponse>>();
 
             result.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();
@@ -146,10 +144,10 @@ public class GetCategoryByIdTest : IAsyncLifetime
 
     private async Task<Category> SeedDatabaseAsync()
     {
-        using var scope = _factory.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
-        var category = new CategoryFaker().Generate();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        Category category = new CategoryFaker().Generate();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Categories.Add(category);
         await dbContext.SaveChangesAsync();
@@ -159,26 +157,26 @@ public class GetCategoryByIdTest : IAsyncLifetime
 
     private async Task<IEnumerable<Category>> SeedDatabaseRangeAsync(int count = 10)
     {
-        using var scope = _factory.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
-        var categorys = new CategoryFaker().Generate(count);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        List<Category> categories = new CategoryFaker().Generate(count);
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        await dbContext.Categories.AddRangeAsync(categorys);
+        await dbContext.Categories.AddRangeAsync(categories);
         await dbContext.SaveChangesAsync();
 
-        return categorys;
+        return categories;
     }
 
     private async Task<CategoryResponse> SeedCacheAsync()
     {
-        using var scope = _factory.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
-        var category = new CategoryFaker().Generate();
+        Category category = new CategoryFaker().Generate();
 
-        var cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
+        ICacheService cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
         var key = CacheKeys.Category(category.Id.ToString());
-        var categoryDto = category.ToDto();
+        CategoryResponse categoryDto = category.ToDto();
         var result = Result<CategoryResponse>.Success(categoryDto);
         await cache.SetAsync(key, result, TimeSpan.FromMinutes(5));
 

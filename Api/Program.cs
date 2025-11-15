@@ -1,31 +1,29 @@
 using Api;
-using Api.ActionFilters;
 using Api.Middleware;
 using Application;
+using Hangfire;
 using Infrastructure;
 using Serilog;
 
-
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // --------------------------------------------
 // CONFIGURATION SETUP
 // --------------------------------------------
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("appsettings.json", false, true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
     .AddEnvironmentVariables();
 
 // Load external config (for development only)
 if (builder.Environment.IsDevelopment())
 {
     var configPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.FullName, "configs.json");
-    builder.Configuration.AddJsonFile(configPath, optional: true, reloadOnChange: true);
+    builder.Configuration.AddJsonFile(configPath, true, true);
 }
 
 builder.Configuration.AddEnvironmentVariables();
-
 
 
 builder.Host.UseSerilog((context, loggerConfig) =>
@@ -35,20 +33,17 @@ builder.Host.UseSerilog((context, loggerConfig) =>
 builder.Services
     .AddPresentation(builder.Configuration)
     .AddInfrastructure(builder.Configuration)
-    .AddApplication();
+    .AddApplication(builder.Configuration);
 
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "Overclocked API");
-    });
+    app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "Overclocked API"); });
 }
 
 app.UseHttpsRedirection();
@@ -63,6 +58,8 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseHangfireDashboard("/dashboard");
 
 // app.UseStaticFiles();
 

@@ -7,13 +7,13 @@ namespace Application.Services.Product;
 
 public sealed partial class ProductService
 {
-    public async Task<Result<ProductResponse>> GetProductByIdAsync(GetProductByIdRequest request, CancellationToken cancellationToken)
+    public async Task<Result<ProductResponse>> GetProductByIdAsync(GetProductByIdRequest request,
+        CancellationToken cancellationToken)
     {
-        var productDto = await _productRepository.GetProductAsync(request.Id, cancellationToken);
+        ProductResponse? productDto = await productRepository.GetProductDetailsAsync(request.Id, cancellationToken);
 
-        if (productDto is null)
-            return Result<ProductResponse>.Failure(Errors.ProductNotFound, HttpStatusCode.NotFound);
-
-        return Result<ProductResponse>.Success(productDto);
+        return productDto is null
+            ? Result<ProductResponse>.Failure(Errors.ProductNotFound, HttpStatusCode.NotFound)
+            : Result<ProductResponse>.Success(productDto);
     }
 }

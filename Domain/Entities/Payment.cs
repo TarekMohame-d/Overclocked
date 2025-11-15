@@ -3,7 +3,7 @@ using Domain.StaticData;
 
 namespace Domain.Entities;
 
-public class Payment : BaseEntity
+public class Payment : Entity
 {
     public int StatusId { get; set; }
     public PaymentStatusType PaymentStatusType

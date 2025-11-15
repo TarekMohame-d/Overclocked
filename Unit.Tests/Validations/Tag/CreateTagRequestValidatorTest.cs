@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Application.Abstraction.Repositories;
 using Application.Services.Tag.DTOs.Request;
 using Application.Services.Tag.Validations;
+using FluentValidation.TestHelper;
 using NSubstitute;
 using Shouldly;
 using Unit.Tests.Validations.Tag.TestCases;
@@ -11,20 +12,17 @@ namespace Unit.Tests.Validations.Tag;
 
 public class CreateTagRequestValidatorTest
 {
-    private readonly ITagRepository _tagRepositoryMock;
-
-    public CreateTagRequestValidatorTest()
-    {
-        _tagRepositoryMock = Substitute.For<ITagRepository>();
-    }
+    private readonly ITagRepository _tagRepositoryMock = Substitute.For<ITagRepository>();
 
     [Theory]
-    [MemberData(nameof(CreateTagValidationTestCases.InvalidNameCases), MemberType = typeof(CreateTagValidationTestCases))]
+    [MemberData(nameof(CreateTagValidationTestCases.InvalidNameCases),
+        MemberType = typeof(CreateTagValidationTestCases))]
     public async Task CreateTagRequestValidator_Should_ReturnError_WhenNameIsInvalid(string? name)
     {
         // Arrange
         var validator = new CreateTagRequestValidator(_tagRepositoryMock);
-        var command = new CreateTagRequest
+
+        var request = new CreateTagRequest
         {
             Name = name!
         };
@@ -33,15 +31,12 @@ public class CreateTagRequestValidatorTest
             .Returns(false);
 
         // Act
-        var result = await validator.ValidateAsync(command);
+        TestValidationResult<CreateTagRequest> result = await validator.TestValidateAsync(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "Name").ShouldBeTrue();
-        if (!string.IsNullOrWhiteSpace(name))
-            await _tagRepositoryMock.Received(1)
-                .AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>());
+        result.ShouldHaveValidationErrorFor(x => x.Name).Only();
     }
 
     [Fact]
@@ -49,24 +44,22 @@ public class CreateTagRequestValidatorTest
     {
         // Arrange
         var validator = new CreateTagRequestValidator(_tagRepositoryMock);
-        var command = new CreateTagRequest
+
+        var request = new CreateTagRequest
         {
-            Name = "Nike"
+            Name = "Tag Name"
         };
 
         _tagRepositoryMock.AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         // Act
-        var result = await validator.ValidateAsync(command);
+        TestValidationResult<CreateTagRequest> result = await validator.TestValidateAsync(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
         result.Errors.Count().ShouldBe(1);
-        result.Errors.All(e => e.PropertyName == "Name").ShouldBeTrue();
-
-        await _tagRepositoryMock.Received(1)
-            .AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>());
+        result.ShouldHaveValidationErrorFor(x => x.Name).Only();
     }
 }

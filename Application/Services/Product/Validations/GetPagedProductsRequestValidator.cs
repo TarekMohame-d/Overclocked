@@ -1,9 +1,10 @@
+using Application.Common.Enums;
 using Application.Services.Product.DTOs.Request;
 using FluentValidation;
 
 namespace Application.Services.Product.Validations;
 
-public class GetPagedProductsRequestValidator : AbstractValidator<GetPagedProductsRequest>
+public class GetPagedProductsRequestValidator : AbstractValidator<GetPagedProductsQuery>
 {
     public GetPagedProductsRequestValidator()
     {
@@ -16,26 +17,26 @@ public class GetPagedProductsRequestValidator : AbstractValidator<GetPagedProduc
             .WithMessage("{PropertyName} must be between 1 and 100.");
 
         RuleFor(x => x.SortBy)
-            .IsInEnum()
-            .WithMessage("{PropertyName} must be one of: Id, Name, Price, Rating");
+            .Must(value => string.IsNullOrWhiteSpace(value) || Enum.TryParse<ProductSortField>(value, true, out _))
+            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<ProductSortField>()));
 
         RuleFor(x => x.Direction)
-            .IsInEnum()
-            .WithMessage("{PropertyName} must be either Asc or Desc");
+            .Must(value => string.IsNullOrWhiteSpace(value) || Enum.TryParse<SortDirection>(value, true, out _))
+            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<SortDirection>()));
 
         RuleFor(x => x.Search)
-            .MaximumLength(200)
+            .MaximumLength(100)
             .When(x => !string.IsNullOrWhiteSpace(x.Search))
-            .WithMessage("{PropertyName} term must not exceed 200 characters");
+            .WithMessage("{PropertyName} term must not exceed 100 characters");
 
         RuleFor(x => x.Category)
-            .MaximumLength(100)
+            .MaximumLength(50)
             .When(x => !string.IsNullOrWhiteSpace(x.Category))
-            .WithMessage("{PropertyName} must not exceed 100 characters.");
+            .WithMessage("{PropertyName} must not exceed 50 characters.");
 
         RuleFor(x => x.Brand)
-            .MaximumLength(100)
+            .MaximumLength(50)
             .When(x => !string.IsNullOrWhiteSpace(x.Brand))
-            .WithMessage("{PropertyName} must not exceed 100 characters.");
+            .WithMessage("{PropertyName} must not exceed 50 characters.");
     }
 }

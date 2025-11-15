@@ -1,59 +1,54 @@
-using Infrastructure.Data;
-using Integration.Tests.Shared;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Domain.Entities;
+using System.Text;
+using System.Text.Json;
+using Api.Routing;
 using Application.Common.Results;
 using ArchitectureTests.FakeData;
-using System.Text.Json;
-using System.Text;
-using Api.Routing;
+using Domain.Entities;
+using Domain.StaticData;
+using Infrastructure.Data;
+using Integration.Tests.Shared;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
 namespace Integration.Tests.ProductTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class UpdateProductTest : IAsyncLifetime
+public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
-    public UpdateProductTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.HttpClient;
-    }
+    private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = _factory.GenerateJwtToken();
-        _factory.HttpClient.DefaultRequestHeaders.Authorization =
+        var token = CustomWebApplicationFactory
+            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
     }
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Update_Should_ReturnFailure_When_ProductNotFound()
     {
         // Arrange
-        var name = "AMD";
+        const string Name = "AMD";
         var id = Guid.NewGuid().ToString();
 
-        var ids = await SeedDependantEntityAsync();
-        var form = CreateJsonContent(name, ids.brandId, ids.categoryId, ids.tags);
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
+        StringContent form = CreateJsonContent(Name, ids.brandId, ids.categoryId, ids.tags);
 
         // Act
-        var response = await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", id), form);
+        HttpResponseMessage response = await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", id), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -67,21 +62,22 @@ public class UpdateProductTest : IAsyncLifetime
     public async Task Update_Should_ReturnSuccess_When_DataIsValid()
     {
         // Arrange
-        var ids = await SeedDependantEntityAsync();
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
 
-        var product = await SeedDatabaseAsync(ids.brandId, ids.categoryId);
-        var form = CreateJsonContent("New Name", ids.brandId, ids.categoryId, ids.tags);
+        Product product = await SeedDatabaseAsync(ids.brandId, ids.categoryId);
+        StringContent form = CreateJsonContent("New Name", ids.brandId, ids.categoryId, ids.tags);
 
         // Act
-        var response = await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", product.Id.ToString()), form);
+        HttpResponseMessage response =
+            await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", product.Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Product? updatedProduct = await dbContext.Products.FindAsync(product.Id);
         updatedProduct.ShouldNotBeNull();
@@ -93,15 +89,36 @@ public class UpdateProductTest : IAsyncLifetime
         result.Error.ShouldBeNull();
     }
 
+    [Fact]
+    public async Task Update_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    {
+        // Arrange
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
+
+        Product product = await SeedDatabaseAsync(ids.brandId, ids.categoryId);
+        StringContent form = CreateJsonContent("New Name", ids.brandId, ids.categoryId, ids.tags);
+
+        var token = CustomWebApplicationFactory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        HttpResponseMessage response =
+            await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", product.Id.ToString()), form);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
     private async Task<Product> SeedDatabaseAsync(Guid brandId, Guid categoryId)
     {
-        var product = new ProductFaker().Generate();
+        Product product = new ProductFaker().Generate();
 
         product.BrandId = brandId;
         product.CategoryId = categoryId;
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Products.Add(product);
         await dbContext.SaveChangesAsync();
@@ -111,12 +128,12 @@ public class UpdateProductTest : IAsyncLifetime
 
     private async Task<(Guid brandId, Guid categoryId, IEnumerable<Guid> tags)> SeedDependantEntityAsync()
     {
-        var brand = new BrandFaker().Generate();
-        var category = new CategoryFaker().Generate();
-        var tags = new TagFaker().Generate(3);
+        Brand brand = new BrandFaker().Generate();
+        Category category = new CategoryFaker().Generate();
+        List<Tag> tags = new TagFaker().Generate(3);
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);
         dbContext.Categories.Add(category);
@@ -127,7 +144,7 @@ public class UpdateProductTest : IAsyncLifetime
         return (brand.Id, category.Id, tags.Select(x => x.Id));
     }
 
-    private StringContent CreateJsonContent(string name, Guid brandId, Guid categoryId, IEnumerable<Guid> tags)
+    private static StringContent CreateJsonContent(string name, Guid brandId, Guid categoryId, IEnumerable<Guid> tags)
     {
         var payload = new
         {
@@ -147,11 +164,11 @@ public class UpdateProductTest : IAsyncLifetime
             },
             Specification = new[]
             {
-            new { Name = "Name", Value = "Value" }
+                new { Name = "Name", Value = "Value" }
             }
         };
 
-        string json = JsonSerializer.Serialize(payload);
+        var json = JsonSerializer.Serialize(payload);
         return new StringContent(json, Encoding.UTF8, "application/json");
     }
 }

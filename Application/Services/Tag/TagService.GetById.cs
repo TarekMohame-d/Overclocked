@@ -1,23 +1,20 @@
 using System.Net;
 using Application.Common.Results;
-using Application.Features.Brand.Mapping;
-using Application.Features.Tag.Mapping;
 using Application.Services.Tag.DTOs.Request;
 using Application.Services.Tag.DTOs.Response;
+using Application.Services.Tag.Mapping;
 
 namespace Application.Services.Tag;
 
 public sealed partial class TagService
 {
-    public async Task<Result<TagResponse>> GetTagByIdAsync(GetTagByIdRequest request, CancellationToken cancellationToken)
+    public async Task<Result<TagResponse>> GetTagByIdAsync(GetTagByIdRequest request,
+        CancellationToken cancellationToken)
     {
-        var tag = await _tagRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([request.Id], cancellationToken);
 
-        if (tag is null)
-            return Result<TagResponse>.Failure(
-                Errors.TagNotFound,
-                HttpStatusCode.NotFound);
-
-        return tag.ToDto();
+        return tag?.ToDto() ?? Result<TagResponse>.Failure(
+            Errors.TagNotFound,
+            HttpStatusCode.NotFound);
     }
 }

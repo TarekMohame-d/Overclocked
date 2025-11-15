@@ -7,6 +7,7 @@ using Api.Routing;
 using Application.Common.Results;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
+using Domain.StaticData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -16,51 +17,46 @@ using Shouldly;
 namespace Integration.Tests.ProductTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class CreateProductTest : IAsyncLifetime
+public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
-    public CreateProductTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.HttpClient;
-    }
+    private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = _factory.GenerateJwtToken();
-        _factory.HttpClient.DefaultRequestHeaders.Authorization =
+        var token = CustomWebApplicationFactory
+            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
     }
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Create_Should_CreateAndReturnSuccess_When_DataIsValid()
     {
         // Arrange
-        var name = "AMD";
+        const string Name = "AMD";
 
-        var ids = await SeedDependantEntityAsync();
-        var form = CreateJsonContent(name, ids.brandId, ids.categoryId, ids.tags);
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
+        StringContent form = CreateJsonContent(Name, ids.brandId, ids.categoryId, ids.tags);
 
         // Act
-        var response = await _client.PostAsync(ProductRoutes.Create, form);
+        HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var product = await dbContext.Products.SingleOrDefaultAsync(x => x.NormalizedName == name.ToUpper());
+        Product? product = await dbContext.Products.SingleOrDefaultAsync(x => x.NormalizedName == Name.ToUpper());
         product.ShouldNotBeNull();
 
-        product.Name.ShouldBe(name);
+        product.Name.ShouldBe(Name);
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -72,19 +68,19 @@ public class CreateProductTest : IAsyncLifetime
     public async Task Create_Should_ReturnBadRequest_When_NameAlreadyExists()
     {
         // Arrange
-        var ids = await SeedDependantEntityAsync();
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
 
-        var product = await SeedDatabaseAsync(ids.brandId, ids.categoryId);
+        Product product = await SeedDatabaseAsync(ids.brandId, ids.categoryId);
 
-        var form = CreateJsonContent(product.Name, ids.brandId, ids.categoryId, ids.tags);
+        StringContent form = CreateJsonContent(product.Name, ids.brandId, ids.categoryId, ids.tags);
 
         // Act
-        var response = await _client.PostAsync(ProductRoutes.Create, form);
+        HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -92,15 +88,35 @@ public class CreateProductTest : IAsyncLifetime
         result.Error.ShouldNotBeNull();
     }
 
+    [Fact]
+    public async Task Create_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    {
+        // Arrange
+        const string Name = "AMD";
+
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
+        StringContent form = CreateJsonContent(Name, ids.brandId, ids.categoryId, ids.tags);
+
+        var token = CustomWebApplicationFactory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
     private async Task<Product> SeedDatabaseAsync(Guid brandId, Guid categoryId)
     {
-        var product = new ProductFaker().Generate();
+        Product? product = new ProductFaker().Generate();
 
         product.BrandId = brandId;
         product.CategoryId = categoryId;
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Products.Add(product);
         await dbContext.SaveChangesAsync();
@@ -110,12 +126,12 @@ public class CreateProductTest : IAsyncLifetime
 
     private async Task<(Guid brandId, Guid categoryId, IEnumerable<Guid> tags)> SeedDependantEntityAsync()
     {
-        var brand = new BrandFaker().Generate();
-        var category = new CategoryFaker().Generate();
-        var tags = new TagFaker().Generate(3);
+        Brand? brand = new BrandFaker().Generate();
+        Category? category = new CategoryFaker().Generate();
+        List<Tag>? tags = new TagFaker().Generate(3);
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);
         dbContext.Categories.Add(category);
@@ -126,7 +142,7 @@ public class CreateProductTest : IAsyncLifetime
         return (brand.Id, category.Id, tags.Select(x => x.Id));
     }
 
-    private StringContent CreateJsonContent(string name, Guid brandId, Guid categoryId, IEnumerable<Guid> tags)
+    private static StringContent CreateJsonContent(string name, Guid brandId, Guid categoryId, IEnumerable<Guid> tags)
     {
         var payload = new
         {
@@ -146,11 +162,11 @@ public class CreateProductTest : IAsyncLifetime
             },
             Specification = new[]
             {
-            new { Name = "Name", Value = "Value" }
+                new { Name = "Name", Value = "Value" }
             }
         };
 
-        string json = JsonSerializer.Serialize(payload);
+        var json = JsonSerializer.Serialize(payload);
         return new StringContent(json, Encoding.UTF8, "application/json");
     }
 }

@@ -1,66 +1,61 @@
+using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Api.Common.Routing;
+using System.Text;
+using System.Text.Json;
+using Api.Routing;
 using Application.Common.Results;
 using ArchitectureTests.FakeData;
+using Domain.Entities;
+using Domain.StaticData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using Domain.Entities;
-using System.Text.Json;
-using System.Text;
-using System.Net.Http.Headers;
-using System.Net;
 
 namespace Integration.Tests.TagTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class CreateTagTest : IAsyncLifetime
+public class CreateTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
-    public CreateTagTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.HttpClient;
-    }
+    private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = _factory.GenerateJwtToken();
-        _factory.HttpClient.DefaultRequestHeaders.Authorization =
+        var token = CustomWebApplicationFactory
+            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
     }
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Create_Should_CreateAndReturnSuccess_When_DataIsValid()
     {
         // Arrange
-        var name = "AMD";
+        const string Name = "AMD";
 
-        var form = CreateJsonContent(name);
+        StringContent form = CreateJsonContent(Name);
 
         // Act
-        var response = await _client.PostAsync(TagRoutes.Create, form);
+        HttpResponseMessage response = await _client.PostAsync(TagRoutes.Create, form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var tag = await dbContext.Tags.SingleOrDefaultAsync(x => x.NormalizedName == name.ToUpper());
+        Tag? tag = await dbContext.Tags.SingleOrDefaultAsync(x => x.NormalizedName == Name.ToUpper());
         tag.ShouldNotBeNull();
 
-        tag.Name.ShouldBe(name);
+        tag.Name.ShouldBe(Name);
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -72,16 +67,16 @@ public class CreateTagTest : IAsyncLifetime
     public async Task Create_Should_ReturnBadRequest_When_NameAlreadyExists()
     {
         // Arrange
-        var tag = await SeedDatabaseAsync();
-        var form = CreateJsonContent(tag.Name);
+        Tag tag = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent(tag.Name);
 
         // Act
-        var response = await _client.PostAsync(TagRoutes.Create, form);
+        HttpResponseMessage response = await _client.PostAsync(TagRoutes.Create, form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -89,12 +84,30 @@ public class CreateTagTest : IAsyncLifetime
         result.Error.ShouldNotBeNull();
     }
 
+    [Fact]
+    public async Task Create_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    {
+        // Arrange
+        Tag tag = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent(tag.Name);
+
+        var token = CustomWebApplicationFactory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        HttpResponseMessage response = await _client.PostAsync(TagRoutes.Create, form);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
     private async Task<Tag> SeedDatabaseAsync()
     {
-        var tag = new TagFaker().Generate();
+        Tag tag = new TagFaker().Generate();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Tags.Add(tag);
         await dbContext.SaveChangesAsync();
@@ -102,14 +115,14 @@ public class CreateTagTest : IAsyncLifetime
         return tag;
     }
 
-    private StringContent CreateJsonContent(string name)
+    private static StringContent CreateJsonContent(string name)
     {
         var payload = new
         {
             Name = name
         };
 
-        string json = JsonSerializer.Serialize(payload);
+        var json = JsonSerializer.Serialize(payload);
 
         return new StringContent(json, Encoding.UTF8, "application/json");
     }

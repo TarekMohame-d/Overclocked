@@ -2,7 +2,7 @@
 
 namespace Domain.Entities;
 
-public class Tag : BaseEntity
+public class Tag : Entity
 {
     public required string Name { get; set; }
     public string NormalizedName { get; set; } = default!;

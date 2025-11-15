@@ -1,10 +1,10 @@
 using System.Net;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
 using Application.Common.Results;
-using Application.Features.Tag.Mapping;
 using Application.Services.Tag;
 using Application.Services.Tag.DTOs.Request;
+using Application.Services.Tag.DTOs.Response;
+using Application.Services.Tag.Mapping;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
 using NSubstitute;
@@ -15,14 +15,12 @@ namespace Unit.Tests.TagTests;
 public class GetTagByIdAsyncTest
 {
     private readonly ITagRepository _tagRepositoryMock;
-    private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly ITagService _tagService;
+    private readonly TagService _tagService;
 
     public GetTagByIdAsyncTest()
     {
         _tagRepositoryMock = Substitute.For<ITagRepository>();
-        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _tagService = new TagService(_tagRepositoryMock, _unitOfWorkMock);
+        _tagService = new TagService(_tagRepositoryMock, Substitute.For<IUnitOfWork>());
     }
 
     [Fact]
@@ -31,14 +29,14 @@ public class GetTagByIdAsyncTest
         // Arrange
         var tagId = Guid.CreateVersion7();
         var request = new GetTagByIdRequest { Id = tagId };
-        var tag = new TagFaker().Generate();
-        var tagDto = tag.ToDto();
+        Tag tag = new TagFaker().Generate();
+        TagResponse tagDto = tag.ToDto();
 
         _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns(tag);
 
         // Act
-        var result = await _tagService.GetTagByIdAsync(request, CancellationToken.None);
+        Result<TagResponse> result = await _tagService.GetTagByIdAsync(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -63,7 +61,7 @@ public class GetTagByIdAsyncTest
             .Returns((Tag)null!);
 
         // Act
-        var result = await _tagService.GetTagByIdAsync(request, CancellationToken.None);
+        Result<TagResponse> result = await _tagService.GetTagByIdAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();

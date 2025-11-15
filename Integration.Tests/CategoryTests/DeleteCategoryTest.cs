@@ -1,54 +1,51 @@
-﻿using Api.Common.Routing;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Api.Routing;
+using Application.Common.Results;
 using ArchitectureTests.FakeData;
+using Domain.Entities;
+using Domain.StaticData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using Domain.Entities;
-using Application.Common.Results;
 using NSubstitute;
+using Shouldly;
 
 namespace Integration.Tests.CategoryTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class DeleteCategoryTest : IAsyncLifetime
+public class DeleteCategoryTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
-    public DeleteCategoryTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.HttpClient;
-    }
+    private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
-        _factory.FileStorageServiceMock.ClearReceivedCalls();
+        await factory.ResetDatabaseAsync();
+        factory.FileStorageServiceMock.ClearReceivedCalls();
 
-        var token = _factory.GenerateJwtToken();
-        _factory.HttpClient.DefaultRequestHeaders.Authorization =
+        var token = CustomWebApplicationFactory
+            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
     }
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Delete_Should_ReturnFailure_When_IdNotFound()
     {
         // Arrange
-        var categoryId = Guid.NewGuid().ToString();
+        var categoryId = Guid.CreateVersion7().ToString();
 
         // Act
-        var response = await _client.DeleteAsync(CategoryRoutes.Delete.Replace("{id:guid}", categoryId));
+        HttpResponseMessage response =
+            await _client.DeleteAsync(CategoryRoutes.Delete.Replace("{id:guid}", categoryId));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -62,18 +59,19 @@ public class DeleteCategoryTest : IAsyncLifetime
     public async Task Delete_Should_ReturnSuccess_When_IdExists()
     {
         // Arrange
-        var category = await SeedDatabaseAsync();
+        Category category = await SeedDatabaseAsync();
 
         // Act
-        var response = await _client.DeleteAsync(CategoryRoutes.Delete.Replace("{id:guid}", category.Id.ToString()));
+        HttpResponseMessage response =
+            await _client.DeleteAsync(CategoryRoutes.Delete.Replace("{id:guid}", category.Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Category? deletedCategory = await dbContext.Categories.FindAsync(category.Id);
 
@@ -85,12 +83,30 @@ public class DeleteCategoryTest : IAsyncLifetime
         result.Error.ShouldBeNull();
     }
 
+    [Fact]
+    public async Task Delete_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    {
+        // Arrange
+        Category category = await SeedDatabaseAsync();
+
+        var token = CustomWebApplicationFactory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        HttpResponseMessage response =
+            await _client.DeleteAsync(CategoryRoutes.Delete.Replace("{id:guid}", category.Id.ToString()));
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
     private async Task<Category> SeedDatabaseAsync()
     {
-        var category = new CategoryFaker().Generate();
+        Category category = new CategoryFaker().Generate();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Categories.Add(category);
         await dbContext.SaveChangesAsync();

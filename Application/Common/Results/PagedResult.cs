@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+namespace Application.Common.Results;
+
 public class PagedResult<T>
 {
     // Needed for deserialization
@@ -26,8 +28,8 @@ public class PagedResult<T>
         var count = await source.CountAsync();
 
         var items = await source.Skip((pageNumber - 1) * pageSize)
-                                .Take(pageSize)
-                                .ToListAsync();
+            .Take(pageSize)
+            .ToListAsync();
 
         return new PagedResult<T>(items, pageNumber, pageSize, count);
     }

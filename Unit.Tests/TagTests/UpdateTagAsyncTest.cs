@@ -1,22 +1,20 @@
 using System.Net;
-using Application.Common.Results;
-using ArchitectureTests.FakeData;
-using NSubstitute;
-using Shouldly;
-using Application.Abstraction.Messaging;
-using Domain.Entities;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
+using Application.Common.Results;
 using Application.Services.Tag;
 using Application.Services.Tag.DTOs.Request;
+using ArchitectureTests.FakeData;
+using Domain.Entities;
+using NSubstitute;
+using Shouldly;
 
 namespace Unit.Tests.TagTests;
 
 public class UpdateTagAsyncTest
 {
     private readonly ITagRepository _tagRepositoryMock;
+    private readonly TagService _tagService;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly ITagService _tagService;
 
     public UpdateTagAsyncTest()
     {
@@ -32,14 +30,14 @@ public class UpdateTagAsyncTest
         var request = new UpdateTagRequest
         {
             Id = Guid.CreateVersion7(),
-            Name = "AMD"
+            Name = "Tag Name"
         };
 
         _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns((Tag)null!);
 
         // Act
-        var result = await _tagService.UpdateTagAsync(request, CancellationToken.None);
+        Result result = await _tagService.UpdateTagAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -58,10 +56,10 @@ public class UpdateTagAsyncTest
         var request = new UpdateTagRequest
         {
             Id = Guid.CreateVersion7(),
-            Name = "AMD"
+            Name = "Tag Name"
         };
 
-        var tag = new TagFaker().Generate();
+        Tag tag = new TagFaker().Generate();
 
         tag.Name = request.Name;
 
@@ -74,7 +72,7 @@ public class UpdateTagAsyncTest
             .Returns(1);
 
         // Act
-        var result = await _tagService.UpdateTagAsync(request, CancellationToken.None);
+        Result result = await _tagService.UpdateTagAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

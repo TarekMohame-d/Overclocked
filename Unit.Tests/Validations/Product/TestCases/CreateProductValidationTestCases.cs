@@ -6,96 +6,112 @@ public class CreateProductValidationTestCases
 {
     public static IEnumerable<object[]> InvalidNameCases()
     {
-        yield return new object[] { null! };
-        yield return new object[] { "" };
-        yield return new object[] { "   " };
-        yield return new object[] { new string('a', 55) }; // exceeds 50 chars
+        yield return [null!];
+        yield return [""];
+        yield return ["   "];
+        yield return [new string('a', 55)]; // exceeds 50 chars
     }
 
     public static IEnumerable<object[]> InvalidThumbnailCases()
     {
-        yield return new object[] { null! };
-        yield return new object[] { "" };
-        yield return new object[] { "   " };
-        yield return new object[] { "not-a-url" };
-        yield return new object[] { "ftp://example.com/image.jpg" };
-        yield return new object[] { "www.example.com/image.jpg" };
-        yield return new object[] { "https://www.example.com/image.jpg" }; // wrong host
-        yield return new object[] { "https://res.cloudinary.com/over-clocked.txt" }; // invalid URL path
+        yield return [null!];
+        yield return [""];
+        yield return ["   "];
+        yield return ["not-a-url"];
+        yield return ["ftp://example.com/image.jpg"];
+        yield return ["www.example.com/image.jpg"];
+        yield return ["https://www.example.com/image.jpg"]; // wrong host
+        yield return ["https://res.cloudinary.com/over-clocked.txt"]; // invalid URL path
     }
 
     public static IEnumerable<object[]> InvalidDescriptionCases()
     {
-        yield return new object[] { null! };
-        yield return new object[] { "" };
-        yield return new object[] { "   " };
-        yield return new object[] { new string('a', 505) }; // exceeds 500 chars
+        yield return [null!];
+        yield return [""];
+        yield return ["   "];
+        yield return [new string('a', 505)]; // exceeds 500 chars
     }
 
     public static IEnumerable<object[]> InvalidPriceCases()
     {
-        yield return new object[] { -1.0m };
-        yield return new object[] { 0.0m };
+        yield return [-1.0m];
+        yield return [0.0m];
     }
 
     public static IEnumerable<object[]> InvalidStockCases()
     {
-        yield return new object[] { -1 };
+        yield return [-1];
     }
 
     public static IEnumerable<object[]> InvalidDiscountCases()
     {
-        yield return new object[] { -0.1m };
-        yield return new object[] { 1.0m };
-        yield return new object[] { 1.5m };
+        yield return [-0.1m];
+        yield return [1.0m];
+        yield return [1.5m];
     }
 
     public static IEnumerable<object[]> InvalidImagesCases()
     {
-        yield return new object[] { new[] { "https://res.cloudinary.com/over-clocked.txt" } };
-        yield return new object[] { new[] { "not-a-url" } };
-        yield return new object[] { new[] { "ftp://example.com/image.jpg" } };
-        yield return new object[] { new[] { "www.example.com/image.jpg" } };
-        yield return new object[] { new[] { "https://www.example.com/image.jpg" } };
+        yield return [new[] { "https://res.cloudinary.com/over-clocked.txt" }];
+        yield return [new[] { "not-a-url" }];
+        yield return [new[] { "ftp://example.com/image.jpg" }];
+        yield return [new[] { "www.example.com/image.jpg" }];
+        yield return [new[] { "https://www.example.com/image.jpg" }];
     }
 
     public static IEnumerable<object[]> InvalidTagsCases()
     {
-        yield return new object[] { null! }; // no tags
-        yield return new object[] { new List<Guid>() }; // empty list
+        yield return [null!]; // no tags
+        yield return [new List<Guid>()]; // empty list
     }
 
     public static IEnumerable<object[]> InvalidSpecificationsCases()
     {
         // Empty or invalid
-        yield return new object[]
-        {
-                new List<CreateProductRequest.Specs>
+        yield return
+        [
+            new List<CreateProductRequest.Specs>
+            {
+                new()
                 {
-                    new() { Name = null!, Value = null! },
+                    Name = null!,
+                    Value = null!
                 }
-        };
+            }
+        ];
 
         // Too long name and value
-        yield return new object[]
-        {
-                new List<CreateProductRequest.Specs>
+        yield return
+        [
+            new List<CreateProductRequest.Specs>
+            {
+                new()
                 {
-                    new() { Name = new string('N', 55), Value = new string('V', 350) },
+                    Name = new string('N', 55),
+                    Value = new string('V', 350)
                 }
-        };
+            }
+        ];
 
         // Duplicate names
-        yield return new object[]
-        {
-                new List<CreateProductRequest.Specs>
+        yield return
+        [
+            new List<CreateProductRequest.Specs>
+            {
+                new()
                 {
-                    new() { Name = "CPU", Value = "Intel i7" },
-                    new() { Name = "CPU", Value = "Intel i9" }
+                    Name = "Name",
+                    Value = "Value"
+                },
+                new()
+                {
+                    Name = "Name",
+                    Value = "Value"
                 }
-        };
+            }
+        ];
 
         // Empty list
-        yield return new object[] { new List<CreateProductRequest.Specs>() };
+        yield return [new List<CreateProductRequest.Specs>()];
     }
 }

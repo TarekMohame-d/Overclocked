@@ -3,7 +3,7 @@ using Domain.StaticData;
 
 namespace Domain.Entities;
 
-public class Shipment : BaseEntity
+public class Shipment : Entity
 {
     public Guid OrderId { get; set; }
     public Guid AddressId { get; set; }

@@ -1,35 +1,41 @@
-using System.Text.Json.Serialization;
 using Application.Abstraction.Messaging;
 using Application.Common.Constants;
 using Application.Common.Enums;
 
 namespace Application.Services.Tag.DTOs.Request;
 
-public record GetPagedTagsRequest
+public record GetPagedTagsQuery
 {
-    public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TagSortField SortBy { get; set; } = TagSortField.Id;
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public SortDirection Direction { get; set; } = SortDirection.Asc;
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 10;
+    public string SortBy { get; init; } = "";
+    public string Direction { get; init; } = "";
 }
 
-public record GetPagedTagsQuery : GetPagedTagsRequest, ICachedRequest
+public record GetPagedTagsRequest : GetPagedTagsQuery, ICachedRequest
 {
+    public new TagSortField SortBy { get; private init; }
+    public new SortDirection Direction { get; private init; }
     public string CacheKey => CacheKeys.TagPaged(Page, PageSize, SortBy.ToString(), Direction.ToString());
-    public string? CacheSetKey => CacheKeys.TagSet;
+    public string CacheSetKey => CacheKeys.TagSet;
     public TimeSpan SlidingExpiration => TimeSpan.FromMinutes(5);
 
-    public static GetPagedTagsQuery FromRequest(GetPagedTagsRequest request)
+    public static GetPagedTagsRequest FromQuery(GetPagedTagsQuery query)
     {
-        return new GetPagedTagsQuery
+        TagSortField sortBy = Enum.TryParse(query.SortBy, true, out TagSortField parsedSortBy)
+            ? parsedSortBy
+            : TagSortField.Id;
+
+        SortDirection direction = Enum.TryParse(query.Direction, true, out SortDirection parsedDirection)
+            ? parsedDirection
+            : SortDirection.Asc;
+
+        return new GetPagedTagsRequest
         {
-            Page = request.Page,
-            PageSize = request.PageSize,
-            SortBy = request.SortBy,
-            Direction = request.Direction
+            Page = query.Page,
+            PageSize = query.PageSize,
+            SortBy = sortBy,
+            Direction = direction
         };
     }
 }
-

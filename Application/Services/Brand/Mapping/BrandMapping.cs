@@ -1,9 +1,8 @@
 ﻿using Application.Services.Brand.DTOs.Request;
 using Application.Services.Brand.DTOs.Response;
-using Application.Services.Tag.DTOs.Request;
 using BrandEntity = Domain.Entities.Brand;
 
-namespace Application.Features.Brand.Mapping;
+namespace Application.Services.Brand.Mapping;
 
 public static class BrandMapping
 {
@@ -23,23 +22,18 @@ public static class BrandMapping
         entity.UpdatedAt = DateTime.UtcNow;
     }
 
-    public static BrandResponse ToDto(this BrandEntity entity)
+    public static BrandResponse ToDto(this BrandEntity entity) => new()
     {
-        return new BrandResponse
-        {
-            Id = entity.Id,
-            Name = entity.Name,
-            ImageUrl = entity.Image
-        };
-    }
+        Id = entity.Id,
+        Name = entity.Name,
+        ImageUrl = entity.Image
+    };
 
-    public static IEnumerable<BrandListResponse> ToDto(this IEnumerable<BrandEntity> entities)
-    {
-        return entities.Select(x => new BrandListResponse
+    public static IEnumerable<BrandListResponse> ToDto(this IEnumerable<BrandEntity> entities) =>
+        entities.Select(x => new BrandListResponse
         {
             Id = x.Id,
             Name = x.Name,
             ImageUrl = x.Image
         });
-    }
 }

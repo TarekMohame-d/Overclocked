@@ -10,25 +10,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class ProductRepository : GenericRepository<Product>, IProductRepository
+public class ProductRepository(ApplicationDbContext dbContext)
+    : GenericRepository<Product>(dbContext), IProductRepository
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly ApplicationDbContext _dbContext = dbContext;
 
-    public ProductRepository(ApplicationDbContext dbContext) : base(dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
-    public async Task<Product?> GetByIdWithImagesAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<ProductResponse?> GetProductDetailsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Products
-            .Include(p => p.ProductImages)
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
-    }
-
-    public async Task<ProductResponse?> GetProductAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var productDto = await _dbContext.Products
             .AsNoTracking()
             .Where(p => p.Id == id)
             .Select(p => new ProductResponse
@@ -42,46 +31,47 @@ public class ProductRepository : GenericRepository<Product>, IProductRepository
                 Rating = p.Rating,
                 Category = new CategoryResponse
                 {
-                    Id = p.Category.Id,
+                    Id = p.Category!.Id,
                     Name = p.Category.Name,
                     ImageUrl = p.Category.Image
                 },
                 Brand = new BrandResponse
                 {
-                    Id = p.Brand.Id,
+                    Id = p.Brand!.Id,
                     Name = p.Brand.Name,
                     ImageUrl = p.Brand.Image
                 },
-                Images = p.ProductImages == null ? null : p.ProductImages.Select(img => img.Image),
                 Tags = p.TagProducts.Select(tp => new TagResponse
                 {
                     Id = tp.Tag.Id,
                     Name = tp.Tag.Name
                 }),
-                Specifications = p.Specifications.Select(ps => new ProductSpecificationResponse
+                Specifications = p.Specifications.Select(s => new ProductSpecificationResponse
                 {
-                    Id = ps.Id,
-                    Name = ps.Name,
-                    Value = ps.Value
+                    Id = s.Id,
+                    Name = s.Name,
+                    Value = s.Value
                 }),
-                // Reviews = p.Reviews.Select(r => new ProductReviewDto
-                // {
-                //     Id = r.Id,
-                //     Comment = r.Comment,
-                //     Rating = r.Rating,
-                //     CreatedAt = r.CreatedAt,
-                //     UserName = r.User.FirstName,
-                //     Reply = r.ReviewReply == null ? null : new ProductReviewReplyDto
-                //     {
-                //         Id = r.ReviewReply.Id,
-                //         Reply = r.ReviewReply.Reply,
-                //         CreatedAt = r.ReviewReply.CreatedAt
-                //     }
-                // })
-            })
-            .FirstOrDefaultAsync(cancellationToken);
+                Images = p.ProductImages.Select(i => i.Image)
+            }).SingleOrDefaultAsync(cancellationToken);
+    }
 
-        return productDto;
+    public async Task<Product?> GetProductForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Products
+            .Include(p => p.Brand)
+            .Include(p => p.Category)
+            .Include(p => p.TagProducts)
+            .Include(p => p.Specifications)
+            .Include(p => p.ProductImages)
+            .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
+    public async Task<Product?> GetProductWithImagesAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Products
+            .Include(p => p.ProductImages)
+            .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
     public IQueryable<Product> GetProductsQuery(
@@ -92,9 +82,7 @@ public class ProductRepository : GenericRepository<Product>, IProductRepository
         string? brand = null,
         Guid? tagId = null)
     {
-        var query = _dbContext.Products
-            .Include(p => p.Brand)
-            .Include(p => p.Category)
+        IQueryable<Product> query = _dbContext.Products
             .AsNoTracking();
 
         query = ApplyFilters(query, search, category, brand, tagId);
@@ -103,7 +91,7 @@ public class ProductRepository : GenericRepository<Product>, IProductRepository
         return query;
     }
 
-    private IQueryable<Product> ApplyFilters(
+    private static IQueryable<Product> ApplyFilters(
         IQueryable<Product> query,
         string? search,
         string? category,
@@ -123,14 +111,14 @@ public class ProductRepository : GenericRepository<Product>, IProductRepository
         if (!string.IsNullOrWhiteSpace(category))
         {
             var sanitizedCategory = EscapeLikePattern(category);
-            query = query.Where(p => EF.Functions.ILike(p.Category.Name, $"%{sanitizedCategory}%"));
+            query = query.Where(p => EF.Functions.ILike(p.Category!.Name, $"%{sanitizedCategory}%"));
         }
 
         // Apply brand filter
         if (!string.IsNullOrWhiteSpace(brand))
         {
             var sanitizedBrand = EscapeLikePattern(brand);
-            query = query.Where(p => EF.Functions.ILike(p.Brand.Name, $"%{sanitizedBrand}%"));
+            query = query.Where(p => EF.Functions.ILike(p.Brand!.Name, $"%{sanitizedBrand}%"));
         }
 
         if (tagId != null)
@@ -139,7 +127,7 @@ public class ProductRepository : GenericRepository<Product>, IProductRepository
         return query;
     }
 
-    private IQueryable<Product> ApplySorting(
+    private static IQueryable<Product> ApplySorting(
         IQueryable<Product> query,
         ProductSortField sortBy,
         SortDirection direction)
@@ -168,9 +156,6 @@ public class ProductRepository : GenericRepository<Product>, IProductRepository
 
     private static string EscapeLikePattern(string input)
     {
-        if (string.IsNullOrEmpty(input))
-            return input;
-
         return input
             .Replace("\\", "\\\\")
             .Replace("%", "\\%")

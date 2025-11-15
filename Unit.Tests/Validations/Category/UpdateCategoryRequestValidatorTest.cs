@@ -1,5 +1,6 @@
 using Application.Services.Category.DTOs.Request;
 using Application.Services.Category.Validations;
+using FluentValidation.TestHelper;
 using Shouldly;
 using Unit.Tests.Validations.Category.TestCases;
 
@@ -8,10 +9,13 @@ namespace Unit.Tests.Validations.Category;
 public class UpdateCategoryRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(UpdateCategoryValidationTestCases.InvalidNameCases), MemberType = typeof(UpdateCategoryValidationTestCases))]
+    [MemberData(nameof(UpdateCategoryValidationTestCases.InvalidNameCases),
+        MemberType = typeof(UpdateCategoryValidationTestCases))]
     public void UpdateCategoryRequestValidator_Should_ReturnError_When_NameValidationFails(string? name)
     {
         // Arrange
+        var validator = new UpdateCategoryRequestValidator();
+
         var request = new UpdateCategoryRequest
         {
             Id = Guid.CreateVersion7(),
@@ -19,37 +23,36 @@ public class UpdateCategoryRequestValidatorTest
             ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
         };
 
-        var validator = new UpdateCategoryRequestValidator();
-
         // Act
-        var result = validator.Validate(request);
+        TestValidationResult<UpdateCategoryRequest> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "Name").ShouldBeTrue();
+        result.ShouldHaveValidationErrorFor(x => x.Name).Only();
     }
 
     [Theory]
-    [MemberData(nameof(UpdateCategoryValidationTestCases.InvalidImageUrlCases), MemberType = typeof(UpdateCategoryValidationTestCases))]
+    [MemberData(nameof(UpdateCategoryValidationTestCases.InvalidImageUrlCases),
+        MemberType = typeof(UpdateCategoryValidationTestCases))]
     public void UpdateCategoryRequestValidator_Should_ReturnError_When_ImageUrlValidationFails(string? imageUrl)
     {
         // Arrange
+        var validator = new UpdateCategoryRequestValidator();
+
         var request = new UpdateCategoryRequest
         {
             Id = Guid.CreateVersion7(),
-            Name = "Nike",
+            Name = "Category Name",
             ImageUrl = imageUrl!
         };
 
-        var validator = new UpdateCategoryRequestValidator();
-
         // Act
-        var result = validator.Validate(request);
+        TestValidationResult<UpdateCategoryRequest> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "ImageUrl").ShouldBeTrue();
+        result.ShouldHaveValidationErrorFor(x => x.ImageUrl).Only();
     }
 }

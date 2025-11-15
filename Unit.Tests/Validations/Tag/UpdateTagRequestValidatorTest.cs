@@ -1,5 +1,6 @@
 using Application.Services.Tag.DTOs.Request;
 using Application.Services.Tag.Validations;
+using FluentValidation.TestHelper;
 using Shouldly;
 using Unit.Tests.Validations.Tag.TestCases;
 
@@ -8,11 +9,12 @@ namespace Unit.Tests.Validations.Tag;
 public class UpdateTagRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(UpdateTagValidationTestCases.InvalidNameCases), MemberType = typeof(UpdateTagValidationTestCases))]
-    public void Handle_WhenNameValidationFails_ShouldReturnError(string? name)
+    [MemberData(nameof(UpdateTagValidationTestCases.InvalidNameCases),
+        MemberType = typeof(UpdateTagValidationTestCases))]
+    public void UpdateTagRequestValidator_Should_ReturnError_When_NameValidationFails(string? name)
     {
         // Arrange
-        var command = new UpdateTagRequest
+        var request = new UpdateTagRequest
         {
             Id = Guid.CreateVersion7(),
             Name = name!
@@ -21,11 +23,11 @@ public class UpdateTagRequestValidatorTest
         var validator = new UpdateTagRequestValidator();
 
         // Act
-        var result = validator.Validate(command);
+        TestValidationResult<UpdateTagRequest> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "Name").ShouldBeTrue();
+        result.ShouldHaveValidationErrorFor(x => x.Name).Only();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Domain.Entities;
 
-public class RefundItem : BaseEntity
+public class RefundItem : Entity
 {
     public Guid RefundId { get; set; }
     public Guid? OrderItemId { get; set; }

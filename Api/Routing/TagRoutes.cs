@@ -1,8 +1,8 @@
-namespace Api.Common.Routing;
+namespace Api.Routing;
 
-public class TagRoutes : BaseRoute
+public abstract class TagRoutes : BaseRoute
 {
-    public const string Prefix = $"{Base}/tags";
+    private const string Prefix = $"{Base}/tags";
 
     public const string GetById = $"{Prefix}/{{id:guid}}";
     public const string GetAll = $"{Prefix}";
