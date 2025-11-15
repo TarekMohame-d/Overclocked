@@ -26,10 +26,7 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("{PropertyName} is required.")
-            .MustAsync(async (id, cancellation) =>
-            {
-                return await _brandRepository.GetByIdAsync([id], cancellation) is not null;
-            })
+            .MustAsync(async (id, cancellation) => await _brandRepository.GetByIdAsync([id], cancellation) is not null)
             .WithMessage("{PropertyName}: {PropertyValue} does not exist.");
 
         RuleFor(x => x.CategoryId)
@@ -37,9 +34,7 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
             .NotEmpty()
             .WithMessage("{PropertyName} is required.")
             .MustAsync(async (id, cancellation) =>
-            {
-                return await _categoryRepository.GetByIdAsync([id], cancellation) is not null;
-            })
+                await _categoryRepository.GetByIdAsync([id], cancellation) is not null)
             .WithMessage("{PropertyName}: {PropertyValue} does not exist.");
 
         RuleFor(x => x.Name)
@@ -55,24 +50,29 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
         RuleFor(x => x.Thumbnail)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("{PropertyName} is required.")
-            .Must(url => Uri.TryCreate(url, UriKind.Absolute, out var uriResult)
-                        && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            .Must(url => Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult)
+                         && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
             .WithMessage("{PropertyName} must be a valid HTTP/HTTPS URL.")
             .Must(url => url.StartsWith("https://res.cloudinary.com/over-clocked/", StringComparison.OrdinalIgnoreCase))
             .WithMessage("{PropertyName} must be hosted on res.cloudinary.com/over-clocked.");
 
         RuleFor(x => x.Description)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("{PropertyName} is required.")
-            .MaximumLength(500).WithMessage("{PropertyName} must not exceed 500 characters.");
+            .MaximumLength(500)
+            .WithMessage("{PropertyName} must not exceed 500 characters.");
 
         RuleFor(x => x.Price)
-            .GreaterThan(0).WithMessage("{PropertyName} must be greater than 0.");
+            .GreaterThan(0)
+            .WithMessage("{PropertyName} must be greater than 0.");
 
         RuleFor(x => x.Stock)
-            .GreaterThanOrEqualTo(0).WithMessage("{PropertyName} cannot be negative.");
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("{PropertyName} cannot be negative.");
 
         RuleFor(x => x.Discount)
-            .InclusiveBetween(0m, 0.99m).WithMessage("{PropertyName} must be between 0 and 0.99.");
+            .InclusiveBetween(0m, 0.99m)
+            .WithMessage("{PropertyName} must be between 0 and 0.99.");
 
         ValidateTags();
 
@@ -92,8 +92,8 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
                     return;
                 }
 
-                var existingIds = (await _tagRepository
-                    .WhereAsync(t => tags.Contains(t.Id), cancellationToken: cancellation))
+                IEnumerable<Guid> existingIds = (await _tagRepository
+                        .WhereAsync(t => tags.Contains(t.Id), cancellationToken: cancellation))
                     .Select(t => t.Id);
 
                 var missingTags = tags.Except(existingIds).ToList();
@@ -112,18 +112,19 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
             .Custom((images, context) =>
             {
                 var invalidUrls = images!
-                    .Where(url => !Uri.TryCreate(url, UriKind.Absolute, out var uriResult) ||
-                                (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
+                    .Where(url => !Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult) ||
+                                  (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
                     .ToList();
 
                 var invalidHosts = images!
                     .Where(url => !url.StartsWith("https://res.cloudinary.com/over-clocked/",
-                                                StringComparison.OrdinalIgnoreCase))
+                        StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
                 if (invalidHosts.Count != 0 || invalidUrls.Count != 0)
                 {
-                    context.AddFailure("Images", "Image URLs must be valid HTTP/HTTPS URLs hosted on res.cloudinary.com/over-clocked.");
+                    context.AddFailure("Images",
+                        "Image URLs must be valid HTTP/HTTPS URLs hosted on res.cloudinary.com/over-clocked.");
                 }
             }).When(x => x.Images is not null && x.Images!.Any());
     }

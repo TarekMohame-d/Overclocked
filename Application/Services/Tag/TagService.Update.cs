@@ -1,8 +1,7 @@
 using System.Net;
 using Application.Common.Results;
-using Application.Features.Brand.Mapping;
-using Application.Features.Tag.Mapping;
 using Application.Services.Tag.DTOs.Request;
+using Application.Services.Tag.Mapping;
 
 namespace Application.Services.Tag;
 
@@ -10,14 +9,14 @@ public sealed partial class TagService
 {
     public async Task<Result> UpdateTagAsync(UpdateTagRequest request, CancellationToken cancellationToken)
     {
-        var tag = await _tagRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([request.Id], cancellationToken);
 
         if (tag is null)
             return Result.Failure(Errors.TagNotFound, HttpStatusCode.NotFound);
 
         if (tag.Name != request.Name)
         {
-            bool exist = await _tagRepository
+            var exist = await tagRepository
                 .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
 
             if (exist)
@@ -26,9 +25,9 @@ public sealed partial class TagService
 
         tag.UpdateFrom(request);
 
-        _tagRepository.Update(tag);
+        tagRepository.Update(tag);
 
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
     }

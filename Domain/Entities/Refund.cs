@@ -3,7 +3,7 @@ using Domain.StaticData;
 
 namespace Domain.Entities;
 
-public class Refund : BaseEntity
+public class Refund : Entity
 {
     public Guid? OrderId { get; set; }
     public int StatusId { get; set; }

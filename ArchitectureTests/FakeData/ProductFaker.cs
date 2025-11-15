@@ -3,7 +3,7 @@ using Domain.Entities;
 
 namespace ArchitectureTests.FakeData;
 
-public class ProductFaker : Faker<Product>
+public sealed class ProductFaker : Faker<Product>
 {
     public ProductFaker()
     {

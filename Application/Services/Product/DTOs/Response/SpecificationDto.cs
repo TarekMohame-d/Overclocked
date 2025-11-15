@@ -1,6 +1,6 @@
 namespace Application.Services.Product.DTOs.Response;
 
-public class ProductSpecificationResponse
+public record ProductSpecificationResponse
 {
     public required Guid Id { get; init; }
     public required string Name { get; init; }

@@ -1,23 +1,18 @@
 using Api.Extensions;
 using Application.Common.Results;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Api.ActionFilters;
 
-public class ValidationActionAttribute<T> : IAsyncActionFilter where T : class
+public class ValidationActionAttribute<T>(IValidator<T>? validator) : IAsyncActionFilter
+    where T : class
 {
-    private readonly IValidator<T>? _validator;
-
-    public ValidationActionAttribute(IValidator<T>? validator)
-    {
-        _validator = validator;
-    }
-
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         // If no validator is registered for this model, skip validation
-        if (_validator is null)
+        if (validator is null)
         {
             await next();
             return;
@@ -32,10 +27,11 @@ public class ValidationActionAttribute<T> : IAsyncActionFilter where T : class
         }
 
         // Try to extract CancellationToken if action has it as a parameter
-        var cancellationToken = context.ActionArguments.Values.OfType<CancellationToken>().FirstOrDefault();
+        CancellationToken cancellationToken =
+            context.ActionArguments.Values.OfType<CancellationToken>().FirstOrDefault();
 
         // Perform validation
-        var validationResult = await _validator.ValidateAsync(model, cancellationToken);
+        ValidationResult? validationResult = await validator.ValidateAsync(model, cancellationToken);
 
         if (validationResult.IsValid)
         {

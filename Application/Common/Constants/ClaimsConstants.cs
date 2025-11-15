@@ -4,9 +4,10 @@ namespace Application.Common.Constants;
 
 public static class ClaimsConstants
 {
-    public static string Email = ClaimTypes.Email;
-    public static string Name = ClaimTypes.Name;
-    public static string DeviceId = "DeviceId";
-    public static string NameIdentifier = ClaimTypes.NameIdentifier;
-    public static string Role = ClaimTypes.Role;
+    public const string Email = ClaimTypes.Email;
+    public const string Name = ClaimTypes.Name;
+    public const string DeviceId = "DeviceId";
+    public const string NameIdentifier = "nameid";
+    public const string Role = ClaimTypes.Role;
+    public const string Permission = "permission";
 }

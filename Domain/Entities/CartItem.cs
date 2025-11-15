@@ -2,7 +2,7 @@
 
 namespace Domain.Entities;
 
-public class CartItem : BaseEntity
+public class CartItem : Entity
 {
     public Guid CartId { get; set; }
     public Guid ProductId { get; set; }

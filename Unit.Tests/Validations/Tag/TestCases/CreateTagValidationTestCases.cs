@@ -4,9 +4,9 @@ public class CreateTagValidationTestCases
 {
     public static IEnumerable<object[]> InvalidNameCases()
     {
-        yield return new object[] { null! };
-        yield return new object[] { "" };
-        yield return new object[] { "   " };
-        yield return new object[] { new string('a', 55) };
+        yield return [null!];
+        yield return [""];
+        yield return ["   "];
+        yield return [new string('a', 55)];
     }
 }

@@ -1,5 +1,5 @@
-using Application.Abstraction.Services;
-using Application.Features.CloudinarySignature;
+using Application.Abstraction.DomainServices;
+using Application.Services.CloudinarySignature;
 using CloudinaryDotNet;
 using Domain.Configurations;
 using Microsoft.Extensions.Options;
@@ -13,7 +13,7 @@ public class CloudinaryService : ICloudinaryService
 
     public CloudinaryService(IOptions<CloudinarySettings> cloudinaryOptions)
     {
-        var settings = cloudinaryOptions.Value;
+        CloudinarySettings settings = cloudinaryOptions.Value;
 
         _settings = settings;
 
@@ -27,8 +27,7 @@ public class CloudinaryService : ICloudinaryService
 
     public CloudinarySignatureResponse GenerateUploadSignature(string category)
     {
-        // The timestamp is crucial for the signature's validity period.
-        var timestamp = (long)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         var transformation = new Transformation()
             .Quality("auto")
@@ -37,7 +36,7 @@ public class CloudinaryService : ICloudinaryService
             .Crop("limit")
             .Generate(); // .Generate() creates the string "c_limit,f_auto,q_auto,w_800"
 
-        string folder = $"images/{category}";
+        var folder = $"images/{category}";
 
         var parametersToSign = new SortedDictionary<string, object>
         {
@@ -46,9 +45,8 @@ public class CloudinaryService : ICloudinaryService
             { "transformation", transformation }
         };
 
-        string signature = _cloudinary.Api.SignParameters(parametersToSign);
+        var signature = _cloudinary.Api.SignParameters(parametersToSign);
 
-        // 4. Return the response DTO as usual.
         return new CloudinarySignatureResponse
         {
             Signature = signature,

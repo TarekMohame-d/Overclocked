@@ -1,43 +1,49 @@
 using System.Net;
-using Application.Common.Results;
-using ArchitectureTests.FakeData;
-using NSubstitute;
-using Shouldly;
-using Domain.Entities;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
+using Application.Common.Results;
 using Application.Services.Brand;
 using Application.Services.Brand.DTOs.Request;
-using Application.Services;
+using Application.Services.Brand.Events;
+using ArchitectureTests.FakeData;
+using Domain.Entities;
+using NSubstitute;
+using Shouldly;
 
 namespace Unit.Tests.BrandTests;
 
 public class DeleteBrandAsyncTest
 {
-    private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IBrandRepository _brandRepositoryMock;
-    private readonly IBrandService _brandServices;
-    private readonly IFileStorageService _fileStorageServiceMock;
+    private readonly BrandService _brandServices;
+    private readonly IEventDispatcher _eventDispatcherMock;
+    private readonly IUnitOfWork _unitOfWorkMock;
 
     public DeleteBrandAsyncTest()
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _brandServices = new BrandService(_brandRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+        _eventDispatcherMock = Substitute.For<IEventDispatcher>();
+        _brandServices = new BrandService(_brandRepositoryMock, _unitOfWorkMock, _eventDispatcherMock);
     }
 
     [Fact]
     public async Task DeleteBrandAsync_Should_ReturnFailure_When_BrandDoesNotExists()
     {
         // Arrange
-        var request = new DeleteBrandRequest { Id = Guid.NewGuid() };
+        var request = new DeleteBrandRequest
+        {
+            Id = Guid.CreateVersion7()
+        };
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Brand?>(null));
+            .Returns((Brand)null!);
+
+        _eventDispatcherMock.DispatchAsync(Arg.Any<BrandDeletedEvent>(), CancellationToken.None)
+            .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _brandServices.DeleteBrandAsync(request, CancellationToken.None);
+        Result result = await _brandServices.DeleteBrandAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -47,26 +53,35 @@ public class DeleteBrandAsyncTest
 
         await _brandRepositoryMock.Received(1)
             .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+
+        await _eventDispatcherMock.DidNotReceive()
+            .DispatchAsync(Arg.Any<BrandDeletedEvent>(), CancellationToken.None);
     }
 
     [Fact]
     public async Task DeleteBrandAsync_Should_ReturnSuccess_When_BrandExists()
     {
         // Arrange
-        var request = new DeleteBrandRequest { Id = Guid.NewGuid() };
+        var request = new DeleteBrandRequest
+        {
+            Id = Guid.CreateVersion7()
+        };
 
-        var brand = new BrandFaker().Generate();
+        Brand brand = new BrandFaker().Generate();
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
         _brandRepositoryMock.Delete(Arg.Any<Brand>());
 
+        _eventDispatcherMock.DispatchAsync(Arg.Any<BrandDeletedEvent>(), CancellationToken.None)
+            .Returns(Task.CompletedTask);
+
         _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
             .Returns(1);
 
         // Act
-        var result = await _brandServices.DeleteBrandAsync(request, CancellationToken.None);
+        Result result = await _brandServices.DeleteBrandAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -81,5 +96,8 @@ public class DeleteBrandAsyncTest
 
         _brandRepositoryMock.Received(1)
             .Delete(Arg.Any<Brand>());
+
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<BrandDeletedEvent>(), CancellationToken.None);
     }
 }

@@ -2,7 +2,7 @@ using Domain.Entities.Common;
 
 namespace Domain.Entities;
 
-public class ReviewReply : BaseEntity
+public class ReviewReply : Entity
 {
     public Guid ReviewId { get; set; }
     public Guid EmployeeId { get; set; }

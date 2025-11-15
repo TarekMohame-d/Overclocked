@@ -2,7 +2,7 @@
 
 namespace Domain.Entities;
 
-public class Brand : BaseEntity
+public class Brand : Entity
 {
     public required string Name { get; set; }
     public string NormalizedName { get; set; } = default!;

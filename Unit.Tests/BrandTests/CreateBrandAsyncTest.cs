@@ -1,51 +1,49 @@
 using System.Net;
-using ArchitectureTests.FakeData;
-using NSubstitute;
-using Shouldly;
-using Domain.Entities;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
+using Application.Common.Results;
 using Application.Services.Brand;
 using Application.Services.Brand.DTOs.Request;
-using Application.Services;
+using ArchitectureTests.FakeData;
+using Domain.Entities;
+using NSubstitute;
+using Shouldly;
 
 namespace Unit.Tests.BrandTests;
 
 public class CreateBrandAsyncTest
 {
-    private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IBrandRepository _brandRepositoryMock;
-    private readonly IBrandService _brandServices;
-    private readonly IFileStorageService _fileStorageServiceMock;
+    private readonly BrandService _brandServices;
+    private readonly IUnitOfWork _unitOfWorkMock;
 
     public CreateBrandAsyncTest()
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _brandServices = new BrandService(_brandRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+        _brandServices = new BrandService(_brandRepositoryMock, _unitOfWorkMock, Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
-    public async Task Handle_WhenThereIsNoError_ShouldReturnSuccess()
+    public async Task CreateBrandAsync_WhenThereIsNoError_ShouldReturnSuccess()
     {
         // Arrange
         var request = new CreateBrandRequest
         {
-            Name = "Nike",
+            Name = "Brand Name",
             ImageUrl = "image.png"
         };
 
-        var brand = new BrandFaker().Generate();
+        Brand brand = new BrandFaker().Generate();
 
         _brandRepositoryMock.AddAsync(Arg.Any<Brand>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
         _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(1));
+            .Returns(1);
 
         // Act
-        var result = await _brandServices.CreateBrandAsync(request, CancellationToken.None);
+        Result result = await _brandServices.CreateBrandAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

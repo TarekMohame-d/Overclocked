@@ -2,7 +2,7 @@
 using Application.Services.Category.DTOs.Response;
 using CategoryEntity = Domain.Entities.Category;
 
-namespace Application.Features.Category.Mapping;
+namespace Application.Services.Category.Mapping;
 
 public static class CategoryMapping
 {
@@ -22,23 +22,18 @@ public static class CategoryMapping
         entity.UpdatedAt = DateTime.UtcNow;
     }
 
-    public static CategoryResponse ToDto(this CategoryEntity entity)
+    public static CategoryResponse ToDto(this CategoryEntity entity) => new()
     {
-        return new CategoryResponse
-        {
-            Id = entity.Id,
-            Name = entity.Name,
-            ImageUrl = entity.Image
-        };
-    }
+        Id = entity.Id,
+        Name = entity.Name,
+        ImageUrl = entity.Image
+    };
 
-    public static IEnumerable<CategoryListResponse> ToDto(this IEnumerable<CategoryEntity> entities)
-    {
-        return entities.Select(x => new CategoryListResponse
+    public static IEnumerable<CategoryListResponse> ToDto(this IEnumerable<CategoryEntity> entities) =>
+        entities.Select(x => new CategoryListResponse
         {
             Id = x.Id,
             Name = x.Name,
             ImageUrl = x.Image
         });
-    }
 }

@@ -1,6 +1,5 @@
 using Application.Abstraction.Repositories;
 using Application.Services.Brand.DTOs.Request;
-using Application.Services.Tag.DTOs.Request;
 using FluentValidation;
 
 namespace Application.Services.Brand.Validations;
@@ -8,6 +7,7 @@ namespace Application.Services.Brand.Validations;
 public class CreateBrandRequestValidator : AbstractValidator<CreateBrandRequest>
 {
     private readonly IBrandRepository _brandRepository;
+
     public CreateBrandRequestValidator(IBrandRepository brandRepository)
     {
         _brandRepository = brandRepository;
@@ -17,39 +17,35 @@ public class CreateBrandRequestValidator : AbstractValidator<CreateBrandRequest>
             .NotEmpty()
             .WithMessage("{PropertyName} is required and must not be empty or whitespace.")
             .MaximumLength(50)
-            .WithMessage("{PropertyName} must not exceed 50 characters.");
-
-        RuleFor(x => x.Name)
+            .WithMessage("{PropertyName} must not exceed 50 characters.")
             .MustAsync(async (name, cancellation) =>
             {
-                bool exists = await _brandRepository
+                var exists = await _brandRepository
                     .AnyAsync(x => x.NormalizedName == name.ToUpper(), cancellation);
                 return !exists;
             })
-            .When(x => !string.IsNullOrWhiteSpace(x.Name))
             .WithMessage("{PropertyName} already exists.");
 
         RuleFor(x => x.ImageUrl)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("{PropertyName} is required and must not be empty or whitespace.")
-            .Must(ValidateImageExtension).WithMessage("{PropertyName} must be a valid image file (jpg, jpeg, png).");
-
-        RuleFor(x => x.ImageUrl)
-            .Must(url => Uri.TryCreate(url, UriKind.Absolute, out var uriResult)
-                        && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            .NotEmpty()
+            .WithMessage("{PropertyName} is required and must not be empty or whitespace.")
+            .Must(ValidateImageExtension)
+            .WithMessage("{PropertyName} must be a valid image file (jpg, jpeg, png).")
+            .Must(url => Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult)
+                         && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
             .WithMessage("{PropertyName} must be a valid URL.")
             .Must(url => url.StartsWith("https://res.cloudinary.com/over-clocked/", StringComparison.OrdinalIgnoreCase))
-            .WithMessage("{PropertyName} must be hosted on res.cloudinary.com/over-clocked.")
-            .When(x => !string.IsNullOrWhiteSpace(x.ImageUrl));
+            .WithMessage("{PropertyName} must be hosted on res.cloudinary.com/over-clocked.");
     }
 
-    private bool ValidateImageExtension(string? imageUrl)
+    private static bool ValidateImageExtension(string? imageUrl)
     {
         if (string.IsNullOrWhiteSpace(imageUrl))
             return false;
 
-        string[] validExtensions = { ".jpg", ".jpeg", ".png" };
-        string extension = Path.GetExtension(imageUrl).ToLowerInvariant();
+        string[] validExtensions = [".jpg", ".jpeg", ".png"];
+        var extension = Path.GetExtension(imageUrl).ToLowerInvariant();
 
         return validExtensions.Contains(extension);
     }

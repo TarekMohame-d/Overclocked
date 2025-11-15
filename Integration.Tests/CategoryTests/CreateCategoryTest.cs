@@ -1,68 +1,63 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Api.Common.Routing;
+using System.Text;
+using System.Text.Json;
+using Api.Routing;
 using Application.Common.Results;
 using ArchitectureTests.FakeData;
+using Domain.Entities;
+using Domain.StaticData;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using Domain.Entities;
-using System.Text.Json;
-using System.Text;
 using NSubstitute;
+using Shouldly;
 
 namespace Integration.Tests.CategoryTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class CreateCategoryTest : IAsyncLifetime
+public class CreateCategoryTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
-    public CreateCategoryTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.HttpClient;
-    }
+    private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
-        _factory.FileStorageServiceMock.ClearReceivedCalls();
+        await factory.ResetDatabaseAsync();
+        factory.FileStorageServiceMock.ClearReceivedCalls();
 
-        var token = _factory.GenerateJwtToken();
-        _factory.HttpClient.DefaultRequestHeaders.Authorization =
+        var token = CustomWebApplicationFactory
+            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
     }
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Create_Should_CreateAndReturnSuccess_When_DataIsValid()
     {
         // Arrange
-        var name = "NVIDIA";
+        const string Name = "NVIDIA";
 
-        var form = CreateJsonContent(name);
+        StringContent form = CreateJsonContent(Name);
 
         // Act
-        var response = await _client.PostAsync(CategoryRoutes.Create, form);
+        HttpResponseMessage response = await _client.PostAsync(CategoryRoutes.Create, form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var category = await dbContext.Categories.SingleOrDefaultAsync(x => x.NormalizedName == name.ToUpper());
+        Category? category = await dbContext.Categories.SingleOrDefaultAsync(x => x.NormalizedName == Name.ToUpper());
         category.ShouldNotBeNull();
 
-        category.Name.ShouldBe(name);
+        category.Name.ShouldBe(Name);
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -74,16 +69,16 @@ public class CreateCategoryTest : IAsyncLifetime
     public async Task Create_Should_ReturnBadRequest_When_NameAlreadyExists()
     {
         // Arrange
-        var category = await SeedDatabaseAsync();
-        var form = CreateJsonContent(category.Name);
+        Category category = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent(category.Name);
 
         // Act
-        var response = await _client.PostAsync(CategoryRoutes.Create, form);
+        HttpResponseMessage response = await _client.PostAsync(CategoryRoutes.Create, form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -91,12 +86,31 @@ public class CreateCategoryTest : IAsyncLifetime
         result.Error.ShouldNotBeNull();
     }
 
+    [Fact]
+    public async Task Create_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    {
+        // Arrange
+        const string Name = "NVIDIA";
+
+        StringContent form = CreateJsonContent(Name);
+
+        var token = CustomWebApplicationFactory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        HttpResponseMessage response = await _client.PostAsync(CategoryRoutes.Create, form);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
     private async Task<Category> SeedDatabaseAsync()
     {
-        var category = new CategoryFaker().Generate();
+        Category category = new CategoryFaker().Generate();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Categories.Add(category);
         await dbContext.SaveChangesAsync();
@@ -104,7 +118,8 @@ public class CreateCategoryTest : IAsyncLifetime
         return category;
     }
 
-    private StringContent CreateJsonContent(string name, string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
+    private static StringContent CreateJsonContent(string name,
+        string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
     {
         var payload = new
         {
@@ -112,7 +127,7 @@ public class CreateCategoryTest : IAsyncLifetime
             ImageUrl = imageUrl
         };
 
-        string json = JsonSerializer.Serialize(payload);
+        var json = JsonSerializer.Serialize(payload);
 
         return new StringContent(json, Encoding.UTF8, "application/json");
     }

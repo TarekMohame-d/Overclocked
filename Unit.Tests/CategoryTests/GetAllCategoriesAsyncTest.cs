@@ -1,45 +1,46 @@
 using System.Net;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
-using Application.Features.Category.Mapping;
-using Application.Services;
+using Application.Common.Results;
 using Application.Services.Category;
 using Application.Services.Category.DTOs.Request;
+using Application.Services.Category.DTOs.Response;
+using Application.Services.Category.Mapping;
 using ArchitectureTests.FakeData;
+using Domain.Entities;
 using NSubstitute;
 using Shouldly;
 
 namespace Unit.Tests.CategoryTests;
 
-public class GetAllCategorysAsyncTest
+public class GetAllCategoriesAsyncTest
 {
-    private readonly ICategoryRepository _brandRepositoryMock;
-    private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly ICategoryService _brandServices;
-    private readonly IFileStorageService _fileStorageServiceMock;
+    private readonly ICategoryRepository _categoryRepositoryMock;
+    private readonly CategoryService _categoryService;
 
-    public GetAllCategorysAsyncTest()
+    public GetAllCategoriesAsyncTest()
     {
-        _brandRepositoryMock = Substitute.For<ICategoryRepository>();
-        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _brandServices = new CategoryService(_brandRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+        _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
+
+        _categoryService = new CategoryService(_categoryRepositoryMock, Substitute.For<IUnitOfWork>(),
+            Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
-    public async Task GetAllCategoriesAsync_Should_ReturnCategorys_When_CategorysExist()
+    public async Task GetAllCategoriesAsync_Should_ReturnCategories_When_CategoriesExist()
     {
         // Arrange
         var request = new GetAllCategoriesRequest();
-        var brands = new CategoryFaker().Generate(3);
+        List<Category> brands = new CategoryFaker().Generate(3);
 
-        var brandDtos = brands.ToDto();
+        IEnumerable<CategoryListResponse> categoryListResponses = brands.ToDto();
 
-        _brandRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>())
             .Returns(brands);
 
         // Act
-        var result = await _brandServices.GetAllCategoriesAsync(request, CancellationToken.None);
+        Result<IEnumerable<CategoryListResponse>> result =
+            await _categoryService.GetAllCategoriesAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -47,23 +48,24 @@ public class GetAllCategorysAsyncTest
         result.Error.ShouldBeNull();
         brands.Count.ShouldBe(result.Data.Count());
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
-        brandDtos.ShouldBeEquivalentTo(result.Data);
+        categoryListResponses.ShouldBeEquivalentTo(result.Data);
 
-        await _brandRepositoryMock.Received(1)
+        await _categoryRepositoryMock.Received(1)
             .GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task GetAllCategoriesAsync_Should_ReturnEmptyList_When_CategorysDoesNotExist()
+    public async Task GetAllCategoriesAsync_Should_ReturnEmptyList_When_CategoriesDoesNotExist()
     {
         // Arrange
         var request = new GetAllCategoriesRequest();
 
-        _brandRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>())
             .Returns([]);
 
         // Act
-        var result = await _brandServices.GetAllCategoriesAsync(request, CancellationToken.None);
+        Result<IEnumerable<CategoryListResponse>> result =
+            await _categoryService.GetAllCategoriesAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -73,7 +75,7 @@ public class GetAllCategorysAsyncTest
         result.Data.Count().ShouldBe(0);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _brandRepositoryMock.Received(1)
+        await _categoryRepositoryMock.Received(1)
             .GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
     }
 }

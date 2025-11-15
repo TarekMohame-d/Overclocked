@@ -8,14 +8,14 @@ public sealed partial class TagService
 {
     public async Task<Result> DeleteTagAsync(DeleteTagRequest request, CancellationToken cancellationToken)
     {
-        var tag = await _tagRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([request.Id], cancellationToken);
 
         if (tag is null)
             return Result.Failure(Errors.TagNotFound, HttpStatusCode.NotFound);
 
-        _tagRepository.Delete(tag);
+        tagRepository.Delete(tag);
 
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
     }

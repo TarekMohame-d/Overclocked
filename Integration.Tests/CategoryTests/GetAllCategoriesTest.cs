@@ -1,70 +1,65 @@
-﻿using Api.Common.Routing;
+﻿using System.Net;
+using System.Net.Http.Json;
+using Api.Routing;
+using Application.Abstraction.Services;
 using Application.Common.Constants;
 using Application.Common.Results;
-using Application.Features.Category.Mapping;
+using Application.Services.Category.DTOs.Response;
+using Application.Services.Category.Mapping;
 using ArchitectureTests.FakeData;
+using Domain.Entities;
 using Infrastructure.Data;
 using Integration.Tests.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System.Net;
-using System.Net.Http.Json;
-using Domain.Entities;
-using Application.Services.Category.DTOs.Response;
-using Application.Services;
 
 namespace Integration.Tests.CategoryTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class GetAllCategoriesTest : IAsyncLifetime
+public class GetAllCategoriesTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public GetAllCategoriesTest(CustomWebApplicationFactory factory)
-    {
-        _client = factory.HttpClient;
-        _factory = factory;
-    }
-
-    public async Task InitializeAsync() => await _factory.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetAll_Should_ReturnFromDatabase_When_ThereIsDataAndCacheMiss()
     {
         // Arrange
-        var categorys = await SeedDatabaseAsync();
+        IEnumerable<Category> categories = await SeedDatabaseAsync();
 
         // Act
-        var response = await _client.GetAsync(CategoryRoutes.GetAll);
+        HttpResponseMessage response = await _client.GetAsync(CategoryRoutes.GetAll);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
+        Result<IEnumerable<CategoryListResponse>>? result =
+            await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Data.ShouldNotBeNull();
         result.Data.ShouldNotBeEmpty();
-        result.Data.Count().ShouldBe(categorys.Count());
+        result.Data.Count().ShouldBe(categories.Count());
     }
 
     [Fact]
     public async Task GetAll_Should_ReturnFromCache_When_ThereIsDataAndCacheHit()
     {
         // Arrange
-        var categoryListDtos = await SeedCacheAsync();
+        IEnumerable<CategoryListResponse> categoryListDtos = await SeedCacheAsync();
 
         // Act
-        var response = await _client.GetAsync(CategoryRoutes.GetAll);
+        HttpResponseMessage response = await _client.GetAsync(CategoryRoutes.GetAll);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
+        Result<IEnumerable<CategoryListResponse>>? result =
+            await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -78,80 +73,79 @@ public class GetAllCategoriesTest : IAsyncLifetime
     public async Task GetAll_Should_ReturnEmptyList_When_ThereIsNoData()
     {
         // Arrange
-        IEnumerable<Category> categorys = [];
 
         // Act
-        var response = await _client.GetAsync(CategoryRoutes.GetAll);
+        HttpResponseMessage response = await _client.GetAsync(CategoryRoutes.GetAll);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
+        Result<IEnumerable<CategoryListResponse>>? result =
+            await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Data.ShouldNotBeNull();
         result.Data.ShouldBeEmpty();
-        result.Data.Count().ShouldBe(categorys.Count());
+        result.Data.Count().ShouldBe(0);
     }
 
     [Fact]
     public async Task GetAll_Should_ReturnConsistentResults_When_CalledConcurrently()
     {
         // Arrange
-        var categorys = await SeedDatabaseAsync();
+        IEnumerable<Category> categories = await SeedDatabaseAsync();
 
-        int concurrentCalls = 10;
+        const int ConcurrentCalls = 10;
         var tasks = new List<Task<HttpResponseMessage>>();
 
         // Act
-        for (int i = 0; i < concurrentCalls; i++)
-        {
+        for (var i = 0; i < ConcurrentCalls; i++)
             tasks.Add(_client.GetAsync(CategoryRoutes.GetAll));
-        }
 
         await Task.WhenAll(tasks);
 
         // Assert
-        foreach (var task in tasks)
+        foreach (Task<HttpResponseMessage> task in tasks)
         {
-            var response = await task;
+            HttpResponseMessage response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var result = await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
+            Result<IEnumerable<CategoryListResponse>>? result =
+                await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
 
             result.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();
             result.StatusCode.ShouldBe(HttpStatusCode.OK);
             result.Data.ShouldNotBeNull();
             result.Data.ShouldNotBeEmpty();
-            result.Data.Count().ShouldBe(categorys.Count());
+            result.Data.Count().ShouldBe(categories.Count());
         }
     }
 
     private async Task<IEnumerable<Category>> SeedDatabaseAsync()
     {
-        using var scope = _factory.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
-        var categorys = new CategoryFaker().Generate(10);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        List<Category> categories = new CategoryFaker().Generate(10);
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        await dbContext.Categories.AddRangeAsync(categorys);
+        await dbContext.Categories.AddRangeAsync(categories);
         await dbContext.SaveChangesAsync();
 
-        return categorys;
+        return categories;
     }
 
     private async Task<IEnumerable<CategoryListResponse>> SeedCacheAsync()
     {
-        using var scope = _factory.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
-        var categorys = new CategoryFaker().Generate(10);
+        List<Category> categories = new CategoryFaker().Generate(10);
 
-        var cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
+        ICacheService cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
         var key = CacheKeys.AllCategories;
-        var categoryListDtos = categorys.ToDto();
+        IEnumerable<CategoryListResponse> categoryListDtos = categories.ToDto();
         var result = Result<IEnumerable<CategoryListResponse>>.Success(categoryListDtos);
         await cache.SetAsync(key, result, TimeSpan.FromMinutes(5));
 

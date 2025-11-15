@@ -9,9 +9,10 @@ public class EmailConfirmationCodeConfiguration : IEntityTypeConfiguration<Email
     public void Configure(EntityTypeBuilder<EmailConfirmationCode> builder)
     {
         // Attributes
-        builder.HasKey(ecc => ecc.UserId);
-        builder.Property(ecc => ecc.UserId).ValueGeneratedNever().IsRequired();
-        builder.Property(ecc => ecc.CodeHash).HasMaxLength(6).IsRequired();
+        builder.HasKey(ecc => ecc.Id);
+        builder.Property(ecc => ecc.Id).ValueGeneratedNever().IsRequired();
+        builder.Property(ecc => ecc.UserId).IsRequired();
+        builder.Property(ecc => ecc.CodeHash).IsRequired();
         builder.Property(ecc => ecc.IsUsed).HasDefaultValue(false).IsRequired();
         builder.Property(ecc => ecc.ExpiredAt).HasColumnType("timestamptz").IsRequired();
         builder.Property(ecc => ecc.CreatedAt).HasColumnType("timestamptz")

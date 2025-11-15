@@ -3,7 +3,7 @@ using Domain.StaticData;
 
 namespace Domain.Entities;
 
-public class Order : BaseEntity
+public class Order : Entity
 {
     public Guid UserId { get; set; }
     public decimal ShippingCost { get; set; }

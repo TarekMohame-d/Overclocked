@@ -3,7 +3,7 @@ using Domain.StaticData;
 
 namespace Domain.Entities;
 
-public class User : BaseEntity
+public class User : Entity
 {
     public int RoleId { get; set; }
     public RoleType RoleType
@@ -17,7 +17,7 @@ public class User : BaseEntity
     public bool EmailConfirmed { get; set; }
     public required string PasswordHash { get; set; }
     public required string Phone { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } = true;
 
     // Navigation properties
     public Role? Role { get; set; }

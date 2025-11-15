@@ -2,12 +2,12 @@
 
 namespace Domain.Entities;
 
-public class RefreshToken : BaseEntity
+public class RefreshToken : Entity
 {
-    public Guid? UserId { get; set; }
+    public Guid UserId { get; set; }
     public required string DeviceId { get; set; }
     public required string TokenHash { get; set; }
-    public DateTime ExpiredAt { get; set; }
+    public required DateTime ExpiredAt { get; set; }
 
     // Navigation properties
     public User? User { get; set; }

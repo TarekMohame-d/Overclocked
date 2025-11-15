@@ -1,22 +1,16 @@
 using System.Text.RegularExpressions;
 using Api.Routing;
-using Application.Abstraction.Services;
+using Application.Abstraction.DomainServices;
+using Application.Services.CloudinarySignature;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
-public class CloudinarySignature : ControllerBase
+public class CloudinarySignature(ICloudinaryService cloudinaryService) : ControllerBase
 {
-    private readonly ICloudinaryService _cloudinaryService;
-
-    public CloudinarySignature(ICloudinaryService cloudinaryService)
-    {
-        _cloudinaryService = cloudinaryService;
-    }
-
     [HttpGet]
-    [Route(CloudinarySignatureRoute.Generate)]
+    [Route(CloudinarySignatureRoute.UploadSignature)]
     public IActionResult GenerateSignature([FromQuery] string category)
     {
         if (string.IsNullOrWhiteSpace(category))
@@ -26,7 +20,7 @@ public class CloudinarySignature : ControllerBase
         if (string.IsNullOrWhiteSpace(sanitizedCategory))
             return BadRequest("The 'category' query parameter contains invalid characters.");
 
-        var signatureResponse = _cloudinaryService.GenerateUploadSignature(category.ToLower());
+        CloudinarySignatureResponse signatureResponse = cloudinaryService.GenerateUploadSignature(category.ToLower());
         return Ok(signatureResponse);
     }
 }

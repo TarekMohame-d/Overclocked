@@ -1,10 +1,8 @@
-using Api.Common.Routing;
-
 namespace Api.Routing;
 
-public class CloudinarySignatureRoute : BaseRoute
+public abstract class CloudinarySignatureRoute : BaseRoute
 {
-    public const string Prefix = $"{Base}/cloudinary-signature";
+    private const string Prefix = $"{Base}/cloudinary";
 
-    public const string Generate = $"{Prefix}/generate";
+    public const string UploadSignature = $"{Prefix}/upload-signature";
 }

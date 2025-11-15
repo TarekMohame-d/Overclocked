@@ -1,27 +1,26 @@
 ﻿using Api.ActionFilters;
-using Api.Common.Routing;
 using Api.Extensions;
-using Application.Abstraction.Services;
+using Api.Routing;
+using Application.Abstraction.DomainServices;
+using Application.Common.Results;
 using Application.Services.Category.DTOs.Request;
+using Application.Services.Category.DTOs.Response;
+using Domain.StaticData;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
-public class CategoryController : ControllerBase
+public class CategoryController(ICategoryService categoryServices) : ControllerBase
 {
-    private readonly ICategoryService _categoryServices;
-    public CategoryController(ICategoryService categoryServices)
-    {
-        _categoryServices = categoryServices;
-    }
-
     [HttpGet]
     [Route(CategoryRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new GetCategoryByIdRequest { Id = id };
-        var response = await _categoryServices.GetCategoryByIdAsync(request, cancellationToken);
+        Result<CategoryResponse> response =
+            await categoryServices.GetCategoryByIdAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -31,45 +30,52 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var request = new GetAllCategoriesRequest();
-        var response = await _categoryServices.GetAllCategoriesAsync(request, cancellationToken);
+        Result<IEnumerable<CategoryListResponse>> response =
+            await categoryServices.GetAllCategoriesAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    //[Authorize]
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<CreateCategoryRequest>))]
     [Route(CategoryRoutes.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request,
+        CancellationToken cancellationToken)
     {
-        var response = await _categoryServices.CreateCategoryAsync(request, cancellationToken);
+        Result response = await categoryServices.CreateCategoryAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    //[Authorize]
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPut]
     [ServiceFilter(typeof(ValidationActionAttribute<UpdateCategoryRequest>))]
     [Route(CategoryRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromBody] UpdateCategoryRequest request,
+        [FromBody] UpdateCategoryRequestBody request,
         CancellationToken cancellationToken)
     {
-        request = request with { Id = id };
+        UpdateCategoryRequest updateCategoryRequest = new()
+        {
+            Id = id,
+            Name = request.Name,
+            ImageUrl = request.ImageUrl
+        };
 
-        var response = await _categoryServices.UpdateCategoryAsync(request, cancellationToken);
+        Result response = await categoryServices.UpdateCategoryAsync(updateCategoryRequest, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    //[Authorize]
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpDelete]
     [Route(CategoryRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new DeleteCategoryRequest { Id = id };
-        var response = await _categoryServices.DeleteCategoryAsync(request, cancellationToken);
+        Result response = await categoryServices.DeleteCategoryAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }

@@ -1,23 +1,23 @@
 using Application.Common.Results;
-using Application.Features.Brand.Mapping;
-using Application.Features.Tag.Mapping;
 using Application.Services.Tag.DTOs.Request;
 using Application.Services.Tag.DTOs.Response;
+using Application.Services.Tag.Mapping;
 
 namespace Application.Services.Tag;
 
 public sealed partial class TagService
 {
-    public async Task<Result<PagedResult<TagListResponse>>> GetPagedTagsAsync(GetPagedTagsQuery query, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<TagListResponse>>> GetPagedTagsAsync(GetPagedTagsRequest request,
+        CancellationToken cancellationToken)
     {
-        var tagsQuery = _tagRepository.GetTagsQuery(query.SortBy, query.Direction);
+        IQueryable<Domain.Entities.Tag> tagsQuery = tagRepository.GetTagsQuery(request.SortBy, request.Direction);
 
-        var tagsDtoQuery = tagsQuery.ToDto();
+        IQueryable<TagListResponse> tagsDtoQuery = tagsQuery.ToDto();
 
         var pagedResult = await PagedResult<TagListResponse>.CreateAsync(
             tagsDtoQuery,
-            query.Page,
-            query.PageSize);
+            request.Page,
+            request.PageSize);
 
         return Result<PagedResult<TagListResponse>>.Success(pagedResult);
     }

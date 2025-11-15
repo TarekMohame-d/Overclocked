@@ -2,7 +2,9 @@ using System.Text;
 using Api.ActionFilters;
 using Api.Infrastructure;
 using Domain.Configurations;
+using Domain.StaticData;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api;
@@ -14,14 +16,14 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddControllers(options =>
-        {
-            // options.Filters.Add<LoggerActionFilter>();
-        })
-        .ConfigureApiBehaviorOptions(options =>
-        {
-            // To disable the default invalid model state response
-            options.SuppressModelStateInvalidFilter = true;
-        });
+            {
+                // options.Filters.Add<LoggerActionFilter>();
+            })
+            .ConfigureApiBehaviorOptions(options =>
+            {
+                // To disable the default invalid model state response
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
         // Bind configuration sections
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
@@ -44,34 +46,46 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
+        JwtSettings jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
 
         services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme =
-            options.DefaultChallengeScheme =
-            options.DefaultForbidScheme =
-            options.DefaultScheme =
-            options.DefaultSignInScheme =
-            options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-        }
-            ).AddJwtBearer(options =>
             {
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtSettings!.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = jwtSettings.Audience,
-                    ValidateIssuerSigningKey = true,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSettings.SigningKey)
-                    )
-                };
-            });
+                options.DefaultAuthenticateScheme =
+                    options.DefaultChallengeScheme =
+                        options.DefaultForbidScheme =
+                            options.DefaultScheme =
+                                options.DefaultSignInScheme =
+                                    options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
+            }
+        ).AddJwtBearer(options =>
+        {
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtSettings.SigningKey)
+                ),
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+
+        services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
+
+        AuthorizationBuilder builder = services.AddAuthorizationBuilder();
+        foreach (PermissionType permission in Enum.GetValues<PermissionType>())
+        {
+            var permissionName = permission.ToString();
+
+            builder.AddPolicy(permissionName, policy =>
+                policy.Requirements.Add(new PermissionRequirement(permissionName))
+            );
+        }
 
         return services;
     }
@@ -82,7 +96,8 @@ public static class DependencyInjection
         {
             configure.CustomizeProblemDetails = context =>
             {
-                context.ProblemDetails.Instance = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
+                context.ProblemDetails.Instance =
+                    $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
                 context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
             };
         });

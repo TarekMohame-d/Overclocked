@@ -1,20 +1,20 @@
 using System.Net;
-using ArchitectureTests.FakeData;
-using NSubstitute;
-using Shouldly;
-using Domain.Entities;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
+using Application.Common.Results;
 using Application.Services.Tag;
 using Application.Services.Tag.DTOs.Request;
+using ArchitectureTests.FakeData;
+using Domain.Entities;
+using NSubstitute;
+using Shouldly;
 
 namespace Unit.Tests.TagTests;
 
 public class CreateTagAsyncTest
 {
-    private readonly IUnitOfWork _unitOfWorkMock;
     private readonly ITagRepository _tagRepositoryMock;
-    private readonly ITagService _tagService;
+    private readonly TagService _tagService;
+    private readonly IUnitOfWork _unitOfWorkMock;
 
     public CreateTagAsyncTest()
     {
@@ -29,10 +29,10 @@ public class CreateTagAsyncTest
         // Arrange
         var request = new CreateTagRequest
         {
-            Name = "Test"
+            Name = "Tag Name"
         };
 
-        var tag = new TagFaker().Generate();
+        Tag tag = new TagFaker().Generate();
 
         _tagRepositoryMock.AddAsync(Arg.Any<Tag>(), Arg.Any<CancellationToken>())
             .Returns(tag);
@@ -41,7 +41,7 @@ public class CreateTagAsyncTest
             .Returns(1);
 
         // Act
-        var result = await _tagService.CreateTagAsync(request, CancellationToken.None);
+        Result result = await _tagService.CreateTagAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

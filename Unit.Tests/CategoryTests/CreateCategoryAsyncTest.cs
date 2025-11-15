@@ -1,57 +1,56 @@
 using System.Net;
-using ArchitectureTests.FakeData;
-using NSubstitute;
-using Shouldly;
-using Domain.Entities;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
+using Application.Common.Results;
 using Application.Services.Category;
 using Application.Services.Category.DTOs.Request;
-using Application.Services;
+using ArchitectureTests.FakeData;
+using Domain.Entities;
+using NSubstitute;
+using Shouldly;
 
 namespace Unit.Tests.CategoryTests;
 
 public class CreateCategoryAsyncTest
 {
+    private readonly ICategoryRepository _categoryRepositoryMock;
+    private readonly CategoryService _categoryService;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly ICategoryRepository _brandRepositoryMock;
-    private readonly ICategoryService _brandServices;
-    private readonly IFileStorageService _fileStorageServiceMock;
 
     public CreateCategoryAsyncTest()
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _brandRepositoryMock = Substitute.For<ICategoryRepository>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _brandServices = new CategoryService(_brandRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+        _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
+        _categoryService =
+            new CategoryService(_categoryRepositoryMock, _unitOfWorkMock, Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
-    public async Task Handle_WhenThereIsNoError_ShouldReturnSuccess()
+    public async Task CreateCategoryAsync_WhenThereIsNoError_ShouldReturnSuccess()
     {
         // Arrange
         var request = new CreateCategoryRequest
         {
-            Name = "Nike",
+            Name = "Category Name",
             ImageUrl = "image.png"
         };
 
-        var brand = new CategoryFaker().Generate();
+        Category brand = new CategoryFaker().Generate();
 
-        _brandRepositoryMock.AddAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock.AddAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
         _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(1));
+            .Returns(1);
 
         // Act
-        var result = await _brandServices.CreateCategoryAsync(request, CancellationToken.None);
+        Result result = await _categoryService.CreateCategoryAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        await _brandRepositoryMock.Received(1)
+        await _categoryRepositoryMock.Received(1)
             .AddAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)

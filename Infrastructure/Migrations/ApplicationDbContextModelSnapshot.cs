@@ -204,13 +204,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.EmailConfirmationCode", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<string>("CodeHash")
                         .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -230,7 +229,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasDefaultValueSql("NOW()");
 
-                    b.HasKey("UserId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -589,66 +591,61 @@ namespace Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "SuperAdmin"
-                        },
-                        new
-                        {
-                            Id = 2,
                             Name = "ManageUsers"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = 2,
                             Name = "ManageRolePermissions"
                         },
                         new
                         {
-                            Id = 4,
+                            Id = 3,
                             Name = "DeactivateUsers"
                         },
                         new
                         {
-                            Id = 5,
+                            Id = 4,
                             Name = "ManageOrders"
                         },
                         new
                         {
-                            Id = 6,
+                            Id = 5,
                             Name = "ManageShipments"
                         },
                         new
                         {
-                            Id = 7,
+                            Id = 6,
                             Name = "ManagePayments"
                         },
                         new
                         {
-                            Id = 8,
+                            Id = 7,
                             Name = "SeeStatistics"
                         },
                         new
                         {
-                            Id = 9,
+                            Id = 8,
                             Name = "CreateReports"
                         },
                         new
                         {
-                            Id = 10,
+                            Id = 9,
                             Name = "ManageReviews"
                         },
                         new
                         {
-                            Id = 11,
+                            Id = 10,
                             Name = "ReplyToReview"
                         },
                         new
                         {
-                            Id = 12,
+                            Id = 11,
                             Name = "RefundOrder"
                         },
                         new
                         {
-                            Id = 13,
+                            Id = 12,
                             Name = "AddEditDelete"
                         });
                 });
@@ -1131,8 +1128,8 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            RoleId = 1,
-                            PermissionId = 13
+                            RoleId = 2,
+                            PermissionId = 4
                         },
                         new
                         {
@@ -1176,13 +1173,8 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            RoleId = 2,
-                            PermissionId = 13
-                        },
-                        new
-                        {
                             RoleId = 3,
-                            PermissionId = 13
+                            PermissionId = 12
                         });
                 });
 
@@ -1467,6 +1459,22 @@ namespace Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019a497f-e294-71ac-8f28-6f772f4289e1"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "overclocked.cor@gmail.com",
+                            EmailConfirmed = true,
+                            FirstName = "Super",
+                            IsActive = true,
+                            LastName = "Admin",
+                            PasswordHash = "83F0B98915AA027B1D0A55E018181ACC2BDD9088F085A9832CE2081337BC4743-42C24EE7A22304068F0F8745D27B3C38",
+                            Phone = "011xxxxxx24",
+                            RoleId = 1,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Wishlist", b =>

@@ -1,10 +1,8 @@
-using Api.Common.Routing;
-
 namespace Api.Routing;
 
-public class ProductRoutes : BaseRoute
+public abstract class ProductRoutes : BaseRoute
 {
-    public const string Prefix = $"{Base}/products";
+    private const string Prefix = $"{Base}/products";
 
     public const string GetById = $"{Prefix}/{{id:guid}}";
     public const string GetAll = $"{Prefix}";

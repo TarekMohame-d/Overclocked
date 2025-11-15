@@ -1,5 +1,6 @@
 using Application.Services.Brand.DTOs.Request;
 using Application.Services.Brand.Validations;
+using FluentValidation.TestHelper;
 using Shouldly;
 using Unit.Tests.Validations.Brand.TestCases;
 
@@ -8,10 +9,13 @@ namespace Unit.Tests.Validations.Brand;
 public class UpdateBrandRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(UpdateBrandValidationTestCases.InvalidNameCases), MemberType = typeof(UpdateBrandValidationTestCases))]
+    [MemberData(nameof(UpdateBrandValidationTestCases.InvalidNameCases),
+        MemberType = typeof(UpdateBrandValidationTestCases))]
     public void UpdateBrandRequestValidator_Should_ReturnError_When_NameValidationFails(string? name)
     {
         // Arrange
+        var validator = new UpdateBrandRequestValidator();
+
         var request = new UpdateBrandRequest
         {
             Id = Guid.CreateVersion7(),
@@ -19,37 +23,36 @@ public class UpdateBrandRequestValidatorTest
             ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
         };
 
-        var validator = new UpdateBrandRequestValidator();
-
         // Act
-        var result = validator.Validate(request);
+        TestValidationResult<UpdateBrandRequest> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "Name").ShouldBeTrue();
+        result.ShouldHaveValidationErrorFor(x => x.Name).Only();
     }
 
     [Theory]
-    [MemberData(nameof(UpdateBrandValidationTestCases.InvalidImageUrlCases), MemberType = typeof(UpdateBrandValidationTestCases))]
+    [MemberData(nameof(UpdateBrandValidationTestCases.InvalidImageUrlCases),
+        MemberType = typeof(UpdateBrandValidationTestCases))]
     public void UpdateBrandRequestValidator_Should_ReturnError_When_ImageUrlValidationFails(string? imageUrl)
     {
         // Arrange
+        var validator = new UpdateBrandRequestValidator();
+
         var request = new UpdateBrandRequest
         {
             Id = Guid.CreateVersion7(),
-            Name = "Nike",
+            Name = "Brand Name",
             ImageUrl = imageUrl!
         };
 
-        var validator = new UpdateBrandRequestValidator();
-
         // Act
-        var result = validator.Validate(request);
+        TestValidationResult<UpdateBrandRequest> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
-        result.Errors.All(e => e.PropertyName == "ImageUrl").ShouldBeTrue();
+        result.ShouldHaveValidationErrorFor(x => x.ImageUrl).Only();
     }
 }

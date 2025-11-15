@@ -1,6 +1,7 @@
-﻿using Application.Abstraction.Repositories;
+﻿using Application.Abstraction.DomainServices;
+using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
-using Application.Services;
+using Infrastructure.Authentication;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
@@ -27,12 +28,16 @@ public static class DependencyInjection
         });
 
         services.AddSingleton<IConnectionMultiplexer>(sp =>
-        {
-            return ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!);
-        });
+            ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
 
 
         services.AddSingleton<ICacheService, CacheService>();
+        services.AddSingleton<IEmailService, EmailService>();
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IEmailConfirmationCodeHasher, EmailConfirmationCodeHasher>();
+        services.AddSingleton<IRefreshTokenHasher, RefreshTokenHasher>();
+        services.AddSingleton<ITokenProvider, TokenProvider>();
+        services.AddSingleton<ITokenReaderService, TokenReaderService>();
 
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();

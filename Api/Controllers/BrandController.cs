@@ -1,27 +1,25 @@
 ﻿using Api.ActionFilters;
-using Api.Common.Routing;
 using Api.Extensions;
-using Application.Abstraction.Services;
+using Api.Routing;
+using Application.Abstraction.DomainServices;
+using Application.Common.Results;
 using Application.Services.Brand.DTOs.Request;
+using Application.Services.Brand.DTOs.Response;
+using Domain.StaticData;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
-public class BrandController : ControllerBase
+public class BrandController(IBrandService brandServices) : ControllerBase
 {
-    private readonly IBrandService _brandServices;
-    public BrandController(IBrandService brandServices)
-    {
-        _brandServices = brandServices;
-    }
-
     [HttpGet]
     [Route(BrandRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new GetBrandByIdRequest { Id = id };
-        var response = await _brandServices.GetBrandByIdAsync(request, cancellationToken);
+        Result<BrandResponse> response = await brandServices.GetBrandByIdAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -31,45 +29,51 @@ public class BrandController : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var request = new GetAllBrandsRequest();
-        var response = await _brandServices.GetAllBrandsAsync(request, cancellationToken);
+        Result<IEnumerable<BrandListResponse>> response =
+            await brandServices.GetAllBrandsAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    //[Authorize]
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<CreateBrandRequest>))]
     [Route(BrandRoutes.Create)]
     public async Task<IActionResult> Create([FromBody] CreateBrandRequest request, CancellationToken cancellationToken)
     {
-        var response = await _brandServices.CreateBrandAsync(request, cancellationToken);
+        Result response = await brandServices.CreateBrandAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    //[Authorize]
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPut]
     [ServiceFilter(typeof(ValidationActionAttribute<UpdateBrandRequest>))]
     [Route(BrandRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromBody] UpdateBrandRequest request,
+        [FromBody] UpdateBrandRequestBody request,
         CancellationToken cancellationToken)
     {
-        request = request with { Id = id };
+        UpdateBrandRequest updateBrandRequest = new()
+        {
+            Id = id,
+            Name = request.Name,
+            ImageUrl = request.ImageUrl
+        };
 
-        var response = await _brandServices.UpdateBrandAsync(request, cancellationToken);
+        Result response = await brandServices.UpdateBrandAsync(updateBrandRequest, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    //[Authorize]
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpDelete]
     [Route(BrandRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new DeleteBrandRequest { Id = id };
-        var response = await _brandServices.DeleteBrandAsync(request, cancellationToken);
+        Result response = await brandServices.DeleteBrandAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }

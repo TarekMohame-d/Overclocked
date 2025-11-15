@@ -1,9 +1,10 @@
+using Application.Common.Enums;
 using Application.Services.Tag.DTOs.Request;
 using FluentValidation;
 
 namespace Application.Services.Tag.Validations;
 
-public class GetPagedTagsRequestValidator : AbstractValidator<GetPagedTagsRequest>
+public class GetPagedTagsRequestValidator : AbstractValidator<GetPagedTagsQuery>
 {
     public GetPagedTagsRequestValidator()
     {
@@ -16,11 +17,11 @@ public class GetPagedTagsRequestValidator : AbstractValidator<GetPagedTagsReques
             .WithMessage("{PropertyName} must be between 1 and 100.");
 
         RuleFor(x => x.SortBy)
-            .IsInEnum()
-            .WithMessage("{PropertyName} must be one of: Id, Name, Price, Rating");
+            .Must(value => string.IsNullOrWhiteSpace(value) || Enum.TryParse<TagSortField>(value, true, out _))
+            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<TagSortField>()));
 
         RuleFor(x => x.Direction)
-            .IsInEnum()
-            .WithMessage("{PropertyName} must be either Asc or Desc");
+            .Must(value => string.IsNullOrWhiteSpace(value) || Enum.TryParse<SortDirection>(value, true, out _))
+            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<SortDirection>()));
     }
 }

@@ -1,7 +1,8 @@
 using System.Net;
 using Application.Common.Results;
-using Application.Features.Category.Mapping;
 using Application.Services.Category.DTOs.Request;
+using Application.Services.Category.Events;
+using Application.Services.Category.Mapping;
 
 namespace Application.Services.Category;
 
@@ -9,14 +10,14 @@ public sealed partial class CategoryService
 {
     public async Task<Result> UpdateCategoryAsync(UpdateCategoryRequest request, CancellationToken cancellationToken)
     {
-        var category = await _categoryRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Category? category = await categoryRepository.GetByIdAsync([request.Id], cancellationToken);
 
         if (category is null)
             return Result.Failure(Errors.CategoryNotFound, HttpStatusCode.NotFound);
 
         if (category.Name != request.Name)
         {
-            bool exist = await _categoryRepository
+            var exist = await categoryRepository
                 .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
 
             if (exist)
@@ -25,14 +26,16 @@ public sealed partial class CategoryService
 
         // Delete old image
         if (category.Image != request.ImageUrl)
-            await _fileStorageService.DeleteFileAsync(category.Image, cancellationToken);
-
+        {
+            CategoryUpdatedEvent categoryUpdatedEvent = new(category.Image);
+            await eventDispatcher.DispatchAsync(categoryUpdatedEvent, cancellationToken);
+        }
 
         category.UpdateFrom(request);
 
-        _categoryRepository.Update(category);
+        categoryRepository.Update(category);
 
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
     }

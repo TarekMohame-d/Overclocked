@@ -1,10 +1,11 @@
-using System.Text.Json.Serialization;
-
 namespace Application.Services.Tag.DTOs.Request;
 
-public record UpdateTagRequest
+public record UpdateTagRequestBody
 {
-    [JsonIgnore]
-    public Guid Id { get; set; }
     public required string Name { get; init; }
+}
+
+public record UpdateTagRequest : UpdateTagRequestBody
+{
+    public required Guid Id { get; init; }
 }

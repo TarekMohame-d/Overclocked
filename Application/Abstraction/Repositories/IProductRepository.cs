@@ -6,7 +6,10 @@ namespace Application.Abstraction.Repositories;
 
 public interface IProductRepository : IGenericRepository<Product>
 {
-    Task<ProductResponse?> GetProductAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<ProductResponse?> GetProductDetailsAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Product?> GetProductForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Product?> GetProductWithImagesAsync(Guid id, CancellationToken cancellationToken = default);
+
     IQueryable<Product> GetProductsQuery(
         ProductSortField sortBy,
         SortDirection direction,
@@ -14,5 +17,4 @@ public interface IProductRepository : IGenericRepository<Product>
         string? category = null,
         string? brand = null,
         Guid? tagId = null);
-    Task<Product?> GetByIdWithImagesAsync(Guid id, CancellationToken cancellationToken = default);
 }

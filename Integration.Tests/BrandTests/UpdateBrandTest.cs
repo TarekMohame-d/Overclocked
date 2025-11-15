@@ -1,59 +1,57 @@
-﻿using Api.Common.Routing;
-using Infrastructure.Data;
-using Integration.Tests.Shared;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Domain.Entities;
+using System.Text;
+using System.Text.Json;
+using Api.Routing;
 using Application.Common.Results;
 using ArchitectureTests.FakeData;
-using System.Text.Json;
-using System.Text;
+using Domain.Entities;
+using Domain.StaticData;
+using Hangfire.Common;
+using Hangfire.States;
+using Infrastructure.Data;
+using Integration.Tests.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using Shouldly;
 
 namespace Integration.Tests.BrandTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class UpdateBrandTest : IAsyncLifetime
+public class UpdateBrandTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
-    public UpdateBrandTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.HttpClient;
-    }
+    private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
-        _factory.FileStorageServiceMock.ClearReceivedCalls();
+        await factory.ResetDatabaseAsync();
+        factory.FileStorageServiceMock.ClearReceivedCalls();
+        factory.BackgroundJobClientMock.ClearReceivedCalls();
 
-        var token = _factory.GenerateJwtToken();
-        _factory.HttpClient.DefaultRequestHeaders.Authorization =
+        var token = CustomWebApplicationFactory
+            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
     }
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Update_Should_ReturnFailure_When_IdNotFound()
     {
         // Arrange
-        var name = "NVIDIA";
+        const string Name = "NVIDIA";
         var id = Guid.NewGuid().ToString();
-        var form = CreateJsonContent(name);
+        StringContent form = CreateJsonContent(Name);
 
         // Act
-        var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", id), form);
+        HttpResponseMessage response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", id), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -67,19 +65,20 @@ public class UpdateBrandTest : IAsyncLifetime
     public async Task Update_Should_ReturnSuccess_When_BrandExistsAndOldImageUrlIsProvided()
     {
         // Arrange
-        var brand = await SeedDatabaseAsync();
-        var form = CreateJsonContent("New Name", brand.Image);
+        Brand brand = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent("New Name", brand.Image);
 
         // Act
-        var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
+        HttpResponseMessage response =
+            await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Brand? updatedBrand = await dbContext.Brands.FindAsync(brand.Id);
         updatedBrand.ShouldNotBeNull();
@@ -95,19 +94,24 @@ public class UpdateBrandTest : IAsyncLifetime
     public async Task Update_Should_ReturnSuccess_When_BrandExistsAndNewImageUrlIsProvided()
     {
         // Arrange
-        var brand = await SeedDatabaseAsync();
-        var form = CreateJsonContent("New Name", "https://res.cloudinary.com/over-clocked/new-image.jpg");
+        Brand brand = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent("New Name", "https://res.cloudinary.com/over-clocked/new-image.jpg");
+
+        factory.BackgroundJobClientMock
+            .Create(Arg.Any<Job>(), Arg.Any<IState>())
+            .Returns("a-fake-job-id");
 
         // Act
-        var response = await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
+        HttpResponseMessage response =
+            await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Brand? updatedBrand = await dbContext.Brands.FindAsync(brand.Id);
         updatedBrand.ShouldNotBeNull();
@@ -119,10 +123,27 @@ public class UpdateBrandTest : IAsyncLifetime
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
 
-        await _factory.FileStorageServiceMock.Received(1)
-            .DeleteFileAsync(
-            Arg.Is<string>(url => url == "https://res.cloudinary.com/over-clocked/image.jpg"),
-            Arg.Any<CancellationToken>());
+        factory.BackgroundJobClientMock.Received(1)
+            .Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
+    }
+
+    [Fact]
+    public async Task Update_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    {
+        // Arrange
+        Brand brand = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent("New Name", brand.Image);
+
+        var token = CustomWebApplicationFactory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        HttpResponseMessage response =
+            await _client.PutAsync(BrandRoutes.Update.Replace("{id:guid}", brand.Id.ToString()), form);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
     }
 
     private async Task<Brand> SeedDatabaseAsync()
@@ -130,8 +151,8 @@ public class UpdateBrandTest : IAsyncLifetime
         Brand brand = new BrandFaker().Generate();
         brand.Image = "https://res.cloudinary.com/over-clocked/image.jpg";
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);
         await dbContext.SaveChangesAsync();
@@ -139,7 +160,8 @@ public class UpdateBrandTest : IAsyncLifetime
         return brand;
     }
 
-    private StringContent CreateJsonContent(string name, string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
+    private static StringContent CreateJsonContent(string name,
+        string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
     {
         var payload = new
         {
@@ -147,7 +169,7 @@ public class UpdateBrandTest : IAsyncLifetime
             ImageUrl = imageUrl
         };
 
-        string json = JsonSerializer.Serialize(payload);
+        var json = JsonSerializer.Serialize(payload);
 
         return new StringContent(json, Encoding.UTF8, "application/json");
     }

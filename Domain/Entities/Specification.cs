@@ -2,7 +2,7 @@
 
 namespace Domain.Entities;
 
-public class Specification : BaseEntity
+public class Specification : Entity
 {
     public Guid ProductId { get; set; }
     public required string Name { get; set; }

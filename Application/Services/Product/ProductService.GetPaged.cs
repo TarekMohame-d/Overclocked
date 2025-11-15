@@ -1,31 +1,30 @@
 using Application.Common.Results;
-using Application.Features.Brand.Mapping;
-using Application.Features.Product.Mapping;
-using Application.Features.Tag.Mapping;
 using Application.Services.Product.DTOs.Request;
 using Application.Services.Product.DTOs.Response;
+using Application.Services.Product.Mapping;
 
 namespace Application.Services.Product;
 
 public sealed partial class ProductService
 {
-    public async Task<Result<PagedResult<ProductListResponse>>> GetPagedProductsAsync(GetPagedProductsQuery query, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ProductListResponse>>> GetPagedProductsAsync(GetPagedProductsRequest request,
+        CancellationToken cancellationToken)
     {
-        var productsQuery = _productRepository.GetProductsQuery(
-            query.SortBy,
-            query.Direction,
-            query.Search,
-            query.Category,
-            query.Brand,
-            query.TagId
+        IQueryable<Domain.Entities.Product> productsQuery = productRepository.GetProductsQuery(
+            request.SortBy,
+            request.Direction,
+            request.Search,
+            request.Category,
+            request.Brand,
+            request.TagId
         );
 
-        var productsDtoQuery = productsQuery.ToDto();
+        IQueryable<ProductListResponse> productsDtoQuery = productsQuery.ToDto();
 
         var pagedResult = await PagedResult<ProductListResponse>.CreateAsync(
             productsDtoQuery,
-            query.Page,
-            query.PageSize
+            request.Page,
+            request.PageSize
         );
 
         return Result<PagedResult<ProductListResponse>>.Success(pagedResult);

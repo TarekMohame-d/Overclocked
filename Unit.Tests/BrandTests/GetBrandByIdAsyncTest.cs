@@ -1,11 +1,11 @@
 using System.Net;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
 using Application.Common.Results;
-using Application.Features.Brand.Mapping;
-using Application.Services;
 using Application.Services.Brand;
 using Application.Services.Brand.DTOs.Request;
+using Application.Services.Brand.DTOs.Response;
+using Application.Services.Brand.Mapping;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
 using NSubstitute;
@@ -16,16 +16,14 @@ namespace Unit.Tests.BrandTests;
 public class GetBrandByIdAsyncTest
 {
     private readonly IBrandRepository _brandRepositoryMock;
-    private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IBrandService _brandServices;
-    private readonly IFileStorageService _fileStorageServiceMock;
+    private readonly BrandService _brandServices;
 
     public GetBrandByIdAsyncTest()
     {
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
-        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _brandServices = new BrandService(_brandRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+
+        _brandServices = new BrandService(_brandRepositoryMock, Substitute.For<IUnitOfWork>(),
+            Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
@@ -34,14 +32,14 @@ public class GetBrandByIdAsyncTest
         // Arrange
         var brandId = Guid.CreateVersion7();
         var request = new GetBrandByIdRequest { Id = brandId };
-        var brand = new BrandFaker().Generate();
-        var brandDto = brand.ToDto();
+        Brand brand = new BrandFaker().Generate();
+        BrandResponse brandDto = brand.ToDto();
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
         // Act
-        var result = await _brandServices.GetBrandByIdAsync(request, CancellationToken.None);
+        Result<BrandResponse> result = await _brandServices.GetBrandByIdAsync(request, CancellationToken.None);
 
         // Assert
         result.ShouldNotBeNull();
@@ -66,7 +64,7 @@ public class GetBrandByIdAsyncTest
             .Returns((Brand)null!);
 
         // Act
-        var result = await _brandServices.GetBrandByIdAsync(request, CancellationToken.None);
+        Result<BrandResponse> result = await _brandServices.GetBrandByIdAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();

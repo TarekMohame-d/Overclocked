@@ -6,7 +6,7 @@ namespace Application.Services.Product.DTOs.Response;
 
 public record ProductResponse
 {
-    public Guid Id { get; init; }
+    public required Guid Id { get; init; }
     public required string Name { get; init; }
     public required string Thumbnail { get; init; }
     public required string Description { get; init; }
@@ -16,6 +16,7 @@ public record ProductResponse
     public required CategoryResponse Category { get; init; }
     public required BrandResponse Brand { get; init; }
     public required IEnumerable<TagResponse> Tags { get; init; }
+
     // TODO: Add Reviews and ReviewReply
     // public IEnumerable<ProductReviewDto> Reviews { get; init; } = [];
     public required IEnumerable<ProductSpecificationResponse> Specifications { get; init; }

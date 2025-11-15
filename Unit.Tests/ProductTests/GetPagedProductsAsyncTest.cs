@@ -1,43 +1,43 @@
 using System.Net;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
 using Application.Common.Enums;
-using Application.Services;
+using Application.Common.Results;
 using Application.Services.Product;
 using Application.Services.Product.DTOs.Request;
+using Application.Services.Product.DTOs.Response;
 using ArchitectureTests.FakeData;
+using Domain.Entities;
 using MockQueryable;
 using NSubstitute;
 using Shouldly;
+using SortDirection = Application.Common.Enums.SortDirection;
 
 namespace Unit.Tests.ProductTests;
 
 public class GetPagedProductsAsyncTest
 {
     private readonly IProductRepository _productRepositoryMock;
-    private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IFileStorageService _fileStorageServiceMock;
-    private readonly IProductService _productService;
+    private readonly ProductService _productService;
 
     public GetPagedProductsAsyncTest()
     {
         _productRepositoryMock = Substitute.For<IProductRepository>();
-        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _productService = new ProductService(_productRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+        _productService = new ProductService(_productRepositoryMock, Substitute.For<IUnitOfWork>(),
+            Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
     public async Task GetPagedProductsAsync_Should_ReturnProducts_When_ProductsExist()
     {
         // Arrange
-        var query = new GetPagedProductsQuery
+        var request = new GetPagedProductsRequest
         {
             Page = 1,
             PageSize = 10
         };
-        var products = new ProductFaker().Generate(3);
-        var brands = new BrandFaker().Generate(3);
+        List<Product> products = new ProductFaker().Generate(3);
+        List<Brand> brands = new BrandFaker().Generate(3);
 
         for (var i = 0; i < products.Count; i++)
         {
@@ -45,40 +45,42 @@ public class GetPagedProductsAsyncTest
             products[i].BrandId = brands[i].Id;
         }
 
-        var mockQueryable = products.BuildMock();
+        IQueryable<Product> mockQueryable = products.BuildMock();
 
-        _productRepositoryMock.GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<Application.Common.Enums.SortDirection>())
+        _productRepositoryMock.GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>())
             .Returns(mockQueryable);
 
         // Act
-        var result = await _productService.GetPagedProductsAsync(query, CancellationToken.None);
+        Result<PagedResult<ProductListResponse>> result =
+            await _productService.GetPagedProductsAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Data.ShouldNotBeNull();
         result.Error.ShouldBeNull();
-        products.Count.ShouldBe(result.Data.Items.Count());
+        products.Count.ShouldBe(result.Data.Items.Count);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         _productRepositoryMock.Received(1)
-            .GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<Application.Common.Enums.SortDirection>());
+            .GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>());
     }
 
     [Fact]
     public async Task GetPagedProductsAsync_Should_ReturnEmptyList_When_ProductsDoesNotExist()
     {
         // Arrange
-        var query = new GetPagedProductsQuery();
+        var request = new GetPagedProductsRequest();
 
-        var products = new ProductFaker().Generate(0);
+        List<Product> products = new ProductFaker().Generate(0);
 
-        var mockQueryable = products.BuildMock();
+        IQueryable<Product> mockQueryable = products.BuildMock();
 
-        _productRepositoryMock.GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<Application.Common.Enums.SortDirection>())
+        _productRepositoryMock.GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>())
             .Returns(mockQueryable);
 
         // Act
-        var result = await _productService.GetPagedProductsAsync(query, CancellationToken.None);
+        Result<PagedResult<ProductListResponse>> result =
+            await _productService.GetPagedProductsAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -89,6 +91,6 @@ public class GetPagedProductsAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         _productRepositoryMock.Received(1)
-            .GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<Application.Common.Enums.SortDirection>());
+            .GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>());
     }
 }

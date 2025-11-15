@@ -1,8 +1,8 @@
-﻿namespace Api.Common.Routing;
+﻿namespace Api.Routing;
 
 public class BaseRoute
 {
-    public const string Root = "api";
-    public const string Version = "v1";
-    public const string Base = $"{Root}/{Version}";
+    private const string Root = "api";
+    private const string Version = "v1";
+    protected const string Base = $"{Root}/{Version}";
 }

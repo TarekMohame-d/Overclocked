@@ -1,30 +1,30 @@
 using System.Net;
-using Application.Common.Results;
-using ArchitectureTests.FakeData;
-using NSubstitute;
-using Shouldly;
-using Domain.Entities;
+using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
-using Application.Abstraction.Services;
+using Application.Common.Results;
 using Application.Services.Category;
 using Application.Services.Category.DTOs.Request;
-using Application.Services;
+using Application.Services.Category.Events;
+using ArchitectureTests.FakeData;
+using Domain.Entities;
+using NSubstitute;
+using Shouldly;
 
 namespace Unit.Tests.CategoryTests;
 
 public class UpdateCategoryAsyncTest
 {
+    private readonly ICategoryRepository _categoryRepositoryMock;
+    private readonly CategoryService _categoryService;
+    private readonly IEventDispatcher _eventDispatcherMock;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly ICategoryRepository _brandRepositoryMock;
-    private readonly ICategoryService _brandServices;
-    private readonly IFileStorageService _fileStorageServiceMock;
 
     public UpdateCategoryAsyncTest()
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _brandRepositoryMock = Substitute.For<ICategoryRepository>();
-        _fileStorageServiceMock = Substitute.For<IFileStorageService>();
-        _brandServices = new CategoryService(_brandRepositoryMock, _unitOfWorkMock, _fileStorageServiceMock);
+        _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
+        _eventDispatcherMock = Substitute.For<IEventDispatcher>();
+        _categoryService = new CategoryService(_categoryRepositoryMock, _unitOfWorkMock, _eventDispatcherMock);
     }
 
     [Fact]
@@ -34,15 +34,18 @@ public class UpdateCategoryAsyncTest
         var request = new UpdateCategoryRequest
         {
             Id = Guid.CreateVersion7(),
-            Name = "Nike",
+            Name = "Category Name",
             ImageUrl = "image.png"
         };
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns((Category)null!);
 
+        _eventDispatcherMock.DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _brandServices.UpdateCategoryAsync(request, CancellationToken.None);
+        Result result = await _categoryService.UpdateCategoryAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -50,8 +53,11 @@ public class UpdateCategoryAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _brandRepositoryMock.Received(1)
+        await _categoryRepositoryMock.Received(1)
             .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+
+        await _eventDispatcherMock.DidNotReceive()
+            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
     }
 
     [Fact]
@@ -61,37 +67,43 @@ public class UpdateCategoryAsyncTest
         var request = new UpdateCategoryRequest
         {
             Id = Guid.CreateVersion7(),
-            Name = "Nike",
+            Name = "Category Name",
             ImageUrl = "image.png"
         };
 
-        var brand = new CategoryFaker().Generate();
+        Category brand = new CategoryFaker().Generate();
 
         brand.Name = request.Name;
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
-        _brandRepositoryMock.Update(Arg.Any<Category>());
+        _categoryRepositoryMock.Update(Arg.Any<Category>());
+
+        _eventDispatcherMock.DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
+            .Returns(Task.CompletedTask);
 
         _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
             .Returns(1);
 
         // Act
-        var result = await _brandServices.UpdateCategoryAsync(request, CancellationToken.None);
+        Result result = await _categoryService.UpdateCategoryAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBeNull();
 
-        await _brandRepositoryMock.Received(1)
+        await _categoryRepositoryMock.Received(1)
             .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)
             .CompleteAsync(Arg.Any<CancellationToken>());
 
-        _brandRepositoryMock.Received(1)
+        _categoryRepositoryMock.Received(1)
             .Update(Arg.Any<Category>());
+
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
     }
 }

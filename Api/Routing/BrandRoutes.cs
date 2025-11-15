@@ -1,8 +1,8 @@
-﻿namespace Api.Common.Routing;
+﻿namespace Api.Routing;
 
-public class BrandRoutes : BaseRoute
+public abstract class BrandRoutes : BaseRoute
 {
-    public const string Prefix = $"{Base}/brands";
+    private const string Prefix = $"{Base}/brands";
 
     public const string GetById = $"{Prefix}/{{id:guid}}";
     public const string GetAll = $"{Prefix}";

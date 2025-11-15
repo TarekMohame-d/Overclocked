@@ -1,11 +1,7 @@
-using System.Text.Json.Serialization;
-
 namespace Application.Services.Product.DTOs.Request;
 
-public record UpdateProductRequest
+public record UpdateProductRequestBody
 {
-    [JsonIgnore]
-    public Guid Id { get; init; }
     public required Guid BrandId { get; init; }
     public required Guid CategoryId { get; init; }
     public required string Name { get; init; }
@@ -23,4 +19,9 @@ public record UpdateProductRequest
         public required string Name { get; init; }
         public required string Value { get; init; }
     }
+}
+
+public record UpdateProductRequest : UpdateProductRequestBody
+{
+    public required Guid Id { get; init; }
 }

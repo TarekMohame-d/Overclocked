@@ -1,4 +1,4 @@
-namespace Application.Features.CloudinarySignature;
+namespace Application.Services.CloudinarySignature;
 
 public sealed class CloudinarySignatureResponse
 {

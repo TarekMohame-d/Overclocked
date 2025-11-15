@@ -1,59 +1,58 @@
-﻿using Api.Common.Routing;
-using Infrastructure.Data;
-using Integration.Tests.Shared;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Domain.Entities;
+using System.Text;
+using System.Text.Json;
+using Api.Routing;
 using Application.Common.Results;
 using ArchitectureTests.FakeData;
-using System.Text.Json;
-using System.Text;
+using Domain.Entities;
+using Domain.StaticData;
+using Hangfire.Common;
+using Hangfire.States;
+using Infrastructure.Data;
+using Integration.Tests.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using Shouldly;
 
 namespace Integration.Tests.CategoryTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class UpdateCategoryTest : IAsyncLifetime
+public class UpdateCategoryTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client;
-    private readonly CustomWebApplicationFactory _factory;
-
-    public UpdateCategoryTest(CustomWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.HttpClient;
-    }
+    private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
-        _factory.FileStorageServiceMock.ClearReceivedCalls();
+        await factory.ResetDatabaseAsync();
+        factory.FileStorageServiceMock.ClearReceivedCalls();
+        factory.BackgroundJobClientMock.ClearReceivedCalls();
 
-        var token = _factory.GenerateJwtToken();
-        _factory.HttpClient.DefaultRequestHeaders.Authorization =
+        var token = CustomWebApplicationFactory
+            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
     }
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Update_Should_ReturnFailure_When_IdNotFound()
     {
         // Arrange
-        var name = "NVIDIA";
+        const string Name = "NVIDIA";
         var id = Guid.NewGuid().ToString();
-        var form = CreateJsonContent(name);
+        StringContent form = CreateJsonContent(Name);
 
         // Act
-        var response = await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", id), form);
+        HttpResponseMessage response =
+            await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", id), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -67,19 +66,20 @@ public class UpdateCategoryTest : IAsyncLifetime
     public async Task Update_Should_ReturnSuccess_When_CategoryExistsAndOldImageUrlIsProvided()
     {
         // Arrange
-        var category = await SeedDatabaseAsync();
-        var form = CreateJsonContent("New Name", category.Image);
+        Category category = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent("New Name", category.Image);
 
         // Act
-        var response = await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", category.Id.ToString()), form);
+        HttpResponseMessage response =
+            await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", category.Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Category? updatedCategory = await dbContext.Categories.FindAsync(category.Id);
         updatedCategory.ShouldNotBeNull();
@@ -95,19 +95,24 @@ public class UpdateCategoryTest : IAsyncLifetime
     public async Task Update_Should_ReturnSuccess_When_CategoryExistsAndNewImageUrlIsProvided()
     {
         // Arrange
-        var category = await SeedDatabaseAsync();
-        var form = CreateJsonContent("New Name", "https://res.cloudinary.com/over-clocked/new-image.jpg");
+        Category category = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent("New Name", "https://res.cloudinary.com/over-clocked/new-image.jpg");
+
+        factory.BackgroundJobClientMock
+            .Create(Arg.Any<Job>(), Arg.Any<IState>())
+            .Returns("a-fake-job-id");
 
         // Act
-        var response = await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", category.Id.ToString()), form);
+        HttpResponseMessage response =
+            await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", category.Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<Result>();
+        Result? result = await response.Content.ReadFromJsonAsync<Result>();
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Category? updatedCategory = await dbContext.Categories.FindAsync(category.Id);
         updatedCategory.ShouldNotBeNull();
@@ -119,10 +124,27 @@ public class UpdateCategoryTest : IAsyncLifetime
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
 
-        await _factory.FileStorageServiceMock.Received(1)
-            .DeleteFileAsync(
-            Arg.Is<string>(url => url == "https://res.cloudinary.com/over-clocked/image.jpg"),
-            Arg.Any<CancellationToken>());
+        factory.BackgroundJobClientMock.Received(1)
+            .Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
+    }
+
+    [Fact]
+    public async Task Update_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    {
+        // Arrange
+        Category category = await SeedDatabaseAsync();
+        StringContent form = CreateJsonContent("New Name", category.Image);
+
+        var token = CustomWebApplicationFactory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        HttpResponseMessage response =
+            await _client.PutAsync(CategoryRoutes.Update.Replace("{id:guid}", category.Id.ToString()), form);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
     }
 
     private async Task<Category> SeedDatabaseAsync()
@@ -130,8 +152,8 @@ public class UpdateCategoryTest : IAsyncLifetime
         Category category = new CategoryFaker().Generate();
         category.Image = "https://res.cloudinary.com/over-clocked/image.jpg";
 
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Categories.Add(category);
         await dbContext.SaveChangesAsync();
@@ -139,7 +161,8 @@ public class UpdateCategoryTest : IAsyncLifetime
         return category;
     }
 
-    private StringContent CreateJsonContent(string name, string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
+    private static StringContent CreateJsonContent(string name,
+        string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
     {
         var payload = new
         {
@@ -147,7 +170,7 @@ public class UpdateCategoryTest : IAsyncLifetime
             ImageUrl = imageUrl
         };
 
-        string json = JsonSerializer.Serialize(payload);
+        var json = JsonSerializer.Serialize(payload);
 
         return new StringContent(json, Encoding.UTF8, "application/json");
     }

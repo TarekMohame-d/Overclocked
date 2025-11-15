@@ -2,7 +2,7 @@
 
 namespace Domain.Entities;
 
-public class ProductImage : BaseEntity
+public class ProductImage : Entity
 {
     public Guid ProductId { get; set; }
     public required string Image { get; set; }

@@ -1,78 +1,92 @@
 using Api.ActionFilters;
 using Api.Extensions;
 using Api.Routing;
-using Application.Abstraction.Services;
+using Application.Abstraction.DomainServices;
+using Application.Common.Results;
 using Application.Services.Product.DTOs.Request;
+using Application.Services.Product.DTOs.Response;
+using Domain.StaticData;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
-public class ProductController : ControllerBase
+public class ProductController(IProductService productService) : ControllerBase
 {
-    private readonly IProductService _productService;
-
-    public ProductController(IProductService productService)
-    {
-        _productService = productService;
-    }
-
     [HttpGet]
     [Route(ProductRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new GetProductByIdRequest { Id = id };
-        var response = await _productService.GetProductByIdAsync(request, cancellationToken);
+        Result<ProductResponse> response = await productService.GetProductByIdAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
     [HttpGet]
-    [ServiceFilter(typeof(ValidationActionAttribute<GetPagedProductsRequest>))]
+    [ServiceFilter(typeof(ValidationActionAttribute<GetPagedProductsQuery>))]
     [Route(ProductRoutes.GetAll)]
     public async Task<IActionResult> GetAll(
-        [FromQuery] GetPagedProductsRequest request,
+        [FromQuery] GetPagedProductsQuery query,
         CancellationToken cancellationToken)
     {
-        var query = GetPagedProductsQuery.FromRequest(request);
-        var response = await _productService.GetPagedProductsAsync(query, cancellationToken);
+        var request = GetPagedProductsRequest.FromQuery(query);
+        Result<PagedResult<ProductListResponse>> response =
+            await productService.GetPagedProductsAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<CreateProductRequest>))]
     [Route(ProductRoutes.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateProductRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateProductRequest request,
+        CancellationToken cancellationToken)
     {
-        var response = await _productService.CreateProductAsync(request, cancellationToken);
+        Result response = await productService.CreateProductAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    //[Authorize]
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPut]
     [ServiceFilter(typeof(ValidationActionAttribute<UpdateProductRequest>))]
     [Route(ProductRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromBody] UpdateProductRequest request,
+        [FromBody] UpdateProductRequestBody request,
         CancellationToken cancellationToken)
     {
-        request = request with { Id = id };
+        UpdateProductRequest updateProductRequest = new()
+        {
+            Id = id,
+            BrandId = request.BrandId,
+            CategoryId = request.CategoryId,
+            Name = request.Name,
+            Thumbnail = request.Thumbnail,
+            Description = request.Description,
+            Price = request.Price,
+            Stock = request.Stock,
+            Discount = request.Discount,
+            Tags = request.Tags,
+            Specification = request.Specification,
+            Images = request.Images
+        };
 
-        var response = await _productService.UpdateProductAsync(request, cancellationToken);
+        Result response = await productService.UpdateProductAsync(updateProductRequest, cancellationToken);
 
         return response.ToActionResult();
     }
 
-    //[Authorize]
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpDelete]
     [Route(ProductRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new DeleteProductRequest { Id = id };
-        var response = await _productService.DeleteProductAsync(request, cancellationToken);
+        Result response = await productService.DeleteProductAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
