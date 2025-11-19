@@ -12,8 +12,8 @@ public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork, IAsyncDispo
 
     public async ValueTask DisposeAsync()
     {
-        if (this._transaction is not null)
-            await this._transaction.DisposeAsync();
+        if(_transaction is not null)
+            await _transaction.DisposeAsync();
 
         await context.DisposeAsync();
 
@@ -22,11 +22,14 @@ public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork, IAsyncDispo
 
     public async Task<IDbTransaction> BeginTransactionAsync(
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        IDbContextTransaction transaction =
-            await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
-        this._transaction = transaction;
+        IDbContextTransaction transaction = await context.Database.BeginTransactionAsync(
+            isolationLevel,
+            cancellationToken
+        );
+        _transaction = transaction;
 
         return transaction.GetDbTransaction();
     }
@@ -35,14 +38,14 @@ public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork, IAsyncDispo
     {
         try
         {
-            if (this._transaction is not null)
-                await this._transaction.CommitAsync(cancellationToken);
+            if(_transaction is not null)
+                await _transaction.CommitAsync(cancellationToken);
         }
         finally
         {
-            if (this._transaction is not null)
-                await this._transaction.DisposeAsync();
-            this._transaction = null;
+            if(_transaction is not null)
+                await _transaction.DisposeAsync();
+            _transaction = null;
         }
     }
 
@@ -50,14 +53,14 @@ public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork, IAsyncDispo
     {
         try
         {
-            if (this._transaction is not null)
-                await this._transaction.RollbackAsync(cancellationToken);
+            if(_transaction is not null)
+                await _transaction.RollbackAsync(cancellationToken);
         }
         finally
         {
-            if (this._transaction is not null)
-                await this._transaction.DisposeAsync();
-            this._transaction = null;
+            if(_transaction is not null)
+                await _transaction.DisposeAsync();
+            _transaction = null;
         }
     }
 

@@ -31,15 +31,14 @@ public class DeleteCategoryAsyncTest
     public async Task DeleteCategoryAsync_Should_ReturnFailure_When_CategoryDoesNotExists()
     {
         // Arrange
-        var request = new DeleteCategoryRequest
-        {
-            Id = Guid.CreateVersion7()
-        };
+        var request = new DeleteCategoryRequest { Id = Guid.CreateVersion7() };
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock
+            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns((Category)null!);
 
-        _eventDispatcherMock.DispatchAsync(Arg.Any<CategoryDeletedEvent>(), CancellationToken.None)
+        _eventDispatcherMock
+            .DispatchAsync(Arg.Any<CategoryDeletedEvent>(), CancellationToken.None)
             .Returns(Task.CompletedTask);
 
         // Act
@@ -51,10 +50,10 @@ public class DeleteCategoryAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _categoryRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
 
-        await _eventDispatcherMock.DidNotReceive()
+        await _eventDispatcherMock
+            .DidNotReceive()
             .DispatchAsync(Arg.Any<CategoryDeletedEvent>(), CancellationToken.None);
     }
 
@@ -62,23 +61,19 @@ public class DeleteCategoryAsyncTest
     public async Task DeleteCategoryAsync_Should_ReturnSuccess_When_CategoryExists()
     {
         // Arrange
-        var request = new DeleteCategoryRequest
-        {
-            Id = Guid.CreateVersion7()
-        };
+        var request = new DeleteCategoryRequest { Id = Guid.CreateVersion7() };
 
         Category brand = new CategoryFaker().Generate();
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns(brand);
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(brand);
 
         _categoryRepositoryMock.Delete(Arg.Any<Category>());
 
-        _eventDispatcherMock.DispatchAsync(Arg.Any<CategoryDeletedEvent>(), CancellationToken.None)
+        _eventDispatcherMock
+            .DispatchAsync(Arg.Any<CategoryDeletedEvent>(), CancellationToken.None)
             .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
         Result result = await _categoryService.DeleteCategoryAsync(request, CancellationToken.None);
@@ -88,16 +83,12 @@ public class DeleteCategoryAsyncTest
         result.Error.ShouldBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _categoryRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1)
-            .CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
 
-        _categoryRepositoryMock.Received(1)
-            .Delete(Arg.Any<Category>());
+        _categoryRepositoryMock.Received(1).Delete(Arg.Any<Category>());
 
-        await _eventDispatcherMock.Received(1)
-            .DispatchAsync(Arg.Any<CategoryDeletedEvent>(), CancellationToken.None);
+        await _eventDispatcherMock.Received(1).DispatchAsync(Arg.Any<CategoryDeletedEvent>(), CancellationToken.None);
     }
 }

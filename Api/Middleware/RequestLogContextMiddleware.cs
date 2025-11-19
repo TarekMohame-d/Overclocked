@@ -7,6 +7,7 @@ public class RequestLogContextMiddleware
 {
     private readonly RequestDelegate _next;
     private const string CorrelationIdHeaderName = "Correlation-Id";
+
     public RequestLogContextMiddleware(RequestDelegate next)
     {
         _next = next;
@@ -14,7 +15,7 @@ public class RequestLogContextMiddleware
 
     public Task Invoke(HttpContext context)
     {
-        using (LogContext.PushProperty("CorrelationId", GetCorrelationId(context)))
+        using(LogContext.PushProperty("CorrelationId", GetCorrelationId(context)))
         {
             return _next.Invoke(context);
         }
@@ -22,9 +23,7 @@ public class RequestLogContextMiddleware
 
     private static string GetCorrelationId(HttpContext context)
     {
-        context.Request.Headers.TryGetValue(
-            CorrelationIdHeaderName,
-            out StringValues correlationId);
+        context.Request.Headers.TryGetValue(CorrelationIdHeaderName, out StringValues correlationId);
 
         return correlationId.FirstOrDefault() ?? context.TraceIdentifier;
     }

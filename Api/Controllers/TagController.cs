@@ -27,13 +27,10 @@ public class TagController(ITagService tagService) : ControllerBase
     [HttpGet]
     [ServiceFilter(typeof(ValidationActionAttribute<GetPagedTagsQuery>))]
     [Route(TagRoutes.GetAll)]
-    public async Task<IActionResult> GetAll(
-        [FromQuery] GetPagedTagsQuery query,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll([FromQuery] GetPagedTagsQuery query, CancellationToken cancellationToken)
     {
         var request = GetPagedTagsRequest.FromQuery(query);
-        Result<PagedResult<TagListResponse>> response =
-            await tagService.GetPagedTagsAsync(request, cancellationToken);
+        Result<PagedResult<TagListResponse>> response = await tagService.GetPagedTagsAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -56,13 +53,10 @@ public class TagController(ITagService tagService) : ControllerBase
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
         [FromBody] UpdateTagRequestBody request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
-        UpdateTagRequest updateTagRequest = new()
-        {
-            Id = id,
-            Name = request.Name
-        };
+        UpdateTagRequest updateTagRequest = new() { Id = id, Name = request.Name };
 
         Result response = await tagService.UpdateTagAsync(updateTagRequest, cancellationToken);
 

@@ -13,12 +13,14 @@ public class CloudinarySignature(ICloudinaryService cloudinaryService) : Control
     [Route(CloudinarySignatureRoute.UploadSignature)]
     public IActionResult GenerateSignature([FromQuery] string category)
     {
-        if (string.IsNullOrWhiteSpace(category))
+        if(string.IsNullOrWhiteSpace(category))
             return BadRequest("The 'category' query parameter is required.");
 
         var sanitizedCategory = Regex.Replace(category.ToLower(), @"[^a-z0-9-]", "");
-        if (string.IsNullOrWhiteSpace(sanitizedCategory))
+        if(string.IsNullOrWhiteSpace(sanitizedCategory))
+        {
             return BadRequest("The 'category' query parameter contains invalid characters.");
+        }
 
         CloudinarySignatureResponse signatureResponse = cloudinaryService.GenerateUploadSignature(category.ToLower());
         return Ok(signatureResponse);

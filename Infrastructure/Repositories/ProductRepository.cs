@@ -11,14 +11,15 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Repositories;
 
 public class ProductRepository(ApplicationDbContext dbContext)
-    : GenericRepository<Product>(dbContext), IProductRepository
+    : GenericRepository<Product>(dbContext),
+        IProductRepository
 {
     private readonly ApplicationDbContext _dbContext = dbContext;
 
     public async Task<ProductResponse?> GetProductDetailsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Products
-            .AsNoTracking()
+        return await _dbContext
+            .Products.AsNoTracking()
             .Where(p => p.Id == id)
             .Select(p => new ProductResponse
             {
@@ -33,33 +34,30 @@ public class ProductRepository(ApplicationDbContext dbContext)
                 {
                     Id = p.Category!.Id,
                     Name = p.Category.Name,
-                    ImageUrl = p.Category.Image
+                    ImageUrl = p.Category.Image,
                 },
                 Brand = new BrandResponse
                 {
                     Id = p.Brand!.Id,
                     Name = p.Brand.Name,
-                    ImageUrl = p.Brand.Image
+                    ImageUrl = p.Brand.Image,
                 },
-                Tags = p.TagProducts.Select(tp => new TagResponse
-                {
-                    Id = tp.Tag.Id,
-                    Name = tp.Tag.Name
-                }),
+                Tags = p.TagProducts.Select(tp => new TagResponse { Id = tp.Tag.Id, Name = tp.Tag.Name }),
                 Specifications = p.Specifications.Select(s => new ProductSpecificationResponse
                 {
                     Id = s.Id,
                     Name = s.Name,
-                    Value = s.Value
+                    Value = s.Value,
                 }),
-                Images = p.ProductImages.Select(i => i.Image)
-            }).SingleOrDefaultAsync(cancellationToken);
+                Images = p.ProductImages.Select(i => i.Image),
+            })
+            .SingleOrDefaultAsync(cancellationToken);
     }
 
     public async Task<Product?> GetProductForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Products
-            .Include(p => p.Brand)
+        return await _dbContext
+            .Products.Include(p => p.Brand)
             .Include(p => p.Category)
             .Include(p => p.TagProducts)
             .Include(p => p.Specifications)
@@ -69,8 +67,8 @@ public class ProductRepository(ApplicationDbContext dbContext)
 
     public async Task<Product?> GetProductWithImagesAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Products
-            .Include(p => p.ProductImages)
+        return await _dbContext
+            .Products.Include(p => p.ProductImages)
             .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
@@ -80,10 +78,10 @@ public class ProductRepository(ApplicationDbContext dbContext)
         string? search = null,
         string? category = null,
         string? brand = null,
-        Guid? tagId = null)
+        Guid? tagId = null
+    )
     {
-        IQueryable<Product> query = _dbContext.Products
-            .AsNoTracking();
+        IQueryable<Product> query = _dbContext.Products.AsNoTracking();
 
         query = ApplyFilters(query, search, category, brand, tagId);
         query = ApplySorting(query, sortBy, direction);
@@ -96,33 +94,37 @@ public class ProductRepository(ApplicationDbContext dbContext)
         string? search,
         string? category,
         string? brand,
-        Guid? tagId)
+        Guid? tagId
+    )
     {
         // Apply search filter (searches in product name and description)
-        if (!string.IsNullOrWhiteSpace(search))
+        if(!string.IsNullOrWhiteSpace(search))
         {
             var sanitizedSearch = EscapeLikePattern(search);
             query = query.Where(p =>
-                EF.Functions.ILike(p.Name, $"%{sanitizedSearch}%") ||
-                EF.Functions.ILike(p.Description, $"%{sanitizedSearch}%"));
+                EF.Functions.ILike(p.Name, $"%{sanitizedSearch}%")
+                || EF.Functions.ILike(p.Description, $"%{sanitizedSearch}%")
+            );
         }
 
         // Apply category filter
-        if (!string.IsNullOrWhiteSpace(category))
+        if(!string.IsNullOrWhiteSpace(category))
         {
             var sanitizedCategory = EscapeLikePattern(category);
             query = query.Where(p => EF.Functions.ILike(p.Category!.Name, $"%{sanitizedCategory}%"));
         }
 
         // Apply brand filter
-        if (!string.IsNullOrWhiteSpace(brand))
+        if(!string.IsNullOrWhiteSpace(brand))
         {
             var sanitizedBrand = EscapeLikePattern(brand);
             query = query.Where(p => EF.Functions.ILike(p.Brand!.Name, $"%{sanitizedBrand}%"));
         }
 
-        if (tagId != null)
+        if(tagId != null)
+        {
             query = query.Where(p => p.TagProducts.Any(tp => tp.TagId == tagId));
+        }
 
         return query;
     }
@@ -130,15 +132,14 @@ public class ProductRepository(ApplicationDbContext dbContext)
     private static IQueryable<Product> ApplySorting(
         IQueryable<Product> query,
         ProductSortField sortBy,
-        SortDirection direction)
+        SortDirection direction
+    )
     {
         var isDescending = direction == SortDirection.Desc;
 
         return sortBy switch
         {
-            ProductSortField.Name => isDescending
-                ? query.OrderByDescending(p => p.Name)
-                : query.OrderBy(p => p.Name),
+            ProductSortField.Name => isDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
 
             ProductSortField.Price => isDescending
                 ? query.OrderByDescending(p => p.Price)
@@ -148,18 +149,9 @@ public class ProductRepository(ApplicationDbContext dbContext)
                 ? query.OrderByDescending(p => p.Rating)
                 : query.OrderBy(p => p.Rating),
 
-            ProductSortField.Id or _ => isDescending
-                ? query.OrderByDescending(p => p.Id)
-                : query.OrderBy(p => p.Id)
+            ProductSortField.Id or _ => isDescending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id),
         };
     }
 
-    private static string EscapeLikePattern(string input)
-    {
-        return input
-            .Replace("\\", "\\\\")
-            .Replace("%", "\\%")
-            .Replace("_", "\\_")
-            .Replace("[", "\\[");
-    }
+    private static string EscapeLikePattern(string input) => input.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace("[", "\\[");
 }

@@ -35,7 +35,7 @@ public record GetPagedTagsRequest : GetPagedTagsQuery, ICachedRequest
             Page = query.Page,
             PageSize = query.PageSize,
             SortBy = sortBy,
-            Direction = direction
+            Direction = direction,
         };
     }
 }

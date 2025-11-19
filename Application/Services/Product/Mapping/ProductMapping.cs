@@ -23,27 +23,22 @@ public static class ProductMapping
             Thumbnail = request.Thumbnail,
             StockQuantity = request.Stock,
             Rating = 0,
-            IsDeleted = false
+            IsDeleted = false,
         };
 
-        product.TagProducts = request.Tags.Select(t => new TagProduct
-        {
-            ProductId = product.Id,
-            TagId = t
-        }).ToList();
+        product.TagProducts = request.Tags.Select(t => new TagProduct { ProductId = product.Id, TagId = t }).ToList();
 
-        product.ProductImages = request.Images?.Select(url => new ProductImage
-        {
-            ProductId = product.Id,
-            Image = url
-        }).ToList() ?? [];
+        product.ProductImages =
+            request.Images?.Select(url => new ProductImage { ProductId = product.Id, Image = url }).ToList() ?? [];
 
-        product.Specifications = request.Specification.Select(s => new Specification
-        {
-            ProductId = product.Id,
-            Name = s.Name,
-            Value = s.Value
-        }).ToList();
+        product.Specifications = request
+            .Specification.Select(s => new Specification
+            {
+                ProductId = product.Id,
+                Name = s.Name,
+                Value = s.Value,
+            })
+            .ToList();
 
         return product;
     }
@@ -65,14 +60,10 @@ public static class ProductMapping
             {
                 Id = s.Id,
                 Name = s.Name,
-                Value = s.Value
+                Value = s.Value,
             }),
             Images = entity.ProductImages.Select(pImage => pImage.Image),
-            Tags = entity.TagProducts.Select(tp => new TagResponse
-            {
-                Id = tp.TagId,
-                Name = tp.Tag!.Name
-            }).ToList()
+            Tags = entity.TagProducts.Select(tp => new TagResponse { Id = tp.TagId, Name = tp.Tag!.Name }).ToList(),
         };
     }
 
@@ -96,93 +87,89 @@ public static class ProductMapping
 
     public static IQueryable<ProductListResponse> ToDto(this IQueryable<ProductEntity> entities)
     {
-        return entities.Select(x =>
-            new ProductListResponse
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Thumbnail = x.Thumbnail,
-                Price = x.Price,
-                Discount = x.Discount,
-                Rating = x.Rating,
-                Brand = x.Brand!.ToDto()
-            });
+        return entities.Select(x => new ProductListResponse
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Thumbnail = x.Thumbnail,
+            Price = x.Price,
+            Discount = x.Discount,
+            Rating = x.Rating,
+            Brand = x.Brand!.ToDto(),
+        });
     }
 
     private static void UpdateProductTags(ProductEntity product, IEnumerable<Guid> tags)
     {
         var tagsToBeRemoved = product.TagProducts.Where(tp => !tags.Contains(tp.TagId)).ToList();
-        foreach (TagProduct tagProduct in tagsToBeRemoved)
+        foreach(TagProduct tagProduct in tagsToBeRemoved)
             product.TagProducts.Remove(tagProduct);
 
-        foreach (Guid tag in tags)
+        foreach(Guid tag in tags)
         {
-            if (!product.TagProducts.Any(tp => tp.TagId == tag))
+            if(!product.TagProducts.Any(tp => tp.TagId == tag))
             {
-                product.TagProducts.Add(new TagProduct
-                {
-                    ProductId = product.Id,
-                    TagId = tag
-                });
+                product.TagProducts.Add(new TagProduct { ProductId = product.Id, TagId = tag });
             }
         }
     }
 
     private static void UpdateProductImages(ProductEntity product, IEnumerable<string>? images)
     {
-        if (images is null || !images.Any())
+        if(images is null || !images.Any())
         {
             product.ProductImages.Clear();
             return;
         }
 
         var imagesToBeRemoved = product.ProductImages.Where(pImage => !images.Contains(pImage.Image)).ToList();
-        foreach (ProductImage productImage in imagesToBeRemoved)
+        foreach(ProductImage productImage in imagesToBeRemoved)
             product.ProductImages.Remove(productImage);
 
-        foreach (var image in images)
+        foreach(var image in images)
         {
-            if (!product.ProductImages.Any(pImage => pImage.Image == image))
+            if(!product.ProductImages.Any(pImage => pImage.Image == image))
             {
-                product.ProductImages.Add(new ProductImage
-                {
-                    ProductId = product.Id,
-                    Image = image
-                });
+                product.ProductImages.Add(new ProductImage { ProductId = product.Id, Image = image });
             }
         }
     }
 
-    private static void UpdateProductSpecifications(ProductEntity product,
-        IEnumerable<UpdateProductRequest.Specs> specs)
+    private static void UpdateProductSpecifications(
+        ProductEntity product,
+        IEnumerable<UpdateProductRequest.Specs> specs
+    )
     {
-        var incomingKeys = specs
-            .Select(s => s.Name.Trim().ToUpperInvariant())
-            .ToHashSet();
+        var incomingKeys = specs.Select(s => s.Name.Trim().ToUpperInvariant()).ToHashSet();
 
-        var specsToRemove = product.Specifications
-            .Where(s => !incomingKeys.Contains(s.Name.Trim().ToUpperInvariant()))
+        var specsToRemove = product
+            .Specifications.Where(s => !incomingKeys.Contains(s.Name.Trim().ToUpperInvariant()))
             .ToList();
 
-        foreach (Specification spec in specsToRemove)
+        foreach(Specification spec in specsToRemove)
             product.Specifications.Remove(spec);
 
-        foreach (UpdateProductRequest.Specs specDto in specs)
+        foreach(UpdateProductRequest.Specs specDto in specs)
         {
-            Specification? existingSpec = product.Specifications
-                .FirstOrDefault(s => s.Name.Equals(specDto.Name, StringComparison.CurrentCultureIgnoreCase));
+            Specification? existingSpec = product.Specifications.FirstOrDefault(s =>
+                s.Name.Equals(specDto.Name, StringComparison.CurrentCultureIgnoreCase)
+            );
 
-            if (existingSpec is null)
+            if(existingSpec is null)
             {
-                product.Specifications.Add(new Specification
-                {
-                    ProductId = product.Id,
-                    Name = specDto.Name,
-                    Value = specDto.Value
-                });
+                product.Specifications.Add(
+                    new Specification
+                    {
+                        ProductId = product.Id,
+                        Name = specDto.Name,
+                        Value = specDto.Value,
+                    }
+                );
             }
             else
+            {
                 existingSpec.Value = specDto.Value;
+            }
         }
     }
 }

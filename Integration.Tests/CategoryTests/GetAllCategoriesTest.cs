@@ -21,6 +21,7 @@ public class GetAllCategoriesTest(CustomWebApplicationFactory factory) : IAsyncL
     private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
@@ -35,8 +36,9 @@ public class GetAllCategoriesTest(CustomWebApplicationFactory factory) : IAsyncL
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<IEnumerable<CategoryListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
+        Result<IEnumerable<CategoryListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<IEnumerable<CategoryListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -58,8 +60,9 @@ public class GetAllCategoriesTest(CustomWebApplicationFactory factory) : IAsyncL
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<IEnumerable<CategoryListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
+        Result<IEnumerable<CategoryListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<IEnumerable<CategoryListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -80,8 +83,9 @@ public class GetAllCategoriesTest(CustomWebApplicationFactory factory) : IAsyncL
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<IEnumerable<CategoryListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
+        Result<IEnumerable<CategoryListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<IEnumerable<CategoryListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -101,19 +105,20 @@ public class GetAllCategoriesTest(CustomWebApplicationFactory factory) : IAsyncL
         var tasks = new List<Task<HttpResponseMessage>>();
 
         // Act
-        for (var i = 0; i < ConcurrentCalls; i++)
+        for(var i = 0; i < ConcurrentCalls; i++)
             tasks.Add(_client.GetAsync(CategoryRoutes.GetAll));
 
         await Task.WhenAll(tasks);
 
         // Assert
-        foreach (Task<HttpResponseMessage> task in tasks)
+        foreach(Task<HttpResponseMessage> task in tasks)
         {
             HttpResponseMessage response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            Result<IEnumerable<CategoryListResponse>>? result =
-                await response.Content.ReadFromJsonAsync<Result<IEnumerable<CategoryListResponse>>>();
+            Result<IEnumerable<CategoryListResponse>>? result = await response.Content.ReadFromJsonAsync<
+                Result<IEnumerable<CategoryListResponse>>
+            >();
 
             result.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();

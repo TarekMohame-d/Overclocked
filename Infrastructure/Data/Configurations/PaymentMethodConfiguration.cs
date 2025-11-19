@@ -17,8 +17,7 @@ public class PaymentMethodConfiguration : IEntityTypeConfiguration<PaymentMethod
         // Relationships
 
         // Indexes
-        builder.HasIndex(PM => PM.Name)
-            .IsUnique();
+        builder.HasIndex(PM => PM.Name).IsUnique();
 
         // Seed Data
         builder.HasData(GeneratePaymentMethod());
@@ -26,10 +25,7 @@ public class PaymentMethodConfiguration : IEntityTypeConfiguration<PaymentMethod
 
     private IEnumerable<PaymentMethod> GeneratePaymentMethod()
     {
-        return Enum.GetValues<PaymentMethodType>().Select(role => new PaymentMethod
-        {
-            Id = (int)role,
-            Name = role.ToString(),
-        });
+        return Enum.GetValues<PaymentMethodType>()
+            .Select(role => new PaymentMethod { Id = (int)role, Name = role.ToString() });
     }
 }

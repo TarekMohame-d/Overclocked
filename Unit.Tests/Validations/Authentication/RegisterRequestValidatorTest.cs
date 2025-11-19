@@ -15,8 +15,10 @@ public class RegisterRequestValidatorTest
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
 
     [Theory]
-    [MemberData(nameof(RegisterValidationTestCases.InvalidFirstNameCases),
-        MemberType = typeof(RegisterValidationTestCases))]
+    [MemberData(
+        nameof(RegisterValidationTestCases.InvalidFirstNameCases),
+        MemberType = typeof(RegisterValidationTestCases)
+    )]
     public async Task RegisterRequestValidator_Should_ReturnError_When_FirstNameIsInvalid(string? firstName)
     {
         // Arrange
@@ -27,10 +29,11 @@ public class RegisterRequestValidatorTest
             Password = "P@ssword1",
             PhoneNumber = "1234567890",
             FirstName = firstName!,
-            LastName = "last name"
+            LastName = "last name",
         };
 
-        _userRepository.AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _userRepository
+            .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -43,8 +46,10 @@ public class RegisterRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(RegisterValidationTestCases.InvalidLastNameCases),
-        MemberType = typeof(RegisterValidationTestCases))]
+    [MemberData(
+        nameof(RegisterValidationTestCases.InvalidLastNameCases),
+        MemberType = typeof(RegisterValidationTestCases)
+    )]
     public async Task RegisterRequestValidator_Should_ReturnError_When_LastNameIsInvalid(string? lastName)
     {
         // Arrange
@@ -55,10 +60,11 @@ public class RegisterRequestValidatorTest
             Password = "P@ssword1",
             PhoneNumber = "1234567890",
             FirstName = "first name",
-            LastName = lastName!
+            LastName = lastName!,
         };
 
-        _userRepository.AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _userRepository
+            .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -71,8 +77,10 @@ public class RegisterRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(RegisterValidationTestCases.InvalidEmailCases),
-        MemberType = typeof(RegisterValidationTestCases))]
+    [MemberData(
+        nameof(RegisterValidationTestCases.InvalidEmailCases),
+        MemberType = typeof(RegisterValidationTestCases)
+    )]
     public async Task RegisterRequestValidator_Should_ReturnError_When_EmailIsInvalid(string? email)
     {
         // Arrange
@@ -83,10 +91,11 @@ public class RegisterRequestValidatorTest
             Password = "P@ssword1",
             PhoneNumber = "1234567890",
             FirstName = "first name",
-            LastName = "last name"
+            LastName = "last name",
         };
 
-        _userRepository.AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _userRepository
+            .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -109,10 +118,11 @@ public class RegisterRequestValidatorTest
             Password = "P@ssword1",
             PhoneNumber = "1234567890",
             FirstName = "first name",
-            LastName = "last name"
+            LastName = "last name",
         };
 
-        _userRepository.AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _userRepository
+            .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         // Act
@@ -122,13 +132,16 @@ public class RegisterRequestValidatorTest
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
 
-        await _userRepository.Received(2)
+        await _userRepository
+            .Received(2)
             .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]
-    [MemberData(nameof(RegisterValidationTestCases.InvalidPasswordCases),
-        MemberType = typeof(RegisterValidationTestCases))]
+    [MemberData(
+        nameof(RegisterValidationTestCases.InvalidPasswordCases),
+        MemberType = typeof(RegisterValidationTestCases)
+    )]
     public async Task RegisterRequestValidator_Should_ReturnError_When_PasswordIsInvalid(string? password)
     {
         // Arrange
@@ -139,10 +152,11 @@ public class RegisterRequestValidatorTest
             Password = password!,
             PhoneNumber = "1234567890",
             FirstName = "first name",
-            LastName = "last name"
+            LastName = "last name",
         };
 
-        _userRepository.AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _userRepository
+            .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -155,8 +169,10 @@ public class RegisterRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(RegisterValidationTestCases.InvalidPhoneNumberCases),
-        MemberType = typeof(RegisterValidationTestCases))]
+    [MemberData(
+        nameof(RegisterValidationTestCases.InvalidPhoneNumberCases),
+        MemberType = typeof(RegisterValidationTestCases)
+    )]
     public async Task RegisterRequestValidator_Should_ReturnError_When_PhoneNumberIsInvalid(string? phoneNumber)
     {
         // Arrange
@@ -167,10 +183,11 @@ public class RegisterRequestValidatorTest
             Password = "P@ssword1",
             PhoneNumber = phoneNumber!,
             FirstName = "first name",
-            LastName = "last name"
+            LastName = "last name",
         };
 
-        _userRepository.AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _userRepository
+            .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -193,10 +210,11 @@ public class RegisterRequestValidatorTest
             Password = "P@ssword1",
             PhoneNumber = "1234567890",
             FirstName = "first name",
-            LastName = "last name"
+            LastName = "last name",
         };
 
-        _userRepository.AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _userRepository
+            .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         // Act
@@ -206,7 +224,8 @@ public class RegisterRequestValidatorTest
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
 
-        await _userRepository.Received(2)
+        await _userRepository
+            .Received(2)
             .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>());
     }
 }

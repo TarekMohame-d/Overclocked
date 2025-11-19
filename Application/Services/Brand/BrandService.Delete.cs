@@ -1,5 +1,6 @@
 using System.Net;
 using Application.Common.Results;
+using Application.Common.Results.PredefinedErrors;
 using Application.Services.Brand.DTOs.Request;
 using Application.Services.Brand.Events;
 
@@ -11,8 +12,10 @@ public sealed partial class BrandService
     {
         Domain.Entities.Brand? brand = await brandRepository.GetByIdAsync([request.Id], cancellationToken);
 
-        if (brand is null)
+        if(brand is null)
+        {
             return Result.Failure(Errors.BrandNotFound, HttpStatusCode.NotFound);
+        }
 
         brandRepository.Delete(brand);
 

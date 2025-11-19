@@ -24,8 +24,10 @@ public class AuthController(IAuthenticationService authenticationService) : Cont
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<ConfirmEmailRequest>))]
     [Route(AuthRoutes.ConfirmEmail)]
-    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmEmail(
+        [FromBody] ConfirmEmailRequest request,
+        CancellationToken cancellationToken
+    )
     {
         Result response = await authenticationService.ConfirmEmailAsync(request, cancellationToken);
 
@@ -45,8 +47,10 @@ public class AuthController(IAuthenticationService authenticationService) : Cont
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<ResendEmailConfirmationCodeRequest>))]
     [Route(AuthRoutes.ResendConfirmationCode)]
-    public async Task<IActionResult> ResendConfirmationCode([FromBody] ResendEmailConfirmationCodeRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ResendConfirmationCode(
+        [FromBody] ResendEmailConfirmationCodeRequest request,
+        CancellationToken cancellationToken
+    )
     {
         Result response = await authenticationService.ResendEmailConfirmationCodeAsync(request, cancellationToken);
 
@@ -56,8 +60,10 @@ public class AuthController(IAuthenticationService authenticationService) : Cont
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<ForgetPasswordRequest>))]
     [Route(AuthRoutes.ForgotPassword)]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgetPasswordRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] ForgetPasswordRequest request,
+        CancellationToken cancellationToken
+    )
     {
         Result response = await authenticationService.ForgetPasswordAsync(request, cancellationToken);
 
@@ -67,8 +73,10 @@ public class AuthController(IAuthenticationService authenticationService) : Cont
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<ResetPasswordRequest>))]
     [Route(AuthRoutes.ResetPassword)]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordRequest request,
+        CancellationToken cancellationToken
+    )
     {
         Result response = await authenticationService.ResetPasswordAsync(request, cancellationToken);
 
@@ -78,8 +86,10 @@ public class AuthController(IAuthenticationService authenticationService) : Cont
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<RefreshTokenRequest>))]
     [Route(AuthRoutes.RefreshToken)]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> RefreshToken(
+        [FromBody] RefreshTokenRequest request,
+        CancellationToken cancellationToken
+    )
     {
         Result response = await authenticationService.RefreshTokenAsync(request, cancellationToken);
 

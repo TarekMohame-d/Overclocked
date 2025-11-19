@@ -10,4 +10,3 @@ public class Wishlist
     public User? User { get; set; }
     public ICollection<WishlistItem>? WishlistItems { get; set; }
 }
-

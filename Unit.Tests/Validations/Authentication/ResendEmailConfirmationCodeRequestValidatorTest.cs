@@ -9,16 +9,15 @@ namespace Unit.Tests.Validations.Authentication;
 public class ResendEmailConfirmationCodeRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(ResendEmailConfirmationCodeValidationTestCases.InvalidEmailCases),
-        MemberType = typeof(ResendEmailConfirmationCodeValidationTestCases))]
+    [MemberData(
+        nameof(ResendEmailConfirmationCodeValidationTestCases.InvalidEmailCases),
+        MemberType = typeof(ResendEmailConfirmationCodeValidationTestCases)
+    )]
     public void ForgetPasswordRequestValidator_Should_ReturnError_When_EmailIsInvalid(string? email)
     {
         // Arrange
         var validator = new ResendEmailConfirmationCodeRequestValidator();
-        var request = new ResendEmailConfirmationCodeRequest
-        {
-            Email = email!
-        };
+        var request = new ResendEmailConfirmationCodeRequest { Email = email! };
 
         // Act
         TestValidationResult<ResendEmailConfirmationCodeRequest> result = validator.TestValidate(request);

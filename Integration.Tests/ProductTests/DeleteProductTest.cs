@@ -22,10 +22,10 @@ public class DeleteProductTest(CustomWebApplicationFactory factory) : IAsyncLife
     {
         await factory.ResetDatabaseAsync();
 
-        var token = CustomWebApplicationFactory
-            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var token = CustomWebApplicationFactory.GenerateJwtToken(
+            permissions: [PermissionType.AddEditDelete.ToString()]
+        );
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -59,8 +59,9 @@ public class DeleteProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         Product product = await SeedDatabaseAsync();
 
         // Act
-        HttpResponseMessage response =
-            await _client.DeleteAsync(ProductRoutes.Delete.Replace("{id:guid}", product.Id.ToString()));
+        HttpResponseMessage response = await _client.DeleteAsync(
+            ProductRoutes.Delete.Replace("{id:guid}", product.Id.ToString())
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -87,12 +88,12 @@ public class DeleteProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         Product product = await SeedDatabaseAsync();
 
         var token = CustomWebApplicationFactory.GenerateJwtToken();
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        HttpResponseMessage response =
-            await _client.DeleteAsync(ProductRoutes.Delete.Replace("{id:guid}", product.Id.ToString()));
+        HttpResponseMessage response = await _client.DeleteAsync(
+            ProductRoutes.Delete.Replace("{id:guid}", product.Id.ToString())
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);

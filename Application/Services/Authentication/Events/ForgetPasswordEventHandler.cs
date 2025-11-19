@@ -4,9 +4,7 @@ using Hangfire;
 
 namespace Application.Services.Authentication.Events;
 
-public class ForgetPasswordEventHandler(
-    IBackgroundJobClient jobClient,
-    IEmailService emailService)
+public class ForgetPasswordEventHandler(IBackgroundJobClient jobClient, IEmailService emailService)
     : IEventHandler<ForgetPasswordEvent>
 {
     public Task HandleAsync(ForgetPasswordEvent domainEvent, CancellationToken cancellationToken)

@@ -16,26 +16,27 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.OrderId).IsRequired();
         builder.Property(p => p.Amount).HasColumnType("decimal(10,2)").IsRequired();
         builder.Property(p => p.TransactionId).IsRequired(false);
-        builder.Property(p => p.CreatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
-        builder.Property(p => p.UpdatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
+        builder.Property(p => p.CreatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
+        builder.Property(p => p.UpdatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
 
         builder.Ignore(p => p.PaymentStatusType);
         builder.Ignore(p => p.PaymentMethodType);
 
         // Relationships
-        builder.HasOne(p => p.PaymentMethod)
+        builder
+            .HasOne(p => p.PaymentMethod)
             .WithMany(pm => pm.Payments)
             .HasForeignKey(p => p.MethodId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(p => p.PaymentStatus)
+        builder
+            .HasOne(p => p.PaymentStatus)
             .WithMany(ps => ps.Payments)
             .HasForeignKey(p => p.StatusId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(p => p.Order)
+        builder
+            .HasOne(p => p.Order)
             .WithOne(o => o.Payment)
             .HasForeignKey<Payment>(p => p.OrderId)
             .OnDelete(DeleteBehavior.Cascade);

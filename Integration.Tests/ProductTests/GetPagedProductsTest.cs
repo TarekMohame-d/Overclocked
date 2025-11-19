@@ -21,6 +21,7 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
     private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
@@ -36,8 +37,9 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<PagedResult<ProductListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<PagedResult<ProductListResponse>>>();
+        Result<PagedResult<ProductListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<PagedResult<ProductListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -60,8 +62,9 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<PagedResult<ProductListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<PagedResult<ProductListResponse>>>();
+        Result<PagedResult<ProductListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<PagedResult<ProductListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -84,8 +87,9 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<PagedResult<ProductListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<PagedResult<ProductListResponse>>>();
+        Result<PagedResult<ProductListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<PagedResult<ProductListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -105,7 +109,7 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
         var tasks = new List<Task<HttpResponseMessage>>();
 
         // Act
-        for (var i = 0; i < ConcurrentCalls; i++)
+        for(var i = 0; i < ConcurrentCalls; i++)
         {
             const string Url = $"{ProductRoutes.GetAll}?Page=1&PageSize=5&SortBy=name&Direction=asc";
             tasks.Add(_client.GetAsync(Url));
@@ -114,13 +118,14 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
         await Task.WhenAll(tasks);
 
         // Assert
-        foreach (Task<HttpResponseMessage> task in tasks)
+        foreach(Task<HttpResponseMessage> task in tasks)
         {
             HttpResponseMessage response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            Result<PagedResult<ProductListResponse>>? result =
-                await response.Content.ReadFromJsonAsync<Result<PagedResult<ProductListResponse>>>();
+            Result<PagedResult<ProductListResponse>>? result = await response.Content.ReadFromJsonAsync<
+                Result<PagedResult<ProductListResponse>>
+            >();
 
             result.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();
@@ -144,7 +149,7 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
         Category category = new CategoryFaker().Generate();
         dbContext.Categories.Add(category);
 
-        foreach (Product product in products)
+        foreach(Product product in products)
         {
             product.CategoryId = category.Id;
             product.BrandId = brand.Id;
@@ -167,7 +172,7 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
         var key = CacheKeys.ProductPaged(1, 20, "Id", "Asc", "all", "all", "all", "all");
         IEnumerable<ProductListResponse> productListResponses = [];
 
-        for (var i = 0; i < products.Count; i++)
+        for(var i = 0; i < products.Count; i++)
         {
             products[i].Brand = brands[i];
             products[i].BrandId = brands[i].Id;
@@ -179,7 +184,7 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
             Items = productListResponses.ToList(),
             PageNumber = 1,
             PageSize = 20,
-            TotalItemCount = products.Count
+            TotalItemCount = products.Count,
         };
         var result = Result<PagedResult<ProductListResponse>>.Success(pagedResult);
         await cache.SetAsync(key, result, TimeSpan.FromMinutes(5));
@@ -201,8 +206,8 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
             {
                 Id = brand.Id,
                 Name = brand.Name,
-                ImageUrl = brand.Image
-            }
+                ImageUrl = brand.Image,
+            },
         };
     }
 }

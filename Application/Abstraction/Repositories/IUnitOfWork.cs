@@ -9,7 +9,8 @@ public interface IUnitOfWork
     // Transaction methods
     Task<IDbTransaction> BeginTransactionAsync(
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);
     Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 }

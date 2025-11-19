@@ -29,11 +29,14 @@ public class ProductController(IProductService productService) : ControllerBase
     [Route(ProductRoutes.GetAll)]
     public async Task<IActionResult> GetAll(
         [FromQuery] GetPagedProductsQuery query,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var request = GetPagedProductsRequest.FromQuery(query);
-        Result<PagedResult<ProductListResponse>> response =
-            await productService.GetPagedProductsAsync(request, cancellationToken);
+        Result<PagedResult<ProductListResponse>> response = await productService.GetPagedProductsAsync(
+            request,
+            cancellationToken
+        );
 
         return response.ToActionResult();
     }
@@ -42,8 +45,10 @@ public class ProductController(IProductService productService) : ControllerBase
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<CreateProductRequest>))]
     [Route(ProductRoutes.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateProductRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateProductRequest request,
+        CancellationToken cancellationToken
+    )
     {
         Result response = await productService.CreateProductAsync(request, cancellationToken);
 
@@ -57,7 +62,8 @@ public class ProductController(IProductService productService) : ControllerBase
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
         [FromBody] UpdateProductRequestBody request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         UpdateProductRequest updateProductRequest = new()
         {
@@ -72,7 +78,7 @@ public class ProductController(IProductService productService) : ControllerBase
             Discount = request.Discount,
             Tags = request.Tags,
             Specification = request.Specification,
-            Images = request.Images
+            Images = request.Images,
         };
 
         Result response = await productService.UpdateProductAsync(updateProductRequest, cancellationToken);

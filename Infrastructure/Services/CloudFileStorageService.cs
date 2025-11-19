@@ -13,11 +13,7 @@ public class CloudFileStorageService : IFileStorageService
 
     public CloudFileStorageService(IOptions<CloudinarySettings> settings)
     {
-        var account = new Account(
-            settings.Value.CloudName,
-            settings.Value.ApiKey,
-            settings.Value.ApiSecret
-        );
+        var account = new Account(settings.Value.CloudName, settings.Value.ApiKey, settings.Value.ApiSecret);
         _cloudinary = new Cloudinary(account);
     }
 
@@ -26,14 +22,12 @@ public class CloudFileStorageService : IFileStorageService
         cancellationToken.ThrowIfCancellationRequested();
 
         var publicId = ExtractPublicId(fileUrl);
-        if (string.IsNullOrEmpty(publicId))
-            throw new FileDeleteFailedException($"Invalid public Id for file: {fileUrl}");
-
-        var deletionParams = new DeletionParams(publicId)
+        if(string.IsNullOrEmpty(publicId))
         {
-            PublicId = publicId,
-            Invalidate = true
-        };
+            throw new FileDeleteFailedException($"Invalid public Id for file: {fileUrl}");
+        }
+
+        var deletionParams = new DeletionParams(publicId) { PublicId = publicId, Invalidate = true };
 
         await _cloudinary.DestroyAsync(deletionParams);
     }
@@ -45,7 +39,7 @@ public class CloudFileStorageService : IFileStorageService
         {
             PublicIds = publicIds.ToList(),
             Invalidate = true,
-            All = true
+            All = true,
         };
 
         await _cloudinary.DeleteResourcesAsync(delResParams, cancellationToken);
@@ -57,7 +51,8 @@ public class CloudFileStorageService : IFileStorageService
         var segments = url.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
         var publicIdStart = Array.FindIndex(segments, s => s.Equals("images", StringComparison.OrdinalIgnoreCase));
-        if (publicIdStart < 0) return null;
+        if(publicIdStart < 0)
+            return null;
 
         // Join rest into the public ID
         var publicIdWithExt = string.Join("/", segments.Skip(publicIdStart));
@@ -67,10 +62,6 @@ public class CloudFileStorageService : IFileStorageService
         return dotIndex > 0 ? publicIdWithExt[..dotIndex] : publicIdWithExt;
     }
 
-    private static IEnumerable<string> ExtractPublicIds(IEnumerable<string> urls)
-    {
-        return urls
-            .Select(ExtractPublicId)
-            .OfType<string>();
-    }
+    private static IEnumerable<string> ExtractPublicIds(IEnumerable<string> urls) =>
+        urls.Select(ExtractPublicId).OfType<string>();
 }

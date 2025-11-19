@@ -22,6 +22,7 @@ public class GetProductByIdTest(CustomWebApplicationFactory factory) : IAsyncLif
     private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
@@ -31,8 +32,9 @@ public class GetProductByIdTest(CustomWebApplicationFactory factory) : IAsyncLif
         var id = Guid.CreateVersion7();
 
         // Act
-        HttpResponseMessage response =
-            await _client.GetAsync(ProductRoutes.GetById.Replace("{id:guid}", id.ToString()));
+        HttpResponseMessage response = await _client.GetAsync(
+            ProductRoutes.GetById.Replace("{id:guid}", id.ToString())
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -67,8 +69,9 @@ public class GetProductByIdTest(CustomWebApplicationFactory factory) : IAsyncLif
         Product product = await SeedDatabaseAsync();
 
         // Act
-        HttpResponseMessage response =
-            await _client.GetAsync(ProductRoutes.GetById.Replace("{id:guid}", product.Id.ToString()));
+        HttpResponseMessage response = await _client.GetAsync(
+            ProductRoutes.GetById.Replace("{id:guid}", product.Id.ToString())
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -90,8 +93,9 @@ public class GetProductByIdTest(CustomWebApplicationFactory factory) : IAsyncLif
         ProductResponse product = await SeedCacheAsync();
 
         // Act
-        HttpResponseMessage response =
-            await _client.GetAsync(ProductRoutes.GetById.Replace("{id:guid}", product.Id.ToString()));
+        HttpResponseMessage response = await _client.GetAsync(
+            ProductRoutes.GetById.Replace("{id:guid}", product.Id.ToString())
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -116,18 +120,19 @@ public class GetProductByIdTest(CustomWebApplicationFactory factory) : IAsyncLif
         var tasks = new List<Task<HttpResponseMessage>>();
 
         // Act
-        for (var i = 0; i < ConcurrentCalls; i++)
+        for(var i = 0; i < ConcurrentCalls; i++)
         {
             Guid randomId = ids[rnd.Next(ids.Count)];
-            Task<HttpResponseMessage> task =
-                _client.GetAsync(ProductRoutes.GetById.Replace("{id:guid}", randomId.ToString()));
+            Task<HttpResponseMessage> task = _client.GetAsync(
+                ProductRoutes.GetById.Replace("{id:guid}", randomId.ToString())
+            );
             tasks.Add(task);
         }
 
         await Task.WhenAll(tasks);
 
         // Assert
-        foreach (Task<HttpResponseMessage> task in tasks)
+        foreach(Task<HttpResponseMessage> task in tasks)
         {
             HttpResponseMessage response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -176,7 +181,7 @@ public class GetProductByIdTest(CustomWebApplicationFactory factory) : IAsyncLif
         Category category = new CategoryFaker().Generate();
         dbContext.Categories.Add(category);
 
-        foreach (Product product in products)
+        foreach(Product product in products)
         {
             product.CategoryId = category.Id;
             product.BrandId = brand.Id;
@@ -216,19 +221,19 @@ public class GetProductByIdTest(CustomWebApplicationFactory factory) : IAsyncLif
             {
                 Id = Guid.NewGuid(),
                 Name = "Category Name",
-                ImageUrl = "ImageUrl"
+                ImageUrl = "ImageUrl",
             },
             Brand = new BrandResponse
             {
                 Id = Guid.NewGuid(),
                 Name = "Brand Name",
-                ImageUrl = "ImageUrl"
+                ImageUrl = "ImageUrl",
             },
             Tags = [],
             Discount = entity.Discount,
             Price = entity.Price,
             Rating = entity.Rating,
-            Specifications = []
+            Specifications = [],
         };
     }
 }

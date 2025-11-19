@@ -15,7 +15,7 @@ public static class AuthenticationMapping
             Email = request.Email,
             Phone = request.PhoneNumber,
             PasswordHash = passwordHash,
-            RoleType = RoleType.Customer
+            RoleType = RoleType.Customer,
         };
     }
 }

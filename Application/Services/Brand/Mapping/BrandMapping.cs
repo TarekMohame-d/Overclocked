@@ -6,14 +6,7 @@ namespace Application.Services.Brand.Mapping;
 
 public static class BrandMapping
 {
-    public static BrandEntity ToEntity(this CreateBrandRequest request)
-    {
-        return new BrandEntity
-        {
-            Name = request.Name,
-            Image = request.ImageUrl
-        };
-    }
+    public static BrandEntity ToEntity(this CreateBrandRequest request) => new BrandEntity { Name = request.Name, Image = request.ImageUrl };
 
     public static void UpdateFrom(this BrandEntity entity, UpdateBrandRequest request)
     {
@@ -22,18 +15,19 @@ public static class BrandMapping
         entity.UpdatedAt = DateTime.UtcNow;
     }
 
-    public static BrandResponse ToDto(this BrandEntity entity) => new()
-    {
-        Id = entity.Id,
-        Name = entity.Name,
-        ImageUrl = entity.Image
-    };
+    public static BrandResponse ToDto(this BrandEntity entity) =>
+        new()
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            ImageUrl = entity.Image,
+        };
 
     public static IEnumerable<BrandListResponse> ToDto(this IEnumerable<BrandEntity> entities) =>
         entities.Select(x => new BrandListResponse
         {
             Id = x.Id,
             Name = x.Name,
-            ImageUrl = x.Image
+            ImageUrl = x.Image,
         });
 }

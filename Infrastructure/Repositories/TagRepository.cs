@@ -10,7 +10,8 @@ public class TagRepository : GenericRepository<Tag>, ITagRepository
 {
     private readonly ApplicationDbContext _context;
 
-    public TagRepository(ApplicationDbContext context) : base(context)
+    public TagRepository(ApplicationDbContext context)
+        : base(context)
     {
         _context = context;
     }
@@ -24,22 +25,15 @@ public class TagRepository : GenericRepository<Tag>, ITagRepository
         return query;
     }
 
-    private IQueryable<Tag> ApplySorting(
-        IQueryable<Tag> query,
-        TagSortField sortBy,
-        SortDirection direction)
+    private IQueryable<Tag> ApplySorting(IQueryable<Tag> query, TagSortField sortBy, SortDirection direction)
     {
         var isDescending = direction == SortDirection.Desc;
 
         return sortBy switch
         {
-            TagSortField.Name => isDescending
-                ? query.OrderByDescending(p => p.Name)
-                : query.OrderBy(p => p.Name),
+            TagSortField.Name => isDescending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
 
-            TagSortField.Id or _ => isDescending
-                ? query.OrderByDescending(p => p.Id)
-                : query.OrderBy(p => p.Id)
+            TagSortField.Id or _ => isDescending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id),
         };
     }
 }

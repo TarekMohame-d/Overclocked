@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Net;
+using Application.Abstraction.DomainServices;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
@@ -28,6 +29,7 @@ public class LoginAsyncTest
     private readonly IUserRepository _userRepositoryMock;
     private readonly IRolePermissionsRepository _rolePermissionsRepositoryMock;
     private readonly ITokenReaderService _tokenReaderServiceMock;
+    private readonly ICartService _cartServiceMock;
 
     public LoginAsyncTest()
     {
@@ -41,10 +43,21 @@ public class LoginAsyncTest
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _rolePermissionsRepositoryMock = Substitute.For<IRolePermissionsRepository>();
         _tokenReaderServiceMock = Substitute.For<ITokenReaderService>();
+        _cartServiceMock = Substitute.For<ICartService>();
 
-        _authenticationService = new AuthenticationService(_userRepositoryMock, _rolePermissionsRepositoryMock, _unitOfWorkMock, _passwordHasherMock,
-            _eventDispatcherMock, _emailConfirmationCodeHasherMock, _emailConfirmationCodeServiceMock,
-            _tokenProviderMock, _refreshTokenServiceMock, _tokenReaderServiceMock);
+        _authenticationService = new AuthenticationService(
+            _userRepositoryMock,
+            _rolePermissionsRepositoryMock,
+            _unitOfWorkMock,
+            _passwordHasherMock,
+            _eventDispatcherMock,
+            _emailConfirmationCodeHasherMock,
+            _emailConfirmationCodeServiceMock,
+            _tokenProviderMock,
+            _refreshTokenServiceMock,
+            _tokenReaderServiceMock,
+            _cartServiceMock
+        );
     }
 
     [Fact]
@@ -55,15 +68,17 @@ public class LoginAsyncTest
         {
             Email = "email@gmail.com",
             Password = "password",
-            DeviceId = "device-id"
+            DeviceId = "device-id",
         };
 
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns((User)null!);
 
-        _passwordHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>())
-            .Returns(false);
+        _passwordHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
 
         // Act
         Result result = await _authenticationService.LoginAsync(request, CancellationToken.None);
@@ -74,12 +89,14 @@ public class LoginAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
 
-        _passwordHasherMock.Received(1)
-            .Verify(Arg.Any<string>(), Arg.Any<string>());
+        _passwordHasherMock.Received(1).Verify(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -90,16 +107,18 @@ public class LoginAsyncTest
         {
             Email = "email@gmail.com",
             Password = "password",
-            DeviceId = "device-id"
+            DeviceId = "device-id",
         };
 
         User user = new UserFaker().Generate();
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns(user);
 
-        _passwordHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>())
-            .Returns(false);
+        _passwordHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
 
         // Act
         Result result = await _authenticationService.LoginAsync(request, CancellationToken.None);
@@ -110,12 +129,14 @@ public class LoginAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
 
-        _passwordHasherMock.Received(1)
-            .Verify(Arg.Any<string>(), Arg.Any<string>());
+        _passwordHasherMock.Received(1).Verify(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -126,20 +147,23 @@ public class LoginAsyncTest
         {
             Email = "email@gmail.com",
             Password = "password",
-            DeviceId = "device-id"
+            DeviceId = "device-id",
         };
 
         User user = new UserFaker().Generate();
         user.EmailConfirmed = false;
 
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns(user);
 
-        _passwordHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>())
-            .Returns(true);
+        _passwordHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>()).Returns(true);
 
-        _eventDispatcherMock.DispatchAsync(Arg.Any<EmailNotConfirmedEvent>(), Arg.Any<CancellationToken>())
+        _eventDispatcherMock
+            .DispatchAsync(Arg.Any<EmailNotConfirmedEvent>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
         // Act
@@ -151,14 +175,17 @@ public class LoginAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
 
-        _passwordHasherMock.Received(1)
-            .Verify(Arg.Any<string>(), Arg.Any<string>());
+        _passwordHasherMock.Received(1).Verify(Arg.Any<string>(), Arg.Any<string>());
 
-        await _eventDispatcherMock.Received(1)
+        await _eventDispatcherMock
+            .Received(1)
             .DispatchAsync(Arg.Any<EmailNotConfirmedEvent>(), Arg.Any<CancellationToken>());
     }
 }

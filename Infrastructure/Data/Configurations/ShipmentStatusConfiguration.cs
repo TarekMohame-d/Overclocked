@@ -17,8 +17,7 @@ public class ShipmentStatusConfiguration : IEntityTypeConfiguration<ShipmentStat
         // Relationships
 
         // Indexes
-        builder.HasIndex(ss => ss.Name)
-            .IsUnique();
+        builder.HasIndex(ss => ss.Name).IsUnique();
 
         // Seed Data
         builder.HasData(GenerateShipmentStatus());
@@ -26,10 +25,7 @@ public class ShipmentStatusConfiguration : IEntityTypeConfiguration<ShipmentStat
 
     private IEnumerable<ShipmentStatus> GenerateShipmentStatus()
     {
-        return Enum.GetValues<ShipmentStatusType>().Select(role => new ShipmentStatus
-        {
-            Id = (int)role,
-            Name = role.ToString(),
-        });
+        return Enum.GetValues<ShipmentStatusType>()
+            .Select(role => new ShipmentStatus { Id = (int)role, Name = role.ToString() });
     }
 }

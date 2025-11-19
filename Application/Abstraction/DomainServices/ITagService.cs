@@ -8,8 +8,10 @@ public interface ITagService
 {
     Task<Result<TagResponse>> GetTagByIdAsync(GetTagByIdRequest request, CancellationToken cancellationToken);
 
-    Task<Result<PagedResult<TagListResponse>>> GetPagedTagsAsync(GetPagedTagsRequest request,
-        CancellationToken cancellationToken);
+    Task<Result<PagedResult<TagListResponse>>> GetPagedTagsAsync(
+        GetPagedTagsRequest request,
+        CancellationToken cancellationToken
+    );
 
     Task<Result> CreateTagAsync(CreateTagRequest request, CancellationToken cancellationToken);
     Task<Result> UpdateTagAsync(UpdateTagRequest request, CancellationToken cancellationToken);

@@ -22,8 +22,11 @@ public class GetBrandByIdAsyncTest
     {
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
 
-        _brandServices = new BrandService(_brandRepositoryMock, Substitute.For<IUnitOfWork>(),
-            Substitute.For<IEventDispatcher>());
+        _brandServices = new BrandService(
+            _brandRepositoryMock,
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<IEventDispatcher>()
+        );
     }
 
     [Fact]
@@ -35,8 +38,7 @@ public class GetBrandByIdAsyncTest
         Brand brand = new BrandFaker().Generate();
         BrandResponse brandDto = brand.ToDto();
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns(brand);
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(brand);
 
         // Act
         Result<BrandResponse> result = await _brandServices.GetBrandByIdAsync(request, CancellationToken.None);
@@ -49,8 +51,7 @@ public class GetBrandByIdAsyncTest
         result.Data.ShouldNotBeNull();
         brandDto.ShouldBeEquivalentTo(result.Data);
 
-        await _brandRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _brandRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -60,8 +61,7 @@ public class GetBrandByIdAsyncTest
         var brandId = Guid.CreateVersion7();
         var request = new GetBrandByIdRequest { Id = brandId };
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns((Brand)null!);
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns((Brand)null!);
 
         // Act
         Result<BrandResponse> result = await _brandServices.GetBrandByIdAsync(request, CancellationToken.None);
@@ -73,7 +73,6 @@ public class GetBrandByIdAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _brandRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _brandRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
     }
 }

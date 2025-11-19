@@ -21,27 +21,24 @@ public class CreateCategoryAsyncTest
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
-        _categoryService =
-            new CategoryService(_categoryRepositoryMock, _unitOfWorkMock, Substitute.For<IEventDispatcher>());
+        _categoryService = new CategoryService(
+            _categoryRepositoryMock,
+            _unitOfWorkMock,
+            Substitute.For<IEventDispatcher>()
+        );
     }
 
     [Fact]
     public async Task CreateCategoryAsync_WhenThereIsNoError_ShouldReturnSuccess()
     {
         // Arrange
-        var request = new CreateCategoryRequest
-        {
-            Name = "Category Name",
-            ImageUrl = "image.png"
-        };
+        var request = new CreateCategoryRequest { Name = "Category Name", ImageUrl = "image.png" };
 
         Category brand = new CategoryFaker().Generate();
 
-        _categoryRepositoryMock.AddAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>())
-            .Returns(brand);
+        _categoryRepositoryMock.AddAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>()).Returns(brand);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
         Result result = await _categoryService.CreateCategoryAsync(request, CancellationToken.None);
@@ -50,10 +47,8 @@ public class CreateCategoryAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        await _categoryRepositoryMock.Received(1)
-            .AddAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1).AddAsync(Arg.Any<Category>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1)
-            .CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
     }
 }

@@ -11,11 +11,10 @@ namespace Api;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddPresentation(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddControllers(options =>
+        services
+            .AddControllers(options =>
             {
                 // options.Filters.Add<LoggerActionFilter>();
             })
@@ -44,46 +43,48 @@ public static class DependencyInjection
 
     private static IServiceCollection AddAuthenticationAndAuthorization(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration
+    )
     {
         JwtSettings jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
 
-        services.AddAuthentication(options =>
+        services
+            .AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme =
                     options.DefaultChallengeScheme =
-                        options.DefaultForbidScheme =
-                            options.DefaultScheme =
-                                options.DefaultSignInScheme =
-                                    options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-            }
-        ).AddJwtBearer(options =>
-        {
-            options.SaveToken = true;
-            options.TokenValidationParameters = new TokenValidationParameters
+                    options.DefaultForbidScheme =
+                    options.DefaultScheme =
+                    options.DefaultSignInScheme =
+                    options.DefaultSignOutScheme =
+                        JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
             {
-                ValidateIssuer = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidateAudience = true,
-                ValidAudience = jwtSettings.Audience,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSettings.SigningKey)
-                ),
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-        });
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SigningKey)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                };
+            });
 
         services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
 
         AuthorizationBuilder builder = services.AddAuthorizationBuilder();
-        foreach (PermissionType permission in Enum.GetValues<PermissionType>())
+        foreach(PermissionType permission in Enum.GetValues<PermissionType>())
         {
             var permissionName = permission.ToString();
 
-            builder.AddPolicy(permissionName, policy =>
-                policy.Requirements.Add(new PermissionRequirement(permissionName))
+            builder.AddPolicy(
+                permissionName,
+                policy => policy.Requirements.Add(new PermissionRequirement(permissionName))
             );
         }
 

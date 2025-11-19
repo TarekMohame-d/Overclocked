@@ -65,11 +65,7 @@ public class ResetPasswordTest(CustomWebApplicationFactory factory) : IAsyncLife
         emailConfirmationCode.CodeHash = emailConfirmationCodeHasher.Hash(PlainCode);
         emailConfirmationCode.UserId = user.Id;
 
-        var role = new Role
-        {
-            Name = "Customer",
-            Id = 4
-        };
+        var role = new Role { Name = "Customer", Id = 4 };
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -88,7 +84,7 @@ public class ResetPasswordTest(CustomWebApplicationFactory factory) : IAsyncLife
         {
             Email = email,
             Code = PlainCode,
-            Password = "P@ssword123"
+            Password = "P@ssword123",
         };
 
         var json = JsonSerializer.Serialize(payload);

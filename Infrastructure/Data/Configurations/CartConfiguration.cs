@@ -14,14 +14,13 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
         builder.Property(c => c.UserId).IsRequired();
 
         // Relationships
-        builder.HasOne(c => c.User)
+        builder
+            .HasOne(c => c.User)
             .WithOne(u => u.Cart)
             .HasForeignKey<Cart>(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(c => c.UserId)
-            .IsUnique();
+        builder.HasIndex(c => c.UserId).IsUnique();
     }
 }
-

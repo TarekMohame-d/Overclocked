@@ -27,10 +27,10 @@ public class CreateBrandTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         await factory.ResetDatabaseAsync();
         factory.FileStorageServiceMock.ClearReceivedCalls();
 
-        var token = CustomWebApplicationFactory
-            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var token = CustomWebApplicationFactory.GenerateJwtToken(
+            permissions: [PermissionType.AddEditDelete.ToString()]
+        );
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -94,8 +94,7 @@ public class CreateBrandTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         StringContent form = CreateJsonContent(brand.Name);
 
         var token = CustomWebApplicationFactory.GenerateJwtToken();
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(BrandRoutes.Create, form);
@@ -117,14 +116,12 @@ public class CreateBrandTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         return brand;
     }
 
-    private static StringContent CreateJsonContent(string name,
-        string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg")
+    private static StringContent CreateJsonContent(
+        string name,
+        string imageUrl = "https://res.cloudinary.com/over-clocked/image.jpg"
+    )
     {
-        var payload = new
-        {
-            Name = name,
-            ImageUrl = imageUrl
-        };
+        var payload = new { Name = name, ImageUrl = imageUrl };
 
         var json = JsonSerializer.Serialize(payload);
 

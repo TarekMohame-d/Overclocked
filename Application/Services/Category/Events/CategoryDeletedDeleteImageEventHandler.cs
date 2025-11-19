@@ -6,8 +6,8 @@ namespace Application.Services.Category.Events;
 
 public class CategoryDeletedDeleteImageEventHandler(
     IBackgroundJobClient jobClient,
-    IFileStorageService fileStorageService)
-    : IEventHandler<CategoryDeletedEvent>
+    IFileStorageService fileStorageService
+) : IEventHandler<CategoryDeletedEvent>
 {
     public Task HandleAsync(CategoryDeletedEvent domainEvent, CancellationToken cancellationToken)
     {

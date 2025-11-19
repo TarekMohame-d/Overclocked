@@ -8,7 +8,8 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public UserRepository(ApplicationDbContext dbContext) : base(dbContext)
+    public UserRepository(ApplicationDbContext dbContext)
+        : base(dbContext)
     {
         _dbContext = dbContext;
     }

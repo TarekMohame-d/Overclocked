@@ -25,10 +25,10 @@ public class CreateTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
     {
         await factory.ResetDatabaseAsync();
 
-        var token = CustomWebApplicationFactory
-            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var token = CustomWebApplicationFactory.GenerateJwtToken(
+            permissions: [PermissionType.AddEditDelete.ToString()]
+        );
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -92,8 +92,7 @@ public class CreateTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         StringContent form = CreateJsonContent(tag.Name);
 
         var token = CustomWebApplicationFactory.GenerateJwtToken();
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(TagRoutes.Create, form);
@@ -117,10 +116,7 @@ public class CreateTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 
     private static StringContent CreateJsonContent(string name)
     {
-        var payload = new
-        {
-            Name = name
-        };
+        var payload = new { Name = name };
 
         var json = JsonSerializer.Serialize(payload);
 

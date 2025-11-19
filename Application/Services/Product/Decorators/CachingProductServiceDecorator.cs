@@ -12,23 +12,27 @@ namespace Application.Services.Product.Decorators;
 public class CachingProductServiceDecorator(
     IProductService inner,
     ICacheService cacheService,
-    ILogger<CachingProductServiceDecorator> logger)
-    : IProductService
+    ILogger<CachingProductServiceDecorator> logger
+) : IProductService
 {
     public Task<Result<PagedResult<ProductListResponse>>> GetPagedProductsAsync(
-        GetPagedProductsRequest request, CancellationToken cancellationToken)
-        => ExecuteWithCacheAsync(request, inner.GetPagedProductsAsync, cancellationToken);
+        GetPagedProductsRequest request,
+        CancellationToken cancellationToken
+    ) => ExecuteWithCacheAsync(request, inner.GetPagedProductsAsync, cancellationToken);
 
     public Task<Result<ProductResponse>> GetProductByIdAsync(
-        GetProductByIdRequest request, CancellationToken cancellationToken)
-        => ExecuteWithCacheAsync(request, inner.GetProductByIdAsync, cancellationToken);
+        GetProductByIdRequest request,
+        CancellationToken cancellationToken
+    ) => ExecuteWithCacheAsync(request, inner.GetProductByIdAsync, cancellationToken);
 
     public async Task<Result> CreateProductAsync(CreateProductRequest request, CancellationToken cancellationToken)
     {
         Result result = await inner.CreateProductAsync(request, cancellationToken);
 
-        if (result.IsSuccess)
+        if(result.IsSuccess)
+        {
             await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
+        }
 
         return result;
     }
@@ -37,7 +41,7 @@ public class CachingProductServiceDecorator(
     {
         Result result = await inner.UpdateProductAsync(request, cancellationToken);
 
-        if (result.IsSuccess)
+        if(result.IsSuccess)
         {
             await cacheService.RemoveAsync(CacheKeys.Product(request.Id.ToString()), cancellationToken);
             await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
@@ -50,7 +54,7 @@ public class CachingProductServiceDecorator(
     {
         Result result = await inner.DeleteProductAsync(request, cancellationToken);
 
-        if (result.IsSuccess)
+        if(result.IsSuccess)
         {
             await cacheService.RemoveAsync(CacheKeys.Product(request.Id.ToString()), cancellationToken);
             await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
@@ -62,7 +66,8 @@ public class CachingProductServiceDecorator(
     private async Task<Result<T>> ExecuteWithCacheAsync<T, TRequest>(
         TRequest request,
         Func<TRequest, CancellationToken, Task<Result<T>>> action,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
         where TRequest : ICachedRequest
     {
         var requestName = request.GetType().Name;
@@ -70,7 +75,7 @@ public class CachingProductServiceDecorator(
 
         // Try get from cache
         Result<T>? cached = await cacheService.GetAsync<Result<T>>(cacheKey, cancellationToken);
-        if (cached is not null)
+        if(cached is not null)
         {
             logger.LogInformation("Cache hit for {RequestName}", requestName);
             return cached;
@@ -79,11 +84,11 @@ public class CachingProductServiceDecorator(
         logger.LogInformation("Cache miss for {RequestName}", requestName);
         Result<T> result = await action(request, cancellationToken);
 
-        if (result.IsSuccess)
+        if(result.IsSuccess)
         {
             await cacheService.SetAsync(cacheKey, result, request.SlidingExpiration, cancellationToken);
 
-            if (!string.IsNullOrWhiteSpace(request.CacheSetKey))
+            if(!string.IsNullOrWhiteSpace(request.CacheSetKey))
                 await cacheService.AddToSetAsync(request.CacheSetKey, cacheKey);
         }
 

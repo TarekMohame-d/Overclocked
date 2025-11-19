@@ -35,9 +35,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
         .WithPassword("admin-pw")
         .Build();
 
-    private readonly RedisContainer _redisContainer = new RedisBuilder()
-        .WithImage("redis:latest")
-        .Build();
+    private readonly RedisContainer _redisContainer = new RedisBuilder().WithImage("redis:latest").Build();
 
     private DbConnection _dbConnection = null!;
     private Respawner _respawner = null!;
@@ -75,19 +73,14 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
             services.AddScoped(_ => BackgroundJobClientMock);
         });
 
-        Environment.SetEnvironmentVariable(
-            "ConnectionStrings:DefaultConnection",
-            _dbContainer.GetConnectionString());
+        Environment.SetEnvironmentVariable("ConnectionStrings:DefaultConnection", _dbContainer.GetConnectionString());
 
-        Environment.SetEnvironmentVariable(
-            "ConnectionStrings:Redis",
-            _redisContainer.GetConnectionString());
+        Environment.SetEnvironmentVariable("ConnectionStrings:Redis", _redisContainer.GetConnectionString());
 
         Environment.SetEnvironmentVariable("JwtSettings:SigningKey", SigningKey);
         Environment.SetEnvironmentVariable("JwtSettings:Issuer", Issuer);
         Environment.SetEnvironmentVariable("JwtSettings:Audience", Audience);
         Environment.SetEnvironmentVariable("JwtSettings:ExpiresInMinutes", "30");
-
 
         //builder.ConfigureServices(services =>
         //{
@@ -116,12 +109,15 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
 
     private async Task InitializeRespawnerAsync()
     {
-        _respawner = await Respawner.CreateAsync(_dbConnection, new RespawnerOptions
-        {
-            SchemasToInclude = ["public"],
-            DbAdapter = DbAdapter.Postgres,
-            WithReseed = true
-        });
+        _respawner = await Respawner.CreateAsync(
+            _dbConnection,
+            new RespawnerOptions
+            {
+                SchemasToInclude = ["public"],
+                DbAdapter = DbAdapter.Postgres,
+                WithReseed = true,
+            }
+        );
     }
 
     private async Task ApplyMigrationsAsync()
@@ -131,8 +127,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
         await dbContext.Database.MigrateAsync();
     }
 
-    public static string GenerateJwtToken(string userId = "test-user-id", string role = "Customer",
-        string deviceId = "test-device-id", IList<string>? permissions = null)
+    public static string GenerateJwtToken(
+        string userId = "test-user-id",
+        string role = "Customer",
+        string deviceId = "test-device-id",
+        IList<string>? permissions = null
+    )
     {
         var claims = new List<Claim>
         {
@@ -140,21 +140,21 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
             new(ClaimsConstants.Email, "test-user-email"),
             new(ClaimsConstants.DeviceId, deviceId),
             new(ClaimsConstants.Role, role),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        if (permissions is not null)
+        if(permissions is not null)
         {
-            foreach (var permission in permissions)
+            foreach(var permission in permissions)
             {
                 claims.Add(new(ClaimsConstants.Permission, permission));
             }
         }
 
         var credentials = new SigningCredentials(
-            new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(SigningKey)),
-            SecurityAlgorithms.HmacSha256);
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKey)),
+            SecurityAlgorithms.HmacSha256
+        );
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -162,7 +162,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
             Expires = DateTime.UtcNow.AddMinutes(30),
             SigningCredentials = credentials,
             Issuer = Issuer,
-            Audience = Audience
+            Audience = Audience,
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

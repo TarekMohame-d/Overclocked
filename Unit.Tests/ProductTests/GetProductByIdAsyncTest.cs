@@ -18,15 +18,19 @@ public class GetProductByIdAsyncTest
     public GetProductByIdAsyncTest()
     {
         _productRepositoryMock = Substitute.For<IProductRepository>();
-        _productService = new ProductService(_productRepositoryMock, Substitute.For<IUnitOfWork>(),
-            Substitute.For<IEventDispatcher>());
+        _productService = new ProductService(
+            _productRepositoryMock,
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<IEventDispatcher>()
+        );
     }
 
     [Fact]
     public async Task GetProductByIdAsync_Should_ReturnProduct_When_ProductExists()
     {
         // Arrange
-        _productRepositoryMock.GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(Substitute.For<ProductResponse>());
 
         var request = new GetProductByIdRequest { Id = Guid.NewGuid() };
@@ -38,15 +42,15 @@ public class GetProductByIdAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.Data.ShouldNotBeNull();
 
-        await _productRepositoryMock.Received(1)
-            .GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+        await _productRepositoryMock.Received(1).GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task GetProductByIdAsync_Should_ReturnFailure_When_ProductDoesNotExist()
     {
         // Arrange
-        _productRepositoryMock.GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((ProductResponse)null!);
 
         var request = new GetProductByIdRequest { Id = Guid.NewGuid() };

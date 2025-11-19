@@ -24,10 +24,9 @@ public class LoginRequestValidator : AbstractValidator<LoginRequest>
             .WithMessage("{PropertyName} must be at least 8 characters long.")
             .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?""':{}|<>]).{8,}$")
             .WithMessage(
-                "{PropertyName} must contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+                "{PropertyName} must contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+            );
 
-        RuleFor(x => x.DeviceId)
-            .NotEmpty()
-            .WithMessage("{PropertyName} is required.");
+        RuleFor(x => x.DeviceId).NotEmpty().WithMessage("{PropertyName} is required.");
     }
 }

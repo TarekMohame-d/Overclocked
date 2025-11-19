@@ -9,8 +9,10 @@ namespace Unit.Tests.Validations.Category;
 public class UpdateCategoryRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(UpdateCategoryValidationTestCases.InvalidNameCases),
-        MemberType = typeof(UpdateCategoryValidationTestCases))]
+    [MemberData(
+        nameof(UpdateCategoryValidationTestCases.InvalidNameCases),
+        MemberType = typeof(UpdateCategoryValidationTestCases)
+    )]
     public void UpdateCategoryRequestValidator_Should_ReturnError_When_NameValidationFails(string? name)
     {
         // Arrange
@@ -20,7 +22,7 @@ public class UpdateCategoryRequestValidatorTest
         {
             Id = Guid.CreateVersion7(),
             Name = name!,
-            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png",
         };
 
         // Act
@@ -33,8 +35,10 @@ public class UpdateCategoryRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(UpdateCategoryValidationTestCases.InvalidImageUrlCases),
-        MemberType = typeof(UpdateCategoryValidationTestCases))]
+    [MemberData(
+        nameof(UpdateCategoryValidationTestCases.InvalidImageUrlCases),
+        MemberType = typeof(UpdateCategoryValidationTestCases)
+    )]
     public void UpdateCategoryRequestValidator_Should_ReturnError_When_ImageUrlValidationFails(string? imageUrl)
     {
         // Arrange
@@ -44,7 +48,7 @@ public class UpdateCategoryRequestValidatorTest
         {
             Id = Guid.CreateVersion7(),
             Name = "Category Name",
-            ImageUrl = imageUrl!
+            ImageUrl = imageUrl!,
         };
 
         // Act

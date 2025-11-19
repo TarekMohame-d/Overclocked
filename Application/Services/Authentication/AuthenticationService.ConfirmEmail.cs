@@ -1,7 +1,9 @@
 using System.Net;
 using Application.Common.Results;
+using Application.Common.Results.PredefinedErrors;
 using Application.Services.Authentication.DTOs.Request;
 using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Application.Services.Authentication;
 
@@ -12,24 +14,27 @@ public sealed partial class AuthenticationService
         // TODO: refactor to use user service instead of directly using user repository
         User? user = await userRepository.SingleOrDefaultAsync(
             x => x.Email.ToLower() == request.Email.ToLower(),
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken
+        );
 
-        if (user is null)
+        if(user is null)
             return Result.Failure(Errors.InvalidConfirmationCodeCredentials);
 
         EmailConfirmationCode emailConfirmationCode =
             await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, cancellationToken)
-            ?? throw new Exception("Confirmation code not found.");
+            ?? throw new EmailConfirmationCodeNotExistException(user.Id);
 
-        if (user.EmailConfirmed || emailConfirmationCode.IsUsed)
+        if(user.EmailConfirmed || emailConfirmationCode.IsUsed)
+        {
             return Result.Failure(Errors.EmailAlreadyConfirmed, HttpStatusCode.Conflict);
+        }
 
-        if (emailConfirmationCode.ExpiredAt < DateTime.UtcNow)
+        if(emailConfirmationCode.ExpiredAt < DateTime.UtcNow)
             return Result.Failure(Errors.EmailConfirmationCodeExpired);
 
         var isValid = emailConfirmationCodeHasher.Verify(request.Code, emailConfirmationCode.CodeHash);
 
-        if (!isValid)
+        if(!isValid)
             return Result.Failure(Errors.InvalidConfirmationCodeCredentials);
 
         emailConfirmationCode.IsUsed = true;
@@ -41,6 +46,7 @@ public sealed partial class AuthenticationService
         userRepository.Update(user);
 
         // TODO: Implement Create user cart and wishlist
+        await cartService.CreateCartAsync(user.Id, cancellationToken);
 
         await unitOfWork.CompleteAsync(cancellationToken);
 

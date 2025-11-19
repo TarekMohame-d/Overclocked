@@ -16,5 +16,6 @@ public interface IProductRepository : IGenericRepository<Product>
         string? search = null,
         string? category = null,
         string? brand = null,
-        Guid? tagId = null);
+        Guid? tagId = null
+    );
 }

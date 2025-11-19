@@ -14,12 +14,14 @@ public class TagProductConfiguration : IEntityTypeConfiguration<TagProduct>
         builder.Property(tp => tp.ProductId).IsRequired();
 
         // Relationships
-        builder.HasOne(tp => tp.Tag)
+        builder
+            .HasOne(tp => tp.Tag)
             .WithMany(t => t.TagProducts)
             .HasForeignKey(tp => tp.TagId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(tp => tp.Product)
+        builder
+            .HasOne(tp => tp.Product)
             .WithMany(p => p.TagProducts)
             .HasForeignKey(tp => tp.ProductId)
             .OnDelete(DeleteBehavior.Cascade);

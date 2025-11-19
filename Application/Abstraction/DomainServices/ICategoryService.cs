@@ -6,11 +6,15 @@ namespace Application.Abstraction.DomainServices;
 
 public interface ICategoryService
 {
-    Task<Result<CategoryResponse>> GetCategoryByIdAsync(GetCategoryByIdRequest request,
-        CancellationToken cancellationToken);
+    Task<Result<CategoryResponse>> GetCategoryByIdAsync(
+        GetCategoryByIdRequest request,
+        CancellationToken cancellationToken
+    );
 
-    Task<Result<IEnumerable<CategoryListResponse>>> GetAllCategoriesAsync(GetAllCategoriesRequest request,
-        CancellationToken cancellationToken);
+    Task<Result<IEnumerable<CategoryListResponse>>> GetAllCategoriesAsync(
+        GetAllCategoriesRequest request,
+        CancellationToken cancellationToken
+    );
 
     Task<Result> CreateCategoryAsync(CreateCategoryRequest request, CancellationToken cancellationToken);
     Task<Result> UpdateCategoryAsync(UpdateCategoryRequest request, CancellationToken cancellationToken);

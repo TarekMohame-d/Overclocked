@@ -38,9 +38,7 @@ public class LoginTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         await SeedDatabaseAsync();
         StringContent form = CreateJsonContent();
 
-        factory.BackgroundJobClientMock
-            .Create(Arg.Any<Job>(), Arg.Any<IState>())
-            .Returns("a-fake-job-id");
+        factory.BackgroundJobClientMock.Create(Arg.Any<Job>(), Arg.Any<IState>()).Returns("a-fake-job-id");
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(AuthRoutes.Login, form);
@@ -55,8 +53,7 @@ public class LoginTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
 
-        factory.BackgroundJobClientMock.DidNotReceive()
-            .Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
+        factory.BackgroundJobClientMock.DidNotReceive().Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
     }
 
     private async Task<User> SeedDatabaseAsync()
@@ -67,11 +64,7 @@ public class LoginTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         user.EmailConfirmed = true;
         user.PasswordHash = passwordHasher.Hash("P@ssword123");
 
-        var role = new Role
-        {
-            Name = "Customer",
-            Id = 4
-        };
+        var role = new Role { Name = "Customer", Id = 4 };
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -89,7 +82,7 @@ public class LoginTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         {
             Email = email,
             Password = "P@ssword123",
-            DeviceId = "device-id"
+            DeviceId = "device-id",
         };
 
         var json = JsonSerializer.Serialize(payload);

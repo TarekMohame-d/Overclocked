@@ -1,5 +1,6 @@
 using System.Net;
 using Application.Common.Results;
+using Application.Common.Results.PredefinedErrors;
 using Application.Services.Category.DTOs.Request;
 using Application.Services.Category.Events;
 using Application.Services.Category.Mapping;
@@ -12,20 +13,26 @@ public sealed partial class CategoryService
     {
         Domain.Entities.Category? category = await categoryRepository.GetByIdAsync([request.Id], cancellationToken);
 
-        if (category is null)
-            return Result.Failure(Errors.CategoryNotFound, HttpStatusCode.NotFound);
-
-        if (category.Name != request.Name)
+        if(category is null)
         {
-            var exist = await categoryRepository
-                .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
+            return Result.Failure(Errors.CategoryNotFound, HttpStatusCode.NotFound);
+        }
 
-            if (exist)
+        if(category.Name != request.Name)
+        {
+            var exist = await categoryRepository.AnyAsync(
+                x => x.NormalizedName == request.Name.ToUpper(),
+                cancellationToken
+            );
+
+            if(exist)
+            {
                 return Result.Failure(Errors.CategoryNameAlreadyExists, HttpStatusCode.Conflict);
+            }
         }
 
         // Delete old image
-        if (category.Image != request.ImageUrl)
+        if(category.Image != request.ImageUrl)
         {
             CategoryUpdatedEvent categoryUpdatedEvent = new(category.Image);
             await eventDispatcher.DispatchAsync(categoryUpdatedEvent, cancellationToken);

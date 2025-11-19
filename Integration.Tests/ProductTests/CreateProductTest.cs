@@ -25,10 +25,10 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
     {
         await factory.ResetDatabaseAsync();
 
-        var token = CustomWebApplicationFactory
-            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var token = CustomWebApplicationFactory.GenerateJwtToken(
+            permissions: [PermissionType.AddEditDelete.ToString()]
+        );
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -39,8 +39,8 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         // Arrange
         const string Name = "AMD";
 
-        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
-        StringContent form = CreateJsonContent(Name, ids.brandId, ids.categoryId, ids.tags);
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
+        StringContent form = CreateJsonContent(Name, brandId, categoryId, tags);
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
@@ -68,11 +68,11 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
     public async Task Create_Should_ReturnBadRequest_When_NameAlreadyExists()
     {
         // Arrange
-        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
 
-        Product product = await SeedDatabaseAsync(ids.brandId, ids.categoryId);
+        Product product = await SeedDatabaseAsync(brandId, categoryId);
 
-        StringContent form = CreateJsonContent(product.Name, ids.brandId, ids.categoryId, ids.tags);
+        StringContent form = CreateJsonContent(product.Name, brandId, categoryId, tags);
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
@@ -94,12 +94,11 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         // Arrange
         const string Name = "AMD";
 
-        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
-        StringContent form = CreateJsonContent(Name, ids.brandId, ids.categoryId, ids.tags);
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
+        StringContent form = CreateJsonContent(Name, brandId, categoryId, tags);
 
         var token = CustomWebApplicationFactory.GenerateJwtToken();
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
@@ -158,12 +157,9 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
             Images = new List<string>
             {
                 "https://res.cloudinary.com/over-clocked/image1.png",
-                "https://res.cloudinary.com/over-clocked/image2.png"
+                "https://res.cloudinary.com/over-clocked/image2.png",
             },
-            Specification = new[]
-            {
-                new { Name = "Name", Value = "Value" }
-            }
+            Specification = new[] { new { Name = "Name", Value = "Value" } },
         };
 
         var json = JsonSerializer.Serialize(payload);

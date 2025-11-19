@@ -9,8 +9,10 @@ namespace Unit.Tests.Validations.Brand;
 public class UpdateBrandRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(UpdateBrandValidationTestCases.InvalidNameCases),
-        MemberType = typeof(UpdateBrandValidationTestCases))]
+    [MemberData(
+        nameof(UpdateBrandValidationTestCases.InvalidNameCases),
+        MemberType = typeof(UpdateBrandValidationTestCases)
+    )]
     public void UpdateBrandRequestValidator_Should_ReturnError_When_NameValidationFails(string? name)
     {
         // Arrange
@@ -20,7 +22,7 @@ public class UpdateBrandRequestValidatorTest
         {
             Id = Guid.CreateVersion7(),
             Name = name!,
-            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png",
         };
 
         // Act
@@ -33,8 +35,10 @@ public class UpdateBrandRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(UpdateBrandValidationTestCases.InvalidImageUrlCases),
-        MemberType = typeof(UpdateBrandValidationTestCases))]
+    [MemberData(
+        nameof(UpdateBrandValidationTestCases.InvalidImageUrlCases),
+        MemberType = typeof(UpdateBrandValidationTestCases)
+    )]
     public void UpdateBrandRequestValidator_Should_ReturnError_When_ImageUrlValidationFails(string? imageUrl)
     {
         // Arrange
@@ -44,7 +48,7 @@ public class UpdateBrandRequestValidatorTest
         {
             Id = Guid.CreateVersion7(),
             Name = "Brand Name",
-            ImageUrl = imageUrl!
+            ImageUrl = imageUrl!,
         };
 
         // Act

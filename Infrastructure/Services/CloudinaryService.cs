@@ -17,10 +17,7 @@ public class CloudinaryService : ICloudinaryService
 
         _settings = settings;
 
-        var account = new Account(
-            _settings.CloudName,
-            _settings.ApiKey,
-            _settings.ApiSecret);
+        var account = new Account(_settings.CloudName, _settings.ApiKey, _settings.ApiSecret);
 
         _cloudinary = new Cloudinary(account);
     }
@@ -42,7 +39,7 @@ public class CloudinaryService : ICloudinaryService
         {
             { "timestamp", timestamp },
             { "folder", folder },
-            { "transformation", transformation }
+            { "transformation", transformation },
         };
 
         var signature = _cloudinary.Api.SignParameters(parametersToSign);
@@ -54,7 +51,7 @@ public class CloudinaryService : ICloudinaryService
             ApiKey = _settings.ApiKey,
             CloudName = _settings.CloudName,
             Folder = folder,
-            Transformation = transformation
+            Transformation = transformation,
         };
     }
 }

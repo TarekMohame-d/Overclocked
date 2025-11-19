@@ -17,17 +17,23 @@ public class LoggerActionFilter(ILogger<LoggerActionFilter> logger) : IActionFil
     {
         var actionName = context.ActionDescriptor.DisplayName ?? "UnknownAction";
 
-        if (context.Result is ObjectResult { Value: Result result })
+        if(context.Result is ObjectResult { Value: Result result })
         {
-            if (result.IsSuccess)
+            if(result.IsSuccess)
+            {
                 logger.LogInformation("Completed request {ActionName}", actionName);
+            }
             else
             {
-                using (LogContext.PushProperty("Errors", result.Error, true))
+                using(LogContext.PushProperty("Errors", result.Error, true))
+                {
                     logger.LogError("Completed request {ActionName} with errors", actionName);
+                }
             }
         }
         else // Non-Result responses
+        {
             logger.LogInformation("Completed request {ActionName}", actionName);
+        }
     }
 }

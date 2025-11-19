@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public class GenericRepository<T> : IGenericRepository<T>
+    where T : class
 {
     private readonly ApplicationDbContext _context;
     private readonly DbSet<T> _dbSet;
@@ -16,10 +17,12 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _dbSet = _context.Set<T>();
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync(bool asNoTracking = true,
-        CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<T>> GetAllAsync(
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    )
     {
-        var query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
+        IQueryable<T> query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
         return await query.ToListAsync(cancellationToken);
     }
 
@@ -28,64 +31,85 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task<T?> GetByIdAsync(object[] keyValues, CancellationToken cancellationToken = default) =>
         await _dbSet.FindAsync(keyValues, cancellationToken);
 
-    public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true,
-        CancellationToken cancellationToken = default)
+    public async Task<T?> FirstOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    )
     {
-        var query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
+        IQueryable<T> query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
         return await query.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
-    public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate,
-        Expression<Func<T, object>>[] includes, bool asNoTracking = true, CancellationToken cancellationToken = default)
+    public async Task<T?> FirstOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, object>>[] includes,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    )
     {
         IQueryable<T> query = _dbSet;
 
-        foreach (var include in includes)
+        foreach(Expression<Func<T, object>> include in includes)
             query = query.Include(include);
 
-        if (asNoTracking)
+        if(asNoTracking)
             query = query.AsNoTracking();
 
         return await query.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
-    public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true,
-        CancellationToken cancellationToken = default)
+    public async Task<T?> SingleOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    )
     {
-        var query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
+        IQueryable<T> query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
         return await query.SingleOrDefaultAsync(predicate, cancellationToken);
     }
 
-    public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate,
-        Expression<Func<T, object>>[] includes, bool asNoTracking = true, CancellationToken cancellationToken = default)
+    public async Task<T?> SingleOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, object>>[] includes,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    )
     {
         IQueryable<T> query = _dbSet;
 
-        foreach (var include in includes)
+        foreach(Expression<Func<T, object>> include in includes)
             query = query.Include(include);
 
-        if (asNoTracking)
+        if(asNoTracking)
             query = query.AsNoTracking();
 
         return await query.SingleOrDefaultAsync(predicate, cancellationToken);
     }
 
-    public async Task<IEnumerable<T>> WhereAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true,
-        CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<T>> WhereAsync(
+        Expression<Func<T, bool>> predicate,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    )
     {
-        var query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
+        IQueryable<T> query = asNoTracking ? _dbSet.AsNoTracking() : _dbSet;
         return await query.Where(predicate).ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<T>> WhereAsync(Expression<Func<T, bool>> predicate,
-        Expression<Func<T, object>>[] includes, bool asNoTracking = true, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<T>> WhereAsync(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, object>>[] includes,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    )
     {
         IQueryable<T> query = _dbSet;
 
-        foreach (var include in includes)
+        foreach(Expression<Func<T, object>> include in includes)
             query = query.Include(include);
 
-        if (asNoTracking)
+        if(asNoTracking)
             query = query.AsNoTracking();
 
         return await query.Where(predicate).ToListAsync(cancellationToken);
@@ -93,7 +117,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken = default)
     {
-        var entry = await _dbSet.AddAsync(entity, cancellationToken);
+        Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<T> entry = await _dbSet.AddAsync(
+            entity,
+            cancellationToken
+        );
         return entry.Entity;
     }
 
@@ -106,20 +133,24 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public void DeleteRange(IEnumerable<T> entities) => _dbSet.RemoveRange(entities);
 
-    public async Task DeleteWhereAsync(Expression<Func<T, bool>> predicate,
-        CancellationToken cancellationToken = default) =>
-        await _dbSet.Where(predicate).ExecuteDeleteAsync(cancellationToken);
+    public async Task DeleteWhereAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken = default
+    ) => await _dbSet.Where(predicate).ExecuteDeleteAsync(cancellationToken);
 
     public async Task<bool> AnyAsync(CancellationToken cancellationToken = default) =>
         await _dbSet.AnyAsync(cancellationToken);
 
-    public async Task<bool>
-        AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default) =>
-        await _dbSet.AnyAsync(predicate, cancellationToken);
+    public async Task<bool> AnyAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken = default
+    ) => await _dbSet.AnyAsync(predicate, cancellationToken);
 
     public async Task<int> CountAsync(CancellationToken cancellationToken = default) =>
         await _dbSet.CountAsync(cancellationToken);
 
-    public async Task<int> CountAsync(Expression<Func<T, bool>> predicate,
-        CancellationToken cancellationToken = default) => await _dbSet.CountAsync(predicate, cancellationToken);
+    public async Task<int> CountAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken = default
+    ) => await _dbSet.CountAsync(predicate, cancellationToken);
 }

@@ -1,5 +1,6 @@
 using System.Net;
 using Application.Common.Results;
+using Application.Common.Results.PredefinedErrors;
 using Application.Services.Tag.DTOs.Request;
 using Application.Services.Tag.Mapping;
 
@@ -11,16 +12,20 @@ public sealed partial class TagService
     {
         Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([request.Id], cancellationToken);
 
-        if (tag is null)
+        if(tag is null)
             return Result.Failure(Errors.TagNotFound, HttpStatusCode.NotFound);
 
-        if (tag.Name != request.Name)
+        if(tag.Name != request.Name)
         {
-            var exist = await tagRepository
-                .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
+            var exist = await tagRepository.AnyAsync(
+                x => x.NormalizedName == request.Name.ToUpper(),
+                cancellationToken
+            );
 
-            if (exist)
+            if(exist)
+            {
                 return Result.Failure(Errors.TagNameAlreadyExists, HttpStatusCode.Conflict);
+            }
         }
 
         tag.UpdateFrom(request);

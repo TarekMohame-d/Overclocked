@@ -25,14 +25,10 @@ public class CreateBrandAsyncTest
     }
 
     [Fact]
-    public async Task CreateBrandAsync_WhenThereIsNoError_ShouldReturnSuccess()
+    public async Task CreateBrandAsync_When_ThereIsNoError_Should_ReturnSuccess()
     {
         // Arrange
-        var request = new CreateBrandRequest
-        {
-            Name = "Brand Name",
-            ImageUrl = "image.png"
-        };
+        var request = new CreateBrandRequest { Name = "Brand Name", ImageUrl = "image.png" };
 
         Brand brand = new BrandFaker().Generate();
 
@@ -49,10 +45,8 @@ public class CreateBrandAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        await _brandRepositoryMock.Received(1)
-            .AddAsync(Arg.Any<Brand>(), Arg.Any<CancellationToken>());
+        await _brandRepositoryMock.Received(1).AddAsync(Arg.Any<Brand>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1)
-            .CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
     }
 }

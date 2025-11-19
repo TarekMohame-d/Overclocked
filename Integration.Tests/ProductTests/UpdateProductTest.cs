@@ -24,10 +24,10 @@ public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
     {
         await factory.ResetDatabaseAsync();
 
-        var token = CustomWebApplicationFactory
-            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var token = CustomWebApplicationFactory.GenerateJwtToken(
+            permissions: [PermissionType.AddEditDelete.ToString()]
+        );
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -39,8 +39,8 @@ public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         const string Name = "AMD";
         var id = Guid.NewGuid().ToString();
 
-        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
-        StringContent form = CreateJsonContent(Name, ids.brandId, ids.categoryId, ids.tags);
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
+        StringContent form = CreateJsonContent(Name, brandId, categoryId, tags);
 
         // Act
         HttpResponseMessage response = await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", id), form);
@@ -62,14 +62,16 @@ public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
     public async Task Update_Should_ReturnSuccess_When_DataIsValid()
     {
         // Arrange
-        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
 
-        Product product = await SeedDatabaseAsync(ids.brandId, ids.categoryId);
-        StringContent form = CreateJsonContent("New Name", ids.brandId, ids.categoryId, ids.tags);
+        Product product = await SeedDatabaseAsync(brandId, categoryId);
+        StringContent form = CreateJsonContent("New Name", brandId, categoryId, tags);
 
         // Act
-        HttpResponseMessage response =
-            await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", product.Id.ToString()), form);
+        HttpResponseMessage response = await _client.PutAsync(
+            ProductRoutes.Update.Replace("{id:guid}", product.Id.ToString()),
+            form
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -93,18 +95,19 @@ public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
     public async Task Update_Should_ReturnForbidden_When_UserDoesNotHavePermission()
     {
         // Arrange
-        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) ids = await SeedDependantEntityAsync();
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
 
-        Product product = await SeedDatabaseAsync(ids.brandId, ids.categoryId);
-        StringContent form = CreateJsonContent("New Name", ids.brandId, ids.categoryId, ids.tags);
+        Product product = await SeedDatabaseAsync(brandId, categoryId);
+        StringContent form = CreateJsonContent("New Name", brandId, categoryId, tags);
 
         var token = CustomWebApplicationFactory.GenerateJwtToken();
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        HttpResponseMessage response =
-            await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", product.Id.ToString()), form);
+        HttpResponseMessage response = await _client.PutAsync(
+            ProductRoutes.Update.Replace("{id:guid}", product.Id.ToString()),
+            form
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -160,12 +163,9 @@ public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
             Images = new List<string>
             {
                 "https://res.cloudinary.com/over-clocked/image1.png",
-                "https://res.cloudinary.com/over-clocked/image2.png"
+                "https://res.cloudinary.com/over-clocked/image2.png",
             },
-            Specification = new[]
-            {
-                new { Name = "Name", Value = "Value" }
-            }
+            Specification = new[] { new { Name = "Name", Value = "Value" } },
         };
 
         var json = JsonSerializer.Serialize(payload);

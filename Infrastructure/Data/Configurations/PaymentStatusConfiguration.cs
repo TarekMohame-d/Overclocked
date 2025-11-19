@@ -17,8 +17,7 @@ public class PaymentStatusConfiguration : IEntityTypeConfiguration<PaymentStatus
         // Relationships
 
         // Indexes
-        builder.HasIndex(ps => ps.Name)
-            .IsUnique();
+        builder.HasIndex(ps => ps.Name).IsUnique();
 
         // Seed Data
         builder.HasData(GeneratePaymentStatus());
@@ -26,10 +25,7 @@ public class PaymentStatusConfiguration : IEntityTypeConfiguration<PaymentStatus
 
     private IEnumerable<PaymentStatus> GeneratePaymentStatus()
     {
-        return Enum.GetValues<PaymentStatusType>().Select(role => new PaymentStatus
-        {
-            Id = (int)role,
-            Name = role.ToString(),
-        });
+        return Enum.GetValues<PaymentStatusType>()
+            .Select(role => new PaymentStatus { Id = (int)role, Name = role.ToString() });
     }
 }

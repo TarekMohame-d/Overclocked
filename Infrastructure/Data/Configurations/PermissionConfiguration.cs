@@ -25,10 +25,7 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
 
     private static IEnumerable<Permission> GeneratePermissions()
     {
-        return Enum.GetValues<PermissionType>().Select(role => new Permission
-        {
-            Id = (int)role,
-            Name = role.ToString()
-        });
+        return Enum.GetValues<PermissionType>()
+            .Select(role => new Permission { Id = (int)role, Name = role.ToString() });
     }
 }

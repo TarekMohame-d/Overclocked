@@ -15,20 +15,22 @@ public class CreateBrandRequestValidatorTest
     private readonly IBrandRepository _brandRepositoryMock = Substitute.For<IBrandRepository>();
 
     [Theory]
-    [MemberData(nameof(CreateBrandValidationTestCases.InvalidNameCases),
-        MemberType = typeof(CreateBrandValidationTestCases))]
+    [MemberData(
+        nameof(CreateBrandValidationTestCases.InvalidNameCases),
+        MemberType = typeof(CreateBrandValidationTestCases)
+    )]
     public async Task CreateBrandRequestValidator_Should_ReturnError_When_NameIsInvalid(string? name)
     {
         // Arrange
         var validator = new CreateBrandRequestValidator(_brandRepositoryMock);
-        var request =
-            new CreateBrandRequest
-            {
-                Name = name!,
-                ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
-            };
+        var request = new CreateBrandRequest
+        {
+            Name = name!,
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png",
+        };
 
-        _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _brandRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -41,19 +43,18 @@ public class CreateBrandRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateBrandValidationTestCases.InvalidImageUrlCases),
-        MemberType = typeof(CreateBrandValidationTestCases))]
+    [MemberData(
+        nameof(CreateBrandValidationTestCases.InvalidImageUrlCases),
+        MemberType = typeof(CreateBrandValidationTestCases)
+    )]
     public async Task CreateBrandRequestValidator_Should_ReturnError_When_ImageIsInvalid(string? imageUrl)
     {
         // Arrange
         var validator = new CreateBrandRequestValidator(_brandRepositoryMock);
-        var request = new CreateBrandRequest
-        {
-            Name = "Brand Name",
-            ImageUrl = imageUrl!
-        };
+        var request = new CreateBrandRequest { Name = "Brand Name", ImageUrl = imageUrl! };
 
-        _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _brandRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -73,10 +74,11 @@ public class CreateBrandRequestValidatorTest
         var request = new CreateBrandRequest
         {
             Name = "Brand Name",
-            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png",
         };
 
-        _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _brandRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         // Act

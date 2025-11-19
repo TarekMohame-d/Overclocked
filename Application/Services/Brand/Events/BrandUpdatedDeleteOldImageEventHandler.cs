@@ -6,8 +6,8 @@ namespace Application.Services.Brand.Events;
 
 public class BrandUpdatedDeleteOldImageEventHandler(
     IBackgroundJobClient jobClient,
-    IFileStorageService fileStorageService)
-    : IEventHandler<BrandUpdatedEvent>
+    IFileStorageService fileStorageService
+) : IEventHandler<BrandUpdatedEvent>
 {
     public Task HandleAsync(BrandUpdatedEvent domainEvent, CancellationToken cancellationToken)
     {

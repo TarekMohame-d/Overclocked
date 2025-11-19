@@ -15,20 +15,20 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.StatusId).IsRequired();
         builder.Property(o => o.ShippingCost).HasColumnType("decimal(5,2)").IsRequired();
         builder.Property(o => o.TotalPrice).HasColumnType("decimal(10,2)").IsRequired();
-        builder.Property(o => o.CreatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
-        builder.Property(o => o.UpdatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
+        builder.Property(o => o.CreatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
+        builder.Property(o => o.UpdatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
 
         builder.Ignore(o => o.OrderStatusType);
 
         // Relationships
-        builder.HasOne(o => o.User)
+        builder
+            .HasOne(o => o.User)
             .WithMany(u => u.Orders)
             .HasForeignKey(o => o.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(o => o.OrderStatus)
+        builder
+            .HasOne(o => o.OrderStatus)
             .WithMany(os => os.Orders)
             .HasForeignKey(o => o.StatusId)
             .OnDelete(DeleteBehavior.Restrict);

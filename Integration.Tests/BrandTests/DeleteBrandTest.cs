@@ -24,10 +24,10 @@ public class DeleteBrandTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         await factory.ResetDatabaseAsync();
         factory.FileStorageServiceMock.ClearReceivedCalls();
 
-        var token = CustomWebApplicationFactory
-            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var token = CustomWebApplicationFactory.GenerateJwtToken(
+            permissions: [PermissionType.AddEditDelete.ToString()]
+        );
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -61,8 +61,9 @@ public class DeleteBrandTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         Brand brand = await SeedDatabaseAsync();
 
         // Act
-        HttpResponseMessage response =
-            await _client.DeleteAsync(BrandRoutes.Delete.Replace("{id:guid}", brand.Id.ToString()));
+        HttpResponseMessage response = await _client.DeleteAsync(
+            BrandRoutes.Delete.Replace("{id:guid}", brand.Id.ToString())
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -89,8 +90,7 @@ public class DeleteBrandTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         var brandId = Guid.CreateVersion7().ToString();
 
         var token = CustomWebApplicationFactory.GenerateJwtToken();
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.DeleteAsync(BrandRoutes.Delete.Replace("{id:guid}", brandId));

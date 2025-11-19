@@ -1,5 +1,6 @@
 using System.Net;
 using Application.Common.Results;
+using Application.Common.Results.PredefinedErrors;
 using Application.Services.Tag.DTOs.Request;
 
 namespace Application.Services.Tag;
@@ -10,7 +11,7 @@ public sealed partial class TagService
     {
         Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([request.Id], cancellationToken);
 
-        if (tag is null)
+        if(tag is null)
             return Result.Failure(Errors.TagNotFound, HttpStatusCode.NotFound);
 
         tagRepository.Delete(tag);

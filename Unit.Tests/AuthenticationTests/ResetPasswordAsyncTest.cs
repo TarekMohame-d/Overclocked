@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Net;
+using Application.Abstraction.DomainServices;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
@@ -9,6 +10,7 @@ using Application.Services.Authentication.DTOs.Request;
 using Application.Services.Authentication.Helpers.Interfaces;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
+using Domain.Exceptions;
 using NSubstitute;
 using Shouldly;
 
@@ -27,6 +29,7 @@ public class ResetPasswordAsyncTest
     private readonly IUserRepository _userRepositoryMock;
     private readonly IRolePermissionsRepository _rolePermissionsRepositoryMock;
     private readonly ITokenReaderService _tokenReaderServiceMock;
+    private readonly ICartService _cartServiceMock;
 
     public ResetPasswordAsyncTest()
     {
@@ -40,10 +43,21 @@ public class ResetPasswordAsyncTest
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _rolePermissionsRepositoryMock = Substitute.For<IRolePermissionsRepository>();
         _tokenReaderServiceMock = Substitute.For<ITokenReaderService>();
+        _cartServiceMock = Substitute.For<ICartService>();
 
-        _authenticationService = new AuthenticationService(_userRepositoryMock, _rolePermissionsRepositoryMock, _unitOfWorkMock, _passwordHasherMock,
-            _eventDispatcherMock, _emailConfirmationCodeHasherMock, _emailConfirmationCodeServiceMock,
-            _tokenProviderMock, _refreshTokenServiceMock, _tokenReaderServiceMock);
+        _authenticationService = new AuthenticationService(
+            _userRepositoryMock,
+            _rolePermissionsRepositoryMock,
+            _unitOfWorkMock,
+            _passwordHasherMock,
+            _eventDispatcherMock,
+            _emailConfirmationCodeHasherMock,
+            _emailConfirmationCodeServiceMock,
+            _tokenProviderMock,
+            _refreshTokenServiceMock,
+            _tokenReaderServiceMock,
+            _cartServiceMock
+        );
     }
 
     [Fact]
@@ -54,11 +68,14 @@ public class ResetPasswordAsyncTest
         {
             Email = "email@gmail.com",
             Code = "code",
-            Password = "password"
+            Password = "password",
         };
 
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns((User)null!);
 
         // Act
@@ -70,9 +87,12 @@ public class ResetPasswordAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
     }
 
     [Fact]
@@ -83,30 +103,39 @@ public class ResetPasswordAsyncTest
         {
             Email = "email@gmail.com",
             Code = "code",
-            Password = "password"
+            Password = "password",
         };
 
         User user = new UserFaker().Generate();
 
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns(user);
 
-        _emailConfirmationCodeServiceMock.GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _emailConfirmationCodeServiceMock
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((EmailConfirmationCode)null!);
 
         // Act
         Exception exception = await Should.ThrowAsync<Exception>(async () =>
-            await _authenticationService.ResetPasswordAsync(request, CancellationToken.None));
+            await _authenticationService.ResetPasswordAsync(request, CancellationToken.None)
+        );
 
         // Assert
-        exception.Message.ShouldBe("Confirmation code not found.");
+        exception.ShouldBeOfType<EmailConfirmationCodeNotExistException>();
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
 
-        await _emailConfirmationCodeServiceMock.Received(1)
+        await _emailConfirmationCodeServiceMock
+            .Received(1)
             .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
@@ -118,18 +147,22 @@ public class ResetPasswordAsyncTest
         {
             Email = "email@gmail.com",
             Code = "code",
-            Password = "password"
+            Password = "password",
         };
 
         User user = new UserFaker().Generate();
 
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns(user);
 
         EmailConfirmationCode emailConfirmationCode = new EmailConfirmationCodeFaker().Generate();
         emailConfirmationCode.ExpiredAt = DateTime.UtcNow.AddHours(-1);
-        _emailConfirmationCodeServiceMock.GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _emailConfirmationCodeServiceMock
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(emailConfirmationCode);
 
         // Act
@@ -141,11 +174,15 @@ public class ResetPasswordAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
 
-        await _emailConfirmationCodeServiceMock.Received(1)
+        await _emailConfirmationCodeServiceMock
+            .Received(1)
             .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
@@ -157,18 +194,22 @@ public class ResetPasswordAsyncTest
         {
             Email = "email@gmail.com",
             Code = "code",
-            Password = "password"
+            Password = "password",
         };
 
         User user = new UserFaker().Generate();
 
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns(user);
 
         EmailConfirmationCode emailConfirmationCode = new EmailConfirmationCodeFaker().Generate();
         emailConfirmationCode.IsUsed = true;
-        _emailConfirmationCodeServiceMock.GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _emailConfirmationCodeServiceMock
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(emailConfirmationCode);
 
         // Act
@@ -180,11 +221,15 @@ public class ResetPasswordAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
 
-        await _emailConfirmationCodeServiceMock.Received(1)
+        await _emailConfirmationCodeServiceMock
+            .Received(1)
             .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
@@ -196,23 +241,26 @@ public class ResetPasswordAsyncTest
         {
             Email = "email@gmail.com",
             Code = "code",
-            Password = "password"
+            Password = "password",
         };
 
         User user = new UserFaker().Generate();
 
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns(user);
 
         EmailConfirmationCode emailConfirmationCode = new EmailConfirmationCodeFaker().Generate();
         emailConfirmationCode.IsUsed = false;
         emailConfirmationCode.ExpiredAt = DateTime.UtcNow.AddMinutes(10);
-        _emailConfirmationCodeServiceMock.GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _emailConfirmationCodeServiceMock
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(emailConfirmationCode);
 
-        _emailConfirmationCodeHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>())
-            .Returns(false);
+        _emailConfirmationCodeHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
 
         // Act
         Result result = await _authenticationService.ResetPasswordAsync(request, CancellationToken.None);
@@ -223,15 +271,18 @@ public class ResetPasswordAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
 
-        await _emailConfirmationCodeServiceMock.Received(1)
+        await _emailConfirmationCodeServiceMock
+            .Received(1)
             .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
-        _emailConfirmationCodeHasherMock.Received(1)
-            .Verify(Arg.Any<string>(), Arg.Any<string>());
+        _emailConfirmationCodeHasherMock.Received(1).Verify(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -242,32 +293,33 @@ public class ResetPasswordAsyncTest
         {
             Email = "email@gmail.com",
             Code = "code",
-            Password = "password"
+            Password = "password",
         };
 
         User user = new UserFaker().Generate();
 
-        _userRepositoryMock.SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
+        _userRepositoryMock
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
             .Returns(user);
 
         EmailConfirmationCode emailConfirmationCode = new EmailConfirmationCodeFaker().Generate();
         emailConfirmationCode.IsUsed = false;
         emailConfirmationCode.ExpiredAt = DateTime.UtcNow.AddMinutes(10);
-        _emailConfirmationCodeServiceMock.GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _emailConfirmationCodeServiceMock
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(emailConfirmationCode);
 
-        _emailConfirmationCodeHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>())
-            .Returns(true);
+        _emailConfirmationCodeHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>()).Returns(true);
 
-        _passwordHasherMock.Hash(Arg.Any<string>())
-            .Returns("hash");
+        _passwordHasherMock.Hash(Arg.Any<string>()).Returns("hash");
         _userRepositoryMock.Update(Arg.Any<User>());
 
         _emailConfirmationCodeServiceMock.InvalidateEmailConfirmationCode(Arg.Any<EmailConfirmationCode>());
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
         Result result = await _authenticationService.ResetPasswordAsync(request, CancellationToken.None);
@@ -276,26 +328,25 @@ public class ResetPasswordAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+        await _userRepositoryMock
+            .Received(1)
+            .SingleOrDefaultAsync(
+                Arg.Any<Expression<Func<User, bool>>>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
 
-        await _emailConfirmationCodeServiceMock.Received(1)
+        await _emailConfirmationCodeServiceMock
+            .Received(1)
             .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
-        _emailConfirmationCodeHasherMock.Received(1)
-            .Verify(Arg.Any<string>(), Arg.Any<string>());
+        _emailConfirmationCodeHasherMock.Received(1).Verify(Arg.Any<string>(), Arg.Any<string>());
 
-        _passwordHasherMock.Received(1)
-            .Hash(Arg.Any<string>());
+        _passwordHasherMock.Received(1).Hash(Arg.Any<string>());
 
-        _userRepositoryMock.Received(1)
-            .Update(Arg.Any<User>());
+        _userRepositoryMock.Received(1).Update(Arg.Any<User>());
 
-        _emailConfirmationCodeServiceMock.Received(1)
-            .InvalidateEmailConfirmationCode(Arg.Any<EmailConfirmationCode>());
+        _emailConfirmationCodeServiceMock.Received(1).InvalidateEmailConfirmationCode(Arg.Any<EmailConfirmationCode>());
 
-        await _unitOfWorkMock.Received(1)
-            .CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
     }
 }

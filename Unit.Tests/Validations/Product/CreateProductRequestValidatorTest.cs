@@ -32,7 +32,8 @@ public class CreateProductRequestValidatorTest
             _brandRepositoryMock,
             _categoryRepositoryMock,
             _productRepositoryMock,
-            _tagRepositoryMock);
+            _tagRepositoryMock
+        );
     }
 
     [Fact]
@@ -40,20 +41,19 @@ public class CreateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id));
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns((BrandEntity)null!);
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns((BrandEntity)null!);
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -68,20 +68,19 @@ public class CreateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id));
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns((CategoryEntity)null!);
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns((CategoryEntity)null!);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -92,26 +91,27 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidNameCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidNameCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Name_Is_Invalid(string? name)
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id), name: name!);
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -126,20 +126,19 @@ public class CreateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id));
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -150,26 +149,27 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidThumbnailCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidThumbnailCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Thumbnail_Is_Invalid(string? thumbnail)
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id), thumbnail: thumbnail!);
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -180,26 +180,27 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidDescriptionCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidDescriptionCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Description_Is_Invalid(string? description)
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id), description: description!);
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -210,26 +211,27 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidPriceCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidPriceCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Price_Is_Invalid(decimal? price)
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id), price: (decimal)price!);
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -240,26 +242,27 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidStockCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidStockCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Stock_Is_Invalid(int? stock)
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id), stock: (int)stock!);
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -270,27 +273,31 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidDiscountCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidDiscountCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Discount_Is_Invalid(decimal? discount)
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
-        CreateProductRequest request =
-            CreateProductRequest(specs, tags.Select(x => x.Id), discount: (decimal)discount!);
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
+        CreateProductRequest request = CreateProductRequest(
+            specs,
+            tags.Select(x => x.Id),
+            discount: (decimal)discount!
+        );
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -301,26 +308,27 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidImagesCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidImagesCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Images_Is_Invalid(string[] images)
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id), images);
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -331,26 +339,27 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidTagsCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidTagsCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Tags_Is_Invalid(List<Guid> tags)
     {
         // Arrange
         List<TagEntity>? tagEntities = new TagFaker().Generate(3);
-        IEnumerable<CreateProductRequest.Specs> specs =
-            [new() { Name = "Name", Value = "Value" }];
+        IEnumerable<CreateProductRequest.Specs> specs = [new() { Name = "Name", Value = "Value" }];
         CreateProductRequest request = CreateProductRequest(specs, tags);
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tagEntities));
 
         // Act
@@ -361,25 +370,28 @@ public class CreateProductRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateProductValidationTestCases.InvalidSpecificationsCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
+    [MemberData(
+        nameof(CreateProductValidationTestCases.InvalidSpecificationsCases),
+        MemberType = typeof(CreateProductValidationTestCases)
+    )]
     public async Task CreateProductRequestValidator_Should_HaveError_When_Specifications_Is_Invalid(
-        IEnumerable<CreateProductRequest.Specs> specs)
+        IEnumerable<CreateProductRequest.Specs> specs
+    )
     {
         // Arrange
         List<TagEntity>? tags = new TagFaker().Generate(3);
         CreateProductRequest request = CreateProductRequest(specs, tags.Select(x => x.Id));
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<BrandEntity>());
+        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>())
-            .Returns(Substitute.For<CategoryEntity>());
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<CategoryEntity>());
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _tagRepositoryMock.WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
+        _tagRepositoryMock
+            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>())
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
@@ -400,7 +412,8 @@ public class CreateProductRequestValidatorTest
         string thumbnail = "https://res.cloudinary.com/over-clocked/image.png",
         decimal price = 100,
         decimal discount = 0m,
-        int stock = 10)
+        int stock = 10
+    )
     {
         return new CreateProductRequest
         {
@@ -414,7 +427,7 @@ public class CreateProductRequestValidatorTest
             Stock = stock,
             Specification = specs,
             Tags = tags,
-            Images = images
+            Images = images,
         };
     }
 }

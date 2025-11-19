@@ -10,14 +10,14 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // --------------------------------------------
 // CONFIGURATION SETUP
 // --------------------------------------------
-builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
+builder
+    .Configuration.SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", false, true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
     .AddEnvironmentVariables();
 
 // Load external config (for development only)
-if (builder.Environment.IsDevelopment())
+if(builder.Environment.IsDevelopment())
 {
     var configPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.FullName, "configs.json");
     builder.Configuration.AddJsonFile(configPath, true, true);
@@ -25,25 +25,24 @@ if (builder.Environment.IsDevelopment())
 
 builder.Configuration.AddEnvironmentVariables();
 
+builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
 
-builder.Host.UseSerilog((context, loggerConfig) =>
-    loggerConfig.ReadFrom.Configuration(context.Configuration));
-
-
-builder.Services
-    .AddPresentation(builder.Configuration)
+builder
+    .Services.AddPresentation(builder.Configuration)
     .AddInfrastructure(builder.Configuration)
     .AddApplication(builder.Configuration);
-
 
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if(app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 
-    app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "Overclocked API"); });
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "Overclocked API");
+    });
 }
 
 app.UseHttpsRedirection();

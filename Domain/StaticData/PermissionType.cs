@@ -18,5 +18,5 @@ public enum PermissionType
     RefundOrder, // + all below
 
     // === Data Entry ===
-    AddEditDelete
+    AddEditDelete,
 }
