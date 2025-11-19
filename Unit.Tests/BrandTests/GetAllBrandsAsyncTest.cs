@@ -22,8 +22,11 @@ public class GetAllBrandsAsyncTest
     {
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
 
-        _brandServices = new BrandService(_brandRepositoryMock, Substitute.For<IUnitOfWork>(),
-            Substitute.For<IEventDispatcher>());
+        _brandServices = new BrandService(
+            _brandRepositoryMock,
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<IEventDispatcher>()
+        );
     }
 
     [Fact]
@@ -35,12 +38,13 @@ public class GetAllBrandsAsyncTest
 
         IEnumerable<BrandListResponse> brandListResponses = brands.ToDto();
 
-        _brandRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>())
-            .Returns(brands);
+        _brandRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(brands);
 
         // Act
-        Result<IEnumerable<BrandListResponse>> result =
-            await _brandServices.GetAllBrandsAsync(request, CancellationToken.None);
+        Result<IEnumerable<BrandListResponse>> result = await _brandServices.GetAllBrandsAsync(
+            request,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -50,8 +54,7 @@ public class GetAllBrandsAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         brandListResponses.ShouldBeEquivalentTo(result.Data);
 
-        await _brandRepositoryMock.Received(1)
-            .GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
+        await _brandRepositoryMock.Received(1).GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -60,12 +63,13 @@ public class GetAllBrandsAsyncTest
         // Arrange
         var request = new GetAllBrandsRequest();
 
-        _brandRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>())
-            .Returns([]);
+        _brandRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns([]);
 
         // Act
-        Result<IEnumerable<BrandListResponse>> result =
-            await _brandServices.GetAllBrandsAsync(request, CancellationToken.None);
+        Result<IEnumerable<BrandListResponse>> result = await _brandServices.GetAllBrandsAsync(
+            request,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -75,7 +79,6 @@ public class GetAllBrandsAsyncTest
         result.Data.Count().ShouldBe(0);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _brandRepositoryMock.Received(1)
-            .GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
+        await _brandRepositoryMock.Received(1).GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
     }
 }

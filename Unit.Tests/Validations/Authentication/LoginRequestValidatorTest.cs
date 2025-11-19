@@ -9,8 +9,7 @@ namespace Unit.Tests.Validations.Authentication;
 public class LoginRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(LoginValidationTestCases.InvalidEmailCases),
-        MemberType = typeof(LoginValidationTestCases))]
+    [MemberData(nameof(LoginValidationTestCases.InvalidEmailCases), MemberType = typeof(LoginValidationTestCases))]
     public void LoginRequestValidator_Should_ReturnError_When_EmailIsInvalid(string? email)
     {
         // Arrange
@@ -19,7 +18,7 @@ public class LoginRequestValidatorTest
         {
             Email = email!,
             Password = "P@ssword1",
-            DeviceId = "device-id"
+            DeviceId = "device-id",
         };
 
         // Act
@@ -32,8 +31,7 @@ public class LoginRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(LoginValidationTestCases.InvalidPasswordCases),
-        MemberType = typeof(LoginValidationTestCases))]
+    [MemberData(nameof(LoginValidationTestCases.InvalidPasswordCases), MemberType = typeof(LoginValidationTestCases))]
     public void LoginRequestValidator_Should_ReturnError_When_PasswordIsInvalid(string? password)
     {
         // Arrange
@@ -42,7 +40,7 @@ public class LoginRequestValidatorTest
         {
             Email = "email@gmail.com",
             Password = password!,
-            DeviceId = "device-id"
+            DeviceId = "device-id",
         };
 
         // Act
@@ -55,8 +53,7 @@ public class LoginRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(LoginValidationTestCases.InvalidDeviceIdCases),
-        MemberType = typeof(LoginValidationTestCases))]
+    [MemberData(nameof(LoginValidationTestCases.InvalidDeviceIdCases), MemberType = typeof(LoginValidationTestCases))]
     public void LoginRequestValidator_Should_ReturnError_When_DeviceIdIsInvalid(string? deviceId)
     {
         // Arrange
@@ -65,7 +62,7 @@ public class LoginRequestValidatorTest
         {
             Email = "email@gmail.com",
             Password = "P@ssword1",
-            DeviceId = deviceId!
+            DeviceId = deviceId!,
         };
 
         // Act

@@ -15,18 +15,18 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
         builder.Property(r => r.ProductId).IsRequired();
         builder.Property(r => r.Rating).IsRequired();
         builder.Property(r => r.Comment).HasMaxLength(500).IsRequired();
-        builder.Property(r => r.CreatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
-        builder.Property(r => r.UpdatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
+        builder.Property(r => r.CreatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
+        builder.Property(r => r.UpdatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
 
         // Relationships
-        builder.HasOne(r => r.User)
+        builder
+            .HasOne(r => r.User)
             .WithMany(u => u.Reviews)
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(r => r.Product)
+        builder
+            .HasOne(r => r.Product)
             .WithMany(p => p.Reviews)
             .HasForeignKey(r => r.ProductId)
             .OnDelete(DeleteBehavior.Cascade);

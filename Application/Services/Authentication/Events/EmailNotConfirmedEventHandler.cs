@@ -11,8 +11,8 @@ public class EmailNotConfirmedEventHandler(
     IEmailConfirmationCodeService emailConfirmationCodeService,
     IUnitOfWork unitOfWork,
     IBackgroundJobClient jobClient,
-    IEmailService emailService)
-    : IEventHandler<EmailNotConfirmedEvent>
+    IEmailService emailService
+) : IEventHandler<EmailNotConfirmedEvent>
 {
     public async Task HandleAsync(EmailNotConfirmedEvent domainEvent, CancellationToken cancellationToken)
     {
@@ -21,7 +21,7 @@ public class EmailNotConfirmedEventHandler(
             ?? throw new Exception("Confirmation code not found");
 
         // Check if the code is expired and generate a new one
-        if (emailConfirmationCode.ExpiredAt <= DateTime.UtcNow.AddMinutes(5))
+        if(emailConfirmationCode.ExpiredAt <= DateTime.UtcNow.AddMinutes(5))
         {
             var code = emailConfirmationCodeService.UpdateEmailConfirmationCode(emailConfirmationCode);
 

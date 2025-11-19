@@ -16,8 +16,7 @@ public sealed partial class AuthenticationService(
     IEmailConfirmationCodeService emailConfirmationCodeService,
     ITokenProvider tokenProvider,
     IRefreshTokenService refreshTokenService,
-    ITokenReaderService tokenReaderService)
-    : IAuthenticationService
-{
-
-}
+    ITokenReaderService tokenReaderService,
+    ICartService cartService
+) : IAuthenticationService
+{ }

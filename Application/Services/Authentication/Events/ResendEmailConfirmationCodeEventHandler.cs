@@ -4,9 +4,7 @@ using Hangfire;
 
 namespace Application.Services.Authentication.Events;
 
-public class ResendEmailConfirmationCodeEventHandler(
-    IBackgroundJobClient jobClient,
-    IEmailService emailService)
+public class ResendEmailConfirmationCodeEventHandler(IBackgroundJobClient jobClient, IEmailService emailService)
     : IEventHandler<ResendEmailConfirmationCodeEvent>
 {
     public Task HandleAsync(ResendEmailConfirmationCodeEvent domainEvent, CancellationToken cancellationToken)

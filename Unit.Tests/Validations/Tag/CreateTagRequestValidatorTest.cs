@@ -15,19 +15,19 @@ public class CreateTagRequestValidatorTest
     private readonly ITagRepository _tagRepositoryMock = Substitute.For<ITagRepository>();
 
     [Theory]
-    [MemberData(nameof(CreateTagValidationTestCases.InvalidNameCases),
-        MemberType = typeof(CreateTagValidationTestCases))]
+    [MemberData(
+        nameof(CreateTagValidationTestCases.InvalidNameCases),
+        MemberType = typeof(CreateTagValidationTestCases)
+    )]
     public async Task CreateTagRequestValidator_Should_ReturnError_WhenNameIsInvalid(string? name)
     {
         // Arrange
         var validator = new CreateTagRequestValidator(_tagRepositoryMock);
 
-        var request = new CreateTagRequest
-        {
-            Name = name!
-        };
+        var request = new CreateTagRequest { Name = name! };
 
-        _tagRepositoryMock.AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _tagRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -45,12 +45,10 @@ public class CreateTagRequestValidatorTest
         // Arrange
         var validator = new CreateTagRequestValidator(_tagRepositoryMock);
 
-        var request = new CreateTagRequest
-        {
-            Name = "Tag Name"
-        };
+        var request = new CreateTagRequest { Name = "Tag Name" };
 
-        _tagRepositoryMock.AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>())
+        _tagRepositoryMock
+            .AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         // Act

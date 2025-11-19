@@ -28,8 +28,8 @@ public static class DependencyInjection
         });
 
         services.AddSingleton<IConnectionMultiplexer>(sp =>
-            ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
-
+            ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!)
+        );
 
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IEmailService, EmailService>();
@@ -45,11 +45,12 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, CloudFileStorageService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();
 
-        services.Scan(scan => scan
-            .FromAssemblyOf<BrandRepository>()
-            .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
+        services.Scan(scan =>
+            scan.FromAssemblyOf<BrandRepository>()
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+        );
 
         return services;
     }

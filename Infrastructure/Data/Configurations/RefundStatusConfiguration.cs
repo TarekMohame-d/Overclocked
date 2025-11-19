@@ -16,8 +16,7 @@ public class RefundStatusConfiguration : IEntityTypeConfiguration<RefundStatus>
         // Relationships
 
         // Indexes
-        builder.HasIndex(rs => rs.Name)
-            .IsUnique();
+        builder.HasIndex(rs => rs.Name).IsUnique();
 
         // Seed Data
         builder.HasData(GenerateRefundStatus());
@@ -25,10 +24,7 @@ public class RefundStatusConfiguration : IEntityTypeConfiguration<RefundStatus>
 
     private IEnumerable<OrderStatus> GenerateRefundStatus()
     {
-        return Enum.GetValues<RefundStatusType>().Select(role => new OrderStatus
-        {
-            Id = (int)role,
-            Name = role.ToString(),
-        });
+        return Enum.GetValues<RefundStatusType>()
+            .Select(role => new OrderStatus { Id = (int)role, Name = role.ToString() });
     }
 }

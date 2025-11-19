@@ -6,6 +6,7 @@ public class PagedResult<T>
 {
     // Needed for deserialization
     public PagedResult() { }
+
     public List<T> Items { get; set; } = [];
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
@@ -27,9 +28,7 @@ public class PagedResult<T>
     {
         var count = await source.CountAsync();
 
-        var items = await source.Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+        List<T> items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
         return new PagedResult<T>(items, pageNumber, pageSize, count);
     }

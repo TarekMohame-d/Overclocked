@@ -21,10 +21,17 @@ public record GetPagedProductsRequest : GetPagedProductsQuery, ICachedRequest
     public new ProductSortField SortBy { get; private init; }
     public new SortDirection Direction { get; private init; }
 
-    public string CacheKey => CacheKeys.ProductPaged(
-        Page, PageSize, SortBy.ToString(), Direction.ToString(),
-        Category ?? "all", Brand ?? "all", TagId?.ToString() ?? "all", Search ?? "all"
-    );
+    public string CacheKey =>
+        CacheKeys.ProductPaged(
+            Page,
+            PageSize,
+            SortBy.ToString(),
+            Direction.ToString(),
+            Category ?? "all",
+            Brand ?? "all",
+            TagId?.ToString() ?? "all",
+            Search ?? "all"
+        );
 
     public string CacheSetKey => CacheKeys.ProductSet;
     public TimeSpan SlidingExpiration => TimeSpan.FromMinutes(5);
@@ -48,7 +55,7 @@ public record GetPagedProductsRequest : GetPagedProductsQuery, ICachedRequest
             Search = query.Search,
             Category = query.Category,
             Brand = query.Brand,
-            TagId = query.TagId
+            TagId = query.TagId,
         };
     }
 }

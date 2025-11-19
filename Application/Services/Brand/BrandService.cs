@@ -7,5 +7,5 @@ namespace Application.Services.Brand;
 public sealed partial class BrandService(
     IBrandRepository brandRepository,
     IUnitOfWork unitOfWork,
-    IEventDispatcher eventDispatcher)
-    : IBrandService;
+    IEventDispatcher eventDispatcher
+) : IBrandService;

@@ -13,13 +13,12 @@ public class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage>
         builder.Property(pi => pi.Id).ValueGeneratedNever().IsRequired();
         builder.Property(pi => pi.ProductId).IsRequired();
         builder.Property(pi => pi.Image).IsRequired();
-        builder.Property(pi => pi.CreatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
-        builder.Property(pi => pi.UpdatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
+        builder.Property(pi => pi.CreatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
+        builder.Property(pi => pi.UpdatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
 
         // Relationships
-        builder.HasOne(pi => pi.Product)
+        builder
+            .HasOne(pi => pi.Product)
             .WithMany(p => p.ProductImages)
             .HasForeignKey(pi => pi.ProductId)
             .OnDelete(DeleteBehavior.Cascade);

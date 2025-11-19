@@ -19,7 +19,8 @@ public class EmailService(IConfiguration configuration) : IEmailService
         email.To.Add(MailboxAddress.Parse(to));
         email.Subject = "Overclocked Confirmation code";
 
-        var body = $@"
+        var body =
+            $@"
 <!DOCTYPE html>
 <html lang=""en"">
 <head>

@@ -15,20 +15,20 @@ public class RefundConfiguration : IEntityTypeConfiguration<Refund>
         builder.Property(r => r.OrderId).IsRequired();
         builder.Property(r => r.RefundAmount).HasColumnType("decimal(10,2)").IsRequired();
         builder.Property(r => r.RefundReason).HasMaxLength(100).IsRequired();
-        builder.Property(r => r.CreatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
-        builder.Property(r => r.UpdatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
+        builder.Property(r => r.CreatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
+        builder.Property(r => r.UpdatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
 
         builder.Ignore(r => r.RefundStatus);
 
         // Relationships
-        builder.HasOne(r => r.Order)
+        builder
+            .HasOne(r => r.Order)
             .WithOne(o => o.Refund)
             .HasForeignKey<Refund>(r => r.OrderId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(r => r.RefundStatus)
+        builder
+            .HasOne(r => r.RefundStatus)
             .WithMany(rs => rs.Refunds)
             .HasForeignKey(r => r.StatusId)
             .OnDelete(DeleteBehavior.Restrict);

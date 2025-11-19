@@ -17,7 +17,7 @@ public class GetPagedTagsRequestValidatorTest
             Page = 1,
             PageSize = 10,
             SortBy = "wrong",
-            Direction = "Asc"
+            Direction = "Asc",
         };
 
         // Act
@@ -40,7 +40,7 @@ public class GetPagedTagsRequestValidatorTest
             Page = 1,
             PageSize = 10,
             SortBy = "id",
-            Direction = "wrong"
+            Direction = "wrong",
         };
 
         // Act
@@ -63,7 +63,7 @@ public class GetPagedTagsRequestValidatorTest
             Page = 1,
             PageSize = 0,
             SortBy = "id",
-            Direction = "Asc"
+            Direction = "Asc",
         };
 
         // Act
@@ -86,7 +86,7 @@ public class GetPagedTagsRequestValidatorTest
             Page = 0,
             PageSize = 10,
             SortBy = "id",
-            Direction = "Asc"
+            Direction = "Asc",
         };
 
         // Act
@@ -109,7 +109,7 @@ public class GetPagedTagsRequestValidatorTest
             Page = 1,
             PageSize = 10,
             SortBy = "id",
-            Direction = "Asc"
+            Direction = "Asc",
         };
 
         // Act
@@ -131,7 +131,7 @@ public class GetPagedTagsRequestValidatorTest
             Page = 0,
             PageSize = 0,
             SortBy = "wrong",
-            Direction = "wrong"
+            Direction = "wrong",
         };
 
         // Act

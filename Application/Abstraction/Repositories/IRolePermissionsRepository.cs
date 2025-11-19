@@ -2,7 +2,4 @@
 
 namespace Application.Abstraction.Repositories;
 
-public interface IRolePermissionsRepository : IGenericRepository<RolePermission>
-{
-
-}
+public interface IRolePermissionsRepository : IGenericRepository<RolePermission> { }

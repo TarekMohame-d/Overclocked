@@ -7,8 +7,10 @@ namespace Application.Services.Product;
 
 public sealed partial class ProductService
 {
-    public async Task<Result<PagedResult<ProductListResponse>>> GetPagedProductsAsync(GetPagedProductsRequest request,
-        CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ProductListResponse>>> GetPagedProductsAsync(
+        GetPagedProductsRequest request,
+        CancellationToken cancellationToken
+    )
     {
         IQueryable<Domain.Entities.Product> productsQuery = productRepository.GetProductsQuery(
             request.SortBy,
@@ -21,7 +23,7 @@ public sealed partial class ProductService
 
         IQueryable<ProductListResponse> productsDtoQuery = productsQuery.ToDto();
 
-        var pagedResult = await PagedResult<ProductListResponse>.CreateAsync(
+        PagedResult<ProductListResponse> pagedResult = await PagedResult<ProductListResponse>.CreateAsync(
             productsDtoQuery,
             request.Page,
             request.PageSize

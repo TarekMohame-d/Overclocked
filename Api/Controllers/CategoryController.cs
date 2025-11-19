@@ -19,8 +19,7 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new GetCategoryByIdRequest { Id = id };
-        Result<CategoryResponse> response =
-            await categoryServices.GetCategoryByIdAsync(request, cancellationToken);
+        Result<CategoryResponse> response = await categoryServices.GetCategoryByIdAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -30,8 +29,10 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var request = new GetAllCategoriesRequest();
-        Result<IEnumerable<CategoryListResponse>> response =
-            await categoryServices.GetAllCategoriesAsync(request, cancellationToken);
+        Result<IEnumerable<CategoryListResponse>> response = await categoryServices.GetAllCategoriesAsync(
+            request,
+            cancellationToken
+        );
 
         return response.ToActionResult();
     }
@@ -40,8 +41,10 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
     [HttpPost]
     [ServiceFilter(typeof(ValidationActionAttribute<CreateCategoryRequest>))]
     [Route(CategoryRoutes.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateCategoryRequest request,
+        CancellationToken cancellationToken
+    )
     {
         Result response = await categoryServices.CreateCategoryAsync(request, cancellationToken);
 
@@ -55,13 +58,14 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
         [FromBody] UpdateCategoryRequestBody request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         UpdateCategoryRequest updateCategoryRequest = new()
         {
             Id = id,
             Name = request.Name,
-            ImageUrl = request.ImageUrl
+            ImageUrl = request.ImageUrl,
         };
 
         Result response = await categoryServices.UpdateCategoryAsync(updateCategoryRequest, cancellationToken);

@@ -4,9 +4,7 @@ using Hangfire;
 
 namespace Application.Services.Brand.Events;
 
-public class BrandDeletedDeleteImageEventHandler(
-    IBackgroundJobClient jobClient,
-    IFileStorageService fileStorageService)
+public class BrandDeletedDeleteImageEventHandler(IBackgroundJobClient jobClient, IFileStorageService fileStorageService)
     : IEventHandler<BrandDeletedEvent>
 {
     public Task HandleAsync(BrandDeletedEvent domainEvent, CancellationToken cancellationToken)

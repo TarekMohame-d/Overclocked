@@ -37,9 +37,7 @@ public class RegisterTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         const string Email = "test@gmail.com";
         StringContent form = CreateJsonContent();
 
-        factory.BackgroundJobClientMock
-            .Create(Arg.Any<Job>(), Arg.Any<IState>())
-            .Returns("a-fake-job-id");
+        factory.BackgroundJobClientMock.Create(Arg.Any<Job>(), Arg.Any<IState>()).Returns("a-fake-job-id");
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(AuthRoutes.Register, form);
@@ -56,8 +54,9 @@ public class RegisterTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         userDb.ShouldNotBeNull();
         userDb.EmailConfirmed.ShouldBeFalse();
 
-        EmailConfirmationCode? emailConfirmationCodeDb =
-            await dbContext.EmailConfirmationCodes.SingleOrDefaultAsync(x => x.UserId == userDb.Id);
+        EmailConfirmationCode? emailConfirmationCodeDb = await dbContext.EmailConfirmationCodes.SingleOrDefaultAsync(
+            x => x.UserId == userDb.Id
+        );
         emailConfirmationCodeDb.ShouldNotBeNull();
         emailConfirmationCodeDb.IsUsed.ShouldBeFalse();
 
@@ -66,17 +65,12 @@ public class RegisterTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
 
-        factory.BackgroundJobClientMock.Received(1)
-            .Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
+        factory.BackgroundJobClientMock.Received(1).Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
     }
 
     private async Task SeedDatabaseAsync()
     {
-        var role = new Role
-        {
-            Name = "Customer",
-            Id = 4
-        };
+        var role = new Role { Name = "Customer", Id = 4 };
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -93,7 +87,7 @@ public class RegisterTest(CustomWebApplicationFactory factory) : IAsyncLifetime
             Password = "P@ssword123",
             FirstName = "Test",
             LastName = "Test",
-            PhoneNumber = "0123456789"
+            PhoneNumber = "0123456789",
         };
 
         var json = JsonSerializer.Serialize(payload);

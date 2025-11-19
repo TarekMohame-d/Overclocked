@@ -9,8 +9,10 @@ namespace Unit.Tests.Validations.Authentication;
 public class ResetPasswordRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(ResetPasswordValidationTestCases.InvalidEmailCases),
-        MemberType = typeof(ResetPasswordValidationTestCases))]
+    [MemberData(
+        nameof(ResetPasswordValidationTestCases.InvalidEmailCases),
+        MemberType = typeof(ResetPasswordValidationTestCases)
+    )]
     public void ResetPasswordRequestValidator_Should_ReturnError_When_EmailIsInvalid(string? email)
     {
         // Arrange
@@ -19,7 +21,7 @@ public class ResetPasswordRequestValidatorTest
         {
             Email = email!,
             Password = "P@ssword1",
-            Code = "VC74A1"
+            Code = "VC74A1",
         };
 
         // Act
@@ -32,8 +34,10 @@ public class ResetPasswordRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(ResetPasswordValidationTestCases.InvalidPasswordCases),
-        MemberType = typeof(ResetPasswordValidationTestCases))]
+    [MemberData(
+        nameof(ResetPasswordValidationTestCases.InvalidPasswordCases),
+        MemberType = typeof(ResetPasswordValidationTestCases)
+    )]
     public void ResetPasswordRequestValidator_Should_ReturnError_When_PasswordIsInvalid(string? password)
     {
         // Arrange
@@ -42,7 +46,7 @@ public class ResetPasswordRequestValidatorTest
         {
             Email = "email@gmail.com",
             Password = password!,
-            Code = "VC74A1"
+            Code = "VC74A1",
         };
 
         // Act
@@ -55,8 +59,10 @@ public class ResetPasswordRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(ResetPasswordValidationTestCases.InvalidCodeCases),
-        MemberType = typeof(ResetPasswordValidationTestCases))]
+    [MemberData(
+        nameof(ResetPasswordValidationTestCases.InvalidCodeCases),
+        MemberType = typeof(ResetPasswordValidationTestCases)
+    )]
     public void ResetPasswordRequestValidator_Should_ReturnError_When_CodeIsInvalid(string? code)
     {
         // Arrange
@@ -65,7 +71,7 @@ public class ResetPasswordRequestValidatorTest
         {
             Email = "email@gmail.com",
             Password = "P@ssword1",
-            Code = code!
+            Code = code!,
         };
 
         // Act

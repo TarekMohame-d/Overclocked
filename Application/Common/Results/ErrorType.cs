@@ -12,5 +12,5 @@ public enum ErrorType
     Unauthorized,
     Forbidden,
     InternalServerError,
-    FileStorageError
+    FileStorageError,
 }

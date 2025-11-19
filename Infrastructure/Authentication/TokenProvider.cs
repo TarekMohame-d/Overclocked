@@ -24,10 +24,10 @@ internal sealed class TokenProvider(IOptions<JwtSettings> options) : ITokenProvi
             new(ClaimsConstants.Email, tokenClaims.Email),
             new(ClaimsConstants.DeviceId, tokenClaims.DeviceId),
             new(ClaimsConstants.Role, ((RoleType)tokenClaims.RoleId).ToString()),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        foreach (var permission in tokenClaims.Permissions)
+        foreach(var permission in tokenClaims.Permissions)
         {
             // Use a consistent custom claim type for permissions
             claims.Add(new Claim(ClaimsConstants.Permission, permission));
@@ -35,7 +35,8 @@ internal sealed class TokenProvider(IOptions<JwtSettings> options) : ITokenProvi
 
         var credentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SigningKey)),
-            SecurityAlgorithms.HmacSha256);
+            SecurityAlgorithms.HmacSha256
+        );
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -44,7 +45,7 @@ internal sealed class TokenProvider(IOptions<JwtSettings> options) : ITokenProvi
             NotBefore = DateTime.UtcNow,
             SigningCredentials = credentials,
             Issuer = _jwtSettings.Issuer,
-            Audience = _jwtSettings.Audience
+            Audience = _jwtSettings.Audience,
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -60,9 +61,6 @@ internal sealed class TokenProvider(IOptions<JwtSettings> options) : ITokenProvi
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomBytes);
 
-        return Convert.ToBase64String(randomBytes)
-            .Replace("+", "-")
-            .Replace("/", "_")
-            .TrimEnd('=');
+        return Convert.ToBase64String(randomBytes).Replace("+", "-").Replace("/", "_").TrimEnd('=');
     }
 }

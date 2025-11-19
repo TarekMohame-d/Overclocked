@@ -27,13 +27,9 @@ public class DeleteTagAsyncTest
     public async Task DeleteTagAsync_Should_ReturnFailure_WhenTagDoesNotExists()
     {
         // Arrange
-        var request = new DeleteTagRequest
-        {
-            Id = Guid.CreateVersion7()
-        };
+        var request = new DeleteTagRequest { Id = Guid.CreateVersion7() };
 
-        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns((Tag)null!);
+        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns((Tag)null!);
 
         // Act
         Result result = await _tagService.DeleteTagAsync(request, CancellationToken.None);
@@ -44,28 +40,22 @@ public class DeleteTagAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _tagRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _tagRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task DeleteTagAsync_Should_ReturnSuccess_WhenTagExists()
     {
         // Arrange
-        var request = new DeleteTagRequest
-        {
-            Id = Guid.CreateVersion7()
-        };
+        var request = new DeleteTagRequest { Id = Guid.CreateVersion7() };
 
         Tag? tag = new TagFaker().Generate();
 
-        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns(tag);
+        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(tag);
 
         _tagRepositoryMock.Delete(Arg.Any<Tag>());
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
         Result result = await _tagService.DeleteTagAsync(request, CancellationToken.None);
@@ -75,13 +65,10 @@ public class DeleteTagAsyncTest
         result.Error.ShouldBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _tagRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _tagRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1)
-            .CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
 
-        _tagRepositoryMock.Received(1)
-            .Delete(Arg.Any<Tag>());
+        _tagRepositoryMock.Received(1).Delete(Arg.Any<Tag>());
     }
 }

@@ -21,6 +21,7 @@ public class GetAllBrandsTest(CustomWebApplicationFactory factory) : IAsyncLifet
     private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
@@ -35,8 +36,9 @@ public class GetAllBrandsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<IEnumerable<BrandListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<IEnumerable<BrandListResponse>>>();
+        Result<IEnumerable<BrandListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<IEnumerable<BrandListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -58,8 +60,9 @@ public class GetAllBrandsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<IEnumerable<BrandListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<IEnumerable<BrandListResponse>>>();
+        Result<IEnumerable<BrandListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<IEnumerable<BrandListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -80,8 +83,9 @@ public class GetAllBrandsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<IEnumerable<BrandListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<IEnumerable<BrandListResponse>>>();
+        Result<IEnumerable<BrandListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<IEnumerable<BrandListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -101,19 +105,20 @@ public class GetAllBrandsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         var tasks = new List<Task<HttpResponseMessage>>();
 
         // Act
-        for (var i = 0; i < ConcurrentCalls; i++)
+        for(var i = 0; i < ConcurrentCalls; i++)
             tasks.Add(_client.GetAsync(BrandRoutes.GetAll));
 
         await Task.WhenAll(tasks);
 
         // Assert
-        foreach (Task<HttpResponseMessage> task in tasks)
+        foreach(Task<HttpResponseMessage> task in tasks)
         {
             HttpResponseMessage response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            Result<IEnumerable<BrandListResponse>>? result =
-                await response.Content.ReadFromJsonAsync<Result<IEnumerable<BrandListResponse>>>();
+            Result<IEnumerable<BrandListResponse>>? result = await response.Content.ReadFromJsonAsync<
+                Result<IEnumerable<BrandListResponse>>
+            >();
 
             result.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();

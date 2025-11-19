@@ -2,6 +2,7 @@ using Application.Common.Results;
 using Application.Services.Authentication.DTOs.Request;
 using Application.Services.Authentication.Events;
 using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Application.Services.Authentication;
 
@@ -11,16 +12,16 @@ public sealed partial class AuthenticationService
     {
         // TODO: refactor to use user service instead of directly using user repository
         User? user = await userRepository.SingleOrDefaultAsync(
-            x => x.Email == request.Email, cancellationToken: cancellationToken);
+            x => x.Email == request.Email,
+            cancellationToken: cancellationToken
+        );
 
-        if (user is null)
+        if(user is null)
             return Result.Success(); // to not expose user existence
 
         EmailConfirmationCode? emailConfirmationCode =
-            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, cancellationToken);
-
-        if (emailConfirmationCode is null)
-            return Result.Success(); // to not expose user existence
+            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, cancellationToken)
+            ?? throw new EmailConfirmationCodeNotExistException(user.Id);
 
         var code = emailConfirmationCodeService.UpdateEmailConfirmationCode(emailConfirmationCode);
 
@@ -28,7 +29,6 @@ public sealed partial class AuthenticationService
 
         ForgetPasswordEvent forgetPasswordEvent = new(user.Email, code);
         await eventDispatcher.DispatchAsync(forgetPasswordEvent, cancellationToken);
-
 
         return Result.Success();
     }

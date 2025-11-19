@@ -9,4 +9,3 @@ public record GetAllBrandsRequest : ICachedRequest
     public string? CacheSetKey => null;
     public TimeSpan SlidingExpiration => TimeSpan.FromMinutes(5);
 }
-

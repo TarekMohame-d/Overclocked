@@ -7,15 +7,16 @@ public class PermissionRequirementHandler : AuthorizationHandler<PermissionRequi
 {
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
-        PermissionRequirement requirement)
+        PermissionRequirement requirement
+    )
     {
-        // Check if the user has a claim of type "permission" 
+        // Check if the user has a claim of type "permission"
         // with the value equal to the required permission string.
-        var hasPermission = context.User.HasClaim(
-            claim => claim.Type == ClaimsConstants.Permission &&
-                     claim.Value == requirement.Permission);
+        var hasPermission = context.User.HasClaim(claim =>
+            claim.Type == ClaimsConstants.Permission && claim.Value == requirement.Permission
+        );
 
-        if (hasPermission)
+        if(hasPermission)
         {
             context.Succeed(requirement);
         }

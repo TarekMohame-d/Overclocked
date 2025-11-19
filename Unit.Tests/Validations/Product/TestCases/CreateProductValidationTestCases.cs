@@ -72,12 +72,8 @@ public class CreateProductValidationTestCases
         [
             new List<CreateProductRequest.Specs>
             {
-                new()
-                {
-                    Name = null!,
-                    Value = null!
-                }
-            }
+                new() { Name = null!, Value = null! },
+            },
         ];
 
         // Too long name and value
@@ -85,12 +81,8 @@ public class CreateProductValidationTestCases
         [
             new List<CreateProductRequest.Specs>
             {
-                new()
-                {
-                    Name = new string('N', 55),
-                    Value = new string('V', 350)
-                }
-            }
+                new() { Name = new string('N', 55), Value = new string('V', 350) },
+            },
         ];
 
         // Duplicate names
@@ -98,17 +90,9 @@ public class CreateProductValidationTestCases
         [
             new List<CreateProductRequest.Specs>
             {
-                new()
-                {
-                    Name = "Name",
-                    Value = "Value"
-                },
-                new()
-                {
-                    Name = "Name",
-                    Value = "Value"
-                }
-            }
+                new() { Name = "Name", Value = "Value" },
+                new() { Name = "Name", Value = "Value" },
+            },
         ];
 
         // Empty list

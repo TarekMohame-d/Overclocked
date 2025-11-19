@@ -9,16 +9,14 @@ namespace Unit.Tests.Validations.Tag;
 public class UpdateTagRequestValidatorTest
 {
     [Theory]
-    [MemberData(nameof(UpdateTagValidationTestCases.InvalidNameCases),
-        MemberType = typeof(UpdateTagValidationTestCases))]
+    [MemberData(
+        nameof(UpdateTagValidationTestCases.InvalidNameCases),
+        MemberType = typeof(UpdateTagValidationTestCases)
+    )]
     public void UpdateTagRequestValidator_Should_ReturnError_When_NameValidationFails(string? name)
     {
         // Arrange
-        var request = new UpdateTagRequest
-        {
-            Id = Guid.CreateVersion7(),
-            Name = name!
-        };
+        var request = new UpdateTagRequest { Id = Guid.CreateVersion7(), Name = name! };
 
         var validator = new UpdateTagRequestValidator();
 

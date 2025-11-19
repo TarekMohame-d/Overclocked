@@ -15,8 +15,10 @@ public class CreateCategoryRequestValidatorTest
     private readonly ICategoryRepository _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
 
     [Theory]
-    [MemberData(nameof(CreateCategoryValidationTestCases.InvalidNameCases),
-        MemberType = typeof(CreateCategoryValidationTestCases))]
+    [MemberData(
+        nameof(CreateCategoryValidationTestCases.InvalidNameCases),
+        MemberType = typeof(CreateCategoryValidationTestCases)
+    )]
     public async Task CreateCategoryRequestValidator_WhenNameIsInvalid_ShouldReturnError(string? name)
     {
         // Arrange
@@ -24,7 +26,7 @@ public class CreateCategoryRequestValidatorTest
         var request = new CreateCategoryRequest
         {
             Name = name!,
-            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png",
         };
 
         _categoryRepositoryMock
@@ -41,17 +43,15 @@ public class CreateCategoryRequestValidatorTest
     }
 
     [Theory]
-    [MemberData(nameof(CreateCategoryValidationTestCases.InvalidImageUrlCases),
-        MemberType = typeof(CreateCategoryValidationTestCases))]
+    [MemberData(
+        nameof(CreateCategoryValidationTestCases.InvalidImageUrlCases),
+        MemberType = typeof(CreateCategoryValidationTestCases)
+    )]
     public async Task CreateCategoryRequestValidator_WhenImageIsInvalid_ShouldReturnError(string? imageUrl)
     {
         // Arrange
         var validator = new CreateCategoryRequestValidator(_categoryRepositoryMock);
-        var request = new CreateCategoryRequest
-        {
-            Name = "Category Name",
-            ImageUrl = imageUrl!
-        };
+        var request = new CreateCategoryRequest { Name = "Category Name", ImageUrl = imageUrl! };
 
         _categoryRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -74,7 +74,7 @@ public class CreateCategoryRequestValidatorTest
         var request = new CreateCategoryRequest
         {
             Name = "Category Name",
-            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png",
         };
 
         _categoryRepositoryMock

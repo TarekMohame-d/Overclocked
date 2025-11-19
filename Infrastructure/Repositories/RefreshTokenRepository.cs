@@ -8,5 +8,6 @@ public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshT
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public RefreshTokenRepository(ApplicationDbContext dbContext) : base(dbContext) => _dbContext = dbContext;
+    public RefreshTokenRepository(ApplicationDbContext dbContext)
+        : base(dbContext) => _dbContext = dbContext;
 }

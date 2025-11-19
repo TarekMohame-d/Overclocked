@@ -16,8 +16,7 @@ public class OrderStatusConfiguration : IEntityTypeConfiguration<OrderStatus>
         // Relationships
 
         // Indexes
-        builder.HasIndex(os => os.Name)
-            .IsUnique();
+        builder.HasIndex(os => os.Name).IsUnique();
 
         // Seed Data
         builder.HasData(GenerateOrderStatus());
@@ -25,10 +24,7 @@ public class OrderStatusConfiguration : IEntityTypeConfiguration<OrderStatus>
 
     private IEnumerable<OrderStatus> GenerateOrderStatus()
     {
-        return Enum.GetValues<OrderStatusType>().Select(role => new OrderStatus
-        {
-            Id = (int)role,
-            Name = role.ToString(),
-        });
+        return Enum.GetValues<OrderStatusType>()
+            .Select(role => new OrderStatus { Id = (int)role, Name = role.ToString() });
     }
 }

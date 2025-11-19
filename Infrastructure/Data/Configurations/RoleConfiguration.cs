@@ -17,19 +17,11 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
         // Relationships
 
         // Indexes
-        builder.HasIndex(r => r.Name)
-            .IsUnique();
+        builder.HasIndex(r => r.Name).IsUnique();
 
         // Seed data
         builder.HasData(GenerateRoles());
     }
 
-    private static IEnumerable<Role> GenerateRoles()
-    {
-        return Enum.GetValues<RoleType>().Select(role => new Role
-        {
-            Id = (int)role,
-            Name = role.ToString()
-        });
-    }
+    private static IEnumerable<Role> GenerateRoles() => Enum.GetValues<RoleType>().Select(role => new Role { Id = (int)role, Name = role.ToString() });
 }

@@ -8,7 +8,7 @@ public abstract class Entity
 
     protected Entity()
     {
-        if (Id == Guid.Empty)
+        if(Id == Guid.Empty)
             Id = Guid.CreateVersion7();
     }
 }

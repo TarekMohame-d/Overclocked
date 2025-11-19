@@ -20,13 +20,14 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
             .WithMessage("{PropertyName} is not valid email address.")
             .MaximumLength(100)
             .WithMessage("{PropertyName} must be at most 100 characters long.")
-            .MustAsync(async (email, cancellation) =>
-            {
-                var exists =
-                    await _userRepository.AnyAsync(x => x.Email == email, cancellation);
+            .MustAsync(
+                async (email, cancellation) =>
+                {
+                    var exists = await _userRepository.AnyAsync(x => x.Email == email, cancellation);
 
-                return !exists;
-            })
+                    return !exists;
+                }
+            )
             .WithMessage("{PropertyName} already exists, please use another email or login.");
 
         RuleFor(x => x.Password)
@@ -37,7 +38,8 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
             .WithMessage("{PropertyName} must be at least 8 characters long.")
             .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?""':{}|<>]).{8,}$")
             .WithMessage(
-                "{PropertyName} must contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+                "{PropertyName} must contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+            );
 
         RuleFor(x => x.FirstName)
             .NotEmpty()
@@ -59,13 +61,14 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
             .WithMessage("{PropertyName} must be a valid phone number.")
             .MaximumLength(20)
             .WithMessage("{PropertyName} must be at most 20 characters long.")
-            .MustAsync(async (phone, cancellation) =>
-            {
-                var exists =
-                    await _userRepository.AnyAsync(x => x.Phone == phone, cancellation);
+            .MustAsync(
+                async (phone, cancellation) =>
+                {
+                    var exists = await _userRepository.AnyAsync(x => x.Phone == phone, cancellation);
 
-                return !exists;
-            })
+                    return !exists;
+                }
+            )
             .WithMessage("{PropertyName} already exists, please use another phone number.");
     }
 }

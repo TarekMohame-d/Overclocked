@@ -2,17 +2,45 @@
 
 namespace Application.Abstraction.Repositories;
 
-public interface IGenericRepository<T> where T : class
+public interface IGenericRepository<T>
+    where T : class
 {
     Task<IEnumerable<T>> GetAllAsync(bool asNoTracking = true, CancellationToken cancellationToken = default);
     IQueryable<T> Query(bool asNoTracking = true);
     Task<T?> GetByIdAsync(object[] keyValues, CancellationToken cancellationToken = default);
-    Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default);
-    Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>[] includes, bool asNoTracking = true, CancellationToken cancellationToken = default);
-    Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default);
-    Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>[] includes, bool asNoTracking = true, CancellationToken cancellationToken = default);
-    Task<IEnumerable<T>> WhereAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default);
-    Task<IEnumerable<T>> WhereAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>[] includes, bool asNoTracking = true, CancellationToken cancellationToken = default);
+    Task<T?> FirstOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    );
+    Task<T?> FirstOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, object>>[] includes,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    );
+    Task<T?> SingleOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    );
+    Task<T?> SingleOrDefaultAsync(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, object>>[] includes,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    );
+    Task<IEnumerable<T>> WhereAsync(
+        Expression<Func<T, bool>> predicate,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    );
+    Task<IEnumerable<T>> WhereAsync(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, object>>[] includes,
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default
+    );
     Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);
     Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
     void Update(T entity);

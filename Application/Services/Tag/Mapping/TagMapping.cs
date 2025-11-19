@@ -6,13 +6,7 @@ namespace Application.Services.Tag.Mapping;
 
 public static class TagMapping
 {
-    public static TagEntity ToEntity(this CreateTagRequest request)
-    {
-        return new TagEntity
-        {
-            Name = request.Name
-        };
-    }
+    public static TagEntity ToEntity(this CreateTagRequest request) => new TagEntity { Name = request.Name };
 
     public static void UpdateFrom(this TagEntity entity, UpdateTagRequest request)
     {
@@ -20,23 +14,11 @@ public static class TagMapping
         entity.UpdatedAt = DateTime.UtcNow;
     }
 
-    public static TagResponse ToDto(this TagEntity entity) => new()
-    {
-        Id = entity.Id,
-        Name = entity.Name
-    };
+    public static TagResponse ToDto(this TagEntity entity) => new() { Id = entity.Id, Name = entity.Name };
 
     public static IEnumerable<TagListResponse> ToDto(this IEnumerable<TagEntity> entities) =>
-        entities.Select(x => new TagListResponse
-        {
-            Id = x.Id,
-            Name = x.Name
-        });
+        entities.Select(x => new TagListResponse { Id = x.Id, Name = x.Name });
 
     public static IQueryable<TagListResponse> ToDto(this IQueryable<TagEntity> entities) =>
-        entities.Select(x => new TagListResponse
-        {
-            Id = x.Id,
-            Name = x.Name
-        });
+        entities.Select(x => new TagListResponse { Id = x.Id, Name = x.Name });
 }

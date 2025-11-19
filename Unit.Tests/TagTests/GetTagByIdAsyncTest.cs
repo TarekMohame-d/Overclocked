@@ -32,8 +32,7 @@ public class GetTagByIdAsyncTest
         Tag tag = new TagFaker().Generate();
         TagResponse tagDto = tag.ToDto();
 
-        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns(tag);
+        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(tag);
 
         // Act
         Result<TagResponse> result = await _tagService.GetTagByIdAsync(request, CancellationToken.None);
@@ -46,8 +45,7 @@ public class GetTagByIdAsyncTest
         result.Data.ShouldNotBeNull();
         tagDto.ShouldBeEquivalentTo(result.Data);
 
-        await _tagRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _tagRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -57,8 +55,7 @@ public class GetTagByIdAsyncTest
         var tagId = Guid.CreateVersion7();
         var request = new GetTagByIdRequest { Id = tagId };
 
-        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns((Tag)null!);
+        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns((Tag)null!);
 
         // Act
         Result<TagResponse> result = await _tagService.GetTagByIdAsync(request, CancellationToken.None);
@@ -70,7 +67,6 @@ public class GetTagByIdAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _tagRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _tagRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
     }
 }

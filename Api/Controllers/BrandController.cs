@@ -29,8 +29,10 @@ public class BrandController(IBrandService brandServices) : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var request = new GetAllBrandsRequest();
-        Result<IEnumerable<BrandListResponse>> response =
-            await brandServices.GetAllBrandsAsync(request, cancellationToken);
+        Result<IEnumerable<BrandListResponse>> response = await brandServices.GetAllBrandsAsync(
+            request,
+            cancellationToken
+        );
 
         return response.ToActionResult();
     }
@@ -53,13 +55,14 @@ public class BrandController(IBrandService brandServices) : ControllerBase
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
         [FromBody] UpdateBrandRequestBody request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         UpdateBrandRequest updateBrandRequest = new()
         {
             Id = id,
             Name = request.Name,
-            ImageUrl = request.ImageUrl
+            ImageUrl = request.ImageUrl,
         };
 
         Result response = await brandServices.UpdateBrandAsync(updateBrandRequest, cancellationToken);

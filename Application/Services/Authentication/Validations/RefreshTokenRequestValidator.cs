@@ -7,24 +7,17 @@ public class RefreshTokenRequestValidator : AbstractValidator<RefreshTokenReques
 {
     public RefreshTokenRequestValidator()
     {
-        RuleFor(x => x.AccessToken)
-            .Must(BeValidJwt)
-            .WithMessage("{PropertyName} is not a valid JWT.");
+        RuleFor(x => x.AccessToken).Must(BeValidJwt).WithMessage("{PropertyName} is not a valid JWT.");
 
-        RuleFor(x => x.RefreshToken)
-            .NotEmpty()
-            .WithMessage("{PropertyName} is required.");
+        RuleFor(x => x.RefreshToken).NotEmpty().WithMessage("{PropertyName} is required.");
     }
 
     private bool BeValidJwt(string token)
     {
-        if (string.IsNullOrWhiteSpace(token))
+        if(string.IsNullOrWhiteSpace(token))
             return false;
 
         var parts = token.Split('.');
-        return parts.Length == 3
-               && parts[0].Length > 0
-               && parts[1].Length > 0
-               && parts[2].Length > 0;
+        return parts.Length == 3 && parts[0].Length > 0 && parts[1].Length > 0 && parts[2].Length > 0;
     }
 }

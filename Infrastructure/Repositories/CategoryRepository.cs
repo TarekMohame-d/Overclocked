@@ -8,7 +8,8 @@ public class CategoryRepository : GenericRepository<Category>, ICategoryReposito
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public CategoryRepository(ApplicationDbContext dbContext) : base(dbContext)
+    public CategoryRepository(ApplicationDbContext dbContext)
+        : base(dbContext)
     {
         _dbContext = dbContext;
     }

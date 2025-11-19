@@ -19,7 +19,6 @@ using Shouldly;
 
 namespace Integration.Tests.AuthenticationTests;
 
-
 [Collection(nameof(SharedTestCollection))]
 public class RefreshTokenTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
@@ -40,9 +39,7 @@ public class RefreshTokenTest(CustomWebApplicationFactory factory) : IAsyncLifet
         User user = await SeedDatabaseAsync();
         StringContent loginForm = CreateLoginJsonContent();
 
-        factory.BackgroundJobClientMock
-            .Create(Arg.Any<Job>(), Arg.Any<IState>())
-            .Returns("a-fake-job-id");
+        factory.BackgroundJobClientMock.Create(Arg.Any<Job>(), Arg.Any<IState>()).Returns("a-fake-job-id");
         HttpResponseMessage loginResponse = await _client.PostAsync(AuthRoutes.Login, loginForm);
 
         Result<AuthResponse>? loginResult = await loginResponse.Content.ReadFromJsonAsync<Result<AuthResponse>>();
@@ -69,12 +66,12 @@ public class RefreshTokenTest(CustomWebApplicationFactory factory) : IAsyncLifet
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         RefreshToken? refreshTokenDb = await dbContext.RefreshTokens.SingleOrDefaultAsync(x =>
-            x.UserId == user.Id && x.DeviceId == "device-id");
+            x.UserId == user.Id && x.DeviceId == "device-id"
+        );
         refreshTokenDb.ShouldNotBeNull();
         new RefreshTokenHasher().Verify(result.Data.RefreshToken, refreshTokenDb.TokenHash).ShouldBeTrue();
 
-        factory.BackgroundJobClientMock.DidNotReceive()
-            .Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
+        factory.BackgroundJobClientMock.DidNotReceive().Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
     }
 
     private async Task<User> SeedDatabaseAsync()
@@ -85,11 +82,7 @@ public class RefreshTokenTest(CustomWebApplicationFactory factory) : IAsyncLifet
         user.EmailConfirmed = true;
         user.PasswordHash = passwordHasher.Hash("P@ssword123");
 
-        var role = new Role
-        {
-            Name = "Customer",
-            Id = 4
-        };
+        var role = new Role { Name = "Customer", Id = 4 };
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -103,11 +96,7 @@ public class RefreshTokenTest(CustomWebApplicationFactory factory) : IAsyncLifet
 
     private static StringContent CreateJsonContent(string accessToken, string refreshToken)
     {
-        var payload = new
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken
-        };
+        var payload = new { AccessToken = accessToken, RefreshToken = refreshToken };
 
         var json = JsonSerializer.Serialize(payload);
 
@@ -120,7 +109,7 @@ public class RefreshTokenTest(CustomWebApplicationFactory factory) : IAsyncLifet
         {
             Email = email,
             Password = "P@ssword123",
-            DeviceId = "device-id"
+            DeviceId = "device-id",
         };
 
         var json = JsonSerializer.Serialize(payload);

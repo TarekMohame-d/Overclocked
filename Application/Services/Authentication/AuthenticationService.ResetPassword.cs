@@ -1,6 +1,8 @@
 using Application.Common.Results;
+using Application.Common.Results.PredefinedErrors;
 using Application.Services.Authentication.DTOs.Request;
 using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Application.Services.Authentication;
 
@@ -10,21 +12,25 @@ public sealed partial class AuthenticationService
     {
         // TODO: refactor to use user service instead of directly using user repository
         User? user = await userRepository.SingleOrDefaultAsync(
-            x => x.Email == request.Email, cancellationToken: cancellationToken);
+            x => x.Email == request.Email,
+            cancellationToken: cancellationToken
+        );
 
-        if (user is null)
+        if(user is null)
             return Result.Failure(Errors.InvalidResetPasswordCredentials);
 
         EmailConfirmationCode emailConfirmationCode =
             await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, cancellationToken)
-            ?? throw new Exception("Confirmation code not found.");
+            ?? throw new EmailConfirmationCodeNotExistException(user.Id);
 
-        if (emailConfirmationCode.ExpiredAt < DateTime.UtcNow || emailConfirmationCode.IsUsed)
+        if(emailConfirmationCode.ExpiredAt < DateTime.UtcNow || emailConfirmationCode.IsUsed)
+        {
             return Result.Failure(Errors.EmailConfirmationCodeExpired);
+        }
 
         var isValid = emailConfirmationCodeHasher.Verify(request.Code, emailConfirmationCode.CodeHash);
 
-        if (!isValid)
+        if(!isValid)
             return Result.Failure(Errors.InvalidResetPasswordCredentials);
 
         user.PasswordHash = passwordHasher.Hash(request.Password);

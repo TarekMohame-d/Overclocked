@@ -8,5 +8,7 @@ public interface IHasher
 }
 
 public interface IPasswordHasher : IHasher { }
+
 public interface IEmailConfirmationCodeHasher : IHasher { }
+
 public interface IRefreshTokenHasher : IHasher { }

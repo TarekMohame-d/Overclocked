@@ -21,6 +21,7 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
     private readonly HttpClient _client = factory.HttpClient;
 
     public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
+
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
@@ -36,8 +37,9 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<PagedResult<TagListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<PagedResult<TagListResponse>>>();
+        Result<PagedResult<TagListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<PagedResult<TagListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -60,8 +62,9 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<PagedResult<TagListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<PagedResult<TagListResponse>>>();
+        Result<PagedResult<TagListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<PagedResult<TagListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -83,8 +86,9 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<PagedResult<TagListResponse>>? result =
-            await response.Content.ReadFromJsonAsync<Result<PagedResult<TagListResponse>>>();
+        Result<PagedResult<TagListResponse>>? result = await response.Content.ReadFromJsonAsync<
+            Result<PagedResult<TagListResponse>>
+        >();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
@@ -104,7 +108,7 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         var tasks = new List<Task<HttpResponseMessage>>();
 
         // Act
-        for (var i = 0; i < ConcurrentCalls; i++)
+        for(var i = 0; i < ConcurrentCalls; i++)
         {
             const string Url = $"{TagRoutes.GetAll}?Page=1&PageSize=5&SortBy=name&Direction=asc";
             tasks.Add(_client.GetAsync(Url));
@@ -113,13 +117,14 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         await Task.WhenAll(tasks);
 
         // Assert
-        foreach (Task<HttpResponseMessage> task in tasks)
+        foreach(Task<HttpResponseMessage> task in tasks)
         {
             HttpResponseMessage response = await task;
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            Result<PagedResult<TagListResponse>>? result =
-                await response.Content.ReadFromJsonAsync<Result<PagedResult<TagListResponse>>>();
+            Result<PagedResult<TagListResponse>>? result = await response.Content.ReadFromJsonAsync<
+                Result<PagedResult<TagListResponse>>
+            >();
 
             result.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();
@@ -157,7 +162,7 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
             Items = tagListDtos.ToList(),
             PageNumber = 1,
             PageSize = 20,
-            TotalItemCount = tags.Count
+            TotalItemCount = tags.Count,
         };
         var result = Result<PagedResult<TagListResponse>>.Success(pagedResult);
         await cache.SetAsync(key, result, TimeSpan.FromMinutes(5));

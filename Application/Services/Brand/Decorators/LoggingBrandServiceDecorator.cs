@@ -7,18 +7,18 @@ using Serilog.Context;
 
 namespace Application.Services.Brand.Decorators;
 
-public class LoggingBrandServiceDecorator(
-    IBrandService inner,
-    ILogger<LoggingBrandServiceDecorator> logger)
+public class LoggingBrandServiceDecorator(IBrandService inner, ILogger<LoggingBrandServiceDecorator> logger)
     : IBrandService
 {
-    public Task<Result<BrandResponse>> GetBrandByIdAsync(GetBrandByIdRequest request,
-        CancellationToken cancellationToken) =>
-        ExecuteWithLoggingAsync(request, () => inner.GetBrandByIdAsync(request, cancellationToken));
+    public Task<Result<BrandResponse>> GetBrandByIdAsync(
+        GetBrandByIdRequest request,
+        CancellationToken cancellationToken
+    ) => ExecuteWithLoggingAsync(request, () => inner.GetBrandByIdAsync(request, cancellationToken));
 
-    public Task<Result<IEnumerable<BrandListResponse>>> GetAllBrandsAsync(GetAllBrandsRequest request,
-        CancellationToken cancellationToken) =>
-        ExecuteWithLoggingAsync(request, () => inner.GetAllBrandsAsync(request, cancellationToken));
+    public Task<Result<IEnumerable<BrandListResponse>>> GetAllBrandsAsync(
+        GetAllBrandsRequest request,
+        CancellationToken cancellationToken
+    ) => ExecuteWithLoggingAsync(request, () => inner.GetAllBrandsAsync(request, cancellationToken));
 
     public Task<Result> CreateBrandAsync(CreateBrandRequest request, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(request, () => inner.CreateBrandAsync(request, cancellationToken));
@@ -29,9 +29,7 @@ public class LoggingBrandServiceDecorator(
     public Task<Result> DeleteBrandAsync(DeleteBrandRequest request, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(request, () => inner.DeleteBrandAsync(request, cancellationToken));
 
-    private async Task<TResult> ExecuteWithLoggingAsync<TResult>(
-        object request,
-        Func<Task<TResult>> action)
+    private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object request, Func<Task<TResult>> action)
         where TResult : Result
     {
         var requestName = request.GetType().Name;
@@ -39,12 +37,16 @@ public class LoggingBrandServiceDecorator(
 
         TResult result = await action();
 
-        if (result.IsSuccess)
+        if(result.IsSuccess)
+        {
             logger.LogInformation("Completed request {RequestName}", requestName);
+        }
         else
         {
-            using (LogContext.PushProperty("Errors", result.Error, true))
+            using(LogContext.PushProperty("Errors", result.Error, true))
+            {
                 logger.LogError("Completed request {@RequestName} with errors", requestName);
+            }
         }
 
         return result;

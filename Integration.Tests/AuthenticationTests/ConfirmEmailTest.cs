@@ -47,10 +47,15 @@ public class ConfirmEmailTest(CustomWebApplicationFactory factory) : IAsyncLifet
         userDb.ShouldNotBeNull();
         userDb.EmailConfirmed.ShouldBeTrue();
 
-        EmailConfirmationCode? emailConfirmationCodeDb =
-            await dbContext.EmailConfirmationCodes.SingleOrDefaultAsync(x => x.UserId == userDb.Id);
+        EmailConfirmationCode? emailConfirmationCodeDb = await dbContext.EmailConfirmationCodes.SingleOrDefaultAsync(
+            x => x.UserId == userDb.Id
+        );
         emailConfirmationCodeDb.ShouldNotBeNull();
         emailConfirmationCodeDb.IsUsed.ShouldBeTrue();
+
+        Cart? cart = await dbContext.Carts.SingleOrDefaultAsync(x => x.UserId == userDb.Id);
+        cart.ShouldNotBeNull();
+        cart.UserId.ShouldBe(userDb.Id);
 
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -69,11 +74,7 @@ public class ConfirmEmailTest(CustomWebApplicationFactory factory) : IAsyncLifet
         emailConfirmationCode.CodeHash = emailConfirmationCodeHasher.Hash(PlainCode);
         emailConfirmationCode.UserId = user.Id;
 
-        var role = new Role
-        {
-            Name = "Customer",
-            Id = 4
-        };
+        var role = new Role { Name = "Customer", Id = 4 };
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -88,11 +89,7 @@ public class ConfirmEmailTest(CustomWebApplicationFactory factory) : IAsyncLifet
 
     private static StringContent CreateJsonContent(string email = "test@gmail.com", string code = PlainCode)
     {
-        var payload = new
-        {
-            Email = email,
-            Code = code
-        };
+        var payload = new { Email = email, Code = code };
 
         var json = JsonSerializer.Serialize(payload);
 

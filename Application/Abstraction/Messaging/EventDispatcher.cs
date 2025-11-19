@@ -14,14 +14,15 @@ public class EventDispatcher : IEventDispatcher
     public async Task DispatchAsync(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
     {
         // Get the generic handler type (e.g., IEventHandler<UserRegisteredEvent>)
-        var handlerType = typeof(IEventHandler<>).MakeGenericType(domainEvent.GetType());
+        Type handlerType = typeof(IEventHandler<>).MakeGenericType(domainEvent.GetType());
 
         // Resolve all handlers from DI
-        var handlers = _serviceProvider.GetServices(handlerType);
+        IEnumerable<object?> handlers = _serviceProvider.GetServices(handlerType);
 
-        foreach (var handler in handlers)
+        foreach(var handler in handlers)
         {
-            if (handler is null) continue;
+            if(handler is null)
+                continue;
 
             await ((IEventHandler)handler).Handle(domainEvent, cancellationToken);
         }

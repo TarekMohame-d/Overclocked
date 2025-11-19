@@ -39,9 +39,7 @@ public class ForgetPasswordTest(CustomWebApplicationFactory factory) : IAsyncLif
         (User user, EmailConfirmationCode emailConfirmationCode) = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent(user.Email);
 
-        factory.BackgroundJobClientMock
-            .Create(Arg.Any<Job>(), Arg.Any<IState>())
-            .Returns("a-fake-job-id");
+        factory.BackgroundJobClientMock.Create(Arg.Any<Job>(), Arg.Any<IState>()).Returns("a-fake-job-id");
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(AuthRoutes.ForgotPassword, form);
@@ -58,8 +56,9 @@ public class ForgetPasswordTest(CustomWebApplicationFactory factory) : IAsyncLif
         userDb.ShouldNotBeNull();
         userDb.EmailConfirmed.ShouldBeTrue();
 
-        EmailConfirmationCode? emailConfirmationCodeDb =
-            await dbContext.EmailConfirmationCodes.SingleOrDefaultAsync(x => x.UserId == userDb.Id);
+        EmailConfirmationCode? emailConfirmationCodeDb = await dbContext.EmailConfirmationCodes.SingleOrDefaultAsync(
+            x => x.UserId == userDb.Id
+        );
         emailConfirmationCodeDb.ShouldNotBeNull();
         emailConfirmationCodeDb.IsUsed.ShouldBeFalse();
         var emailConfirmationCodeHasher = new EmailConfirmationCodeHasher();
@@ -70,8 +69,7 @@ public class ForgetPasswordTest(CustomWebApplicationFactory factory) : IAsyncLif
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
 
-        factory.BackgroundJobClientMock.Received(1)
-            .Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
+        factory.BackgroundJobClientMock.Received(1).Create(Arg.Any<Job>(), Arg.Any<EnqueuedState>());
     }
 
     private async Task<(User user, EmailConfirmationCode emailConfirmationCode)> SeedDatabaseAsync()
@@ -85,11 +83,7 @@ public class ForgetPasswordTest(CustomWebApplicationFactory factory) : IAsyncLif
         emailConfirmationCode.CodeHash = emailConfirmationCodeHasher.Hash(PlainCode);
         emailConfirmationCode.UserId = user.Id;
 
-        var role = new Role
-        {
-            Name = "Customer",
-            Id = 4
-        };
+        var role = new Role { Name = "Customer", Id = 4 };
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -104,10 +98,7 @@ public class ForgetPasswordTest(CustomWebApplicationFactory factory) : IAsyncLif
 
     private static StringContent CreateJsonContent(string email = "test@gmail.com")
     {
-        var payload = new
-        {
-            Email = email
-        };
+        var payload = new { Email = email };
 
         var json = JsonSerializer.Serialize(payload);
 

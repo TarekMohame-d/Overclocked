@@ -1,5 +1,6 @@
 using System.Net;
 using Application.Common.Results;
+using Application.Common.Results.PredefinedErrors;
 using Application.Services.Category.DTOs.Request;
 using Application.Services.Category.Events;
 
@@ -11,8 +12,10 @@ public sealed partial class CategoryService
     {
         Domain.Entities.Category? category = await categoryRepository.GetByIdAsync([request.Id], cancellationToken);
 
-        if (category is null)
+        if(category is null)
+        {
             return Result.Failure(Errors.CategoryNotFound, HttpStatusCode.NotFound);
+        }
 
         categoryRepository.Delete(category);
 

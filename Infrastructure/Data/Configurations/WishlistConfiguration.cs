@@ -12,17 +12,16 @@ public class WishlistConfiguration : IEntityTypeConfiguration<Wishlist>
         builder.HasKey(w => w.Id);
         builder.Property(w => w.Id).ValueGeneratedNever().IsRequired();
         builder.Property(w => w.UserId).IsRequired();
-        builder.Property(w => w.CreatedAt).HasColumnType("timestamptz")
-            .HasDefaultValueSql("NOW()");
+        builder.Property(w => w.CreatedAt).HasColumnType("timestamptz").HasDefaultValueSql("NOW()");
 
         // Relationships
-        builder.HasOne(w => w.User)
+        builder
+            .HasOne(w => w.User)
             .WithOne(w => w.Wishlist)
             .HasForeignKey<Wishlist>(w => w.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(w => w.UserId)
-            .IsUnique();
+        builder.HasIndex(w => w.UserId).IsUnique();
     }
 }

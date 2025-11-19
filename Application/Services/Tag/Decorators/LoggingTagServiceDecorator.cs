@@ -7,30 +7,26 @@ using Serilog.Context;
 
 namespace Application.Services.Tag.Decorators;
 
-public class LoggingTagServiceDecorator(
-    ITagService inner,
-    ILogger<LoggingTagServiceDecorator> logger)
-    : ITagService
+public class LoggingTagServiceDecorator(ITagService inner, ILogger<LoggingTagServiceDecorator> logger) : ITagService
 {
-    public Task<Result<TagResponse>> GetTagByIdAsync(GetTagByIdRequest request, CancellationToken cancellationToken)
-        => ExecuteWithLoggingAsync(request, () => inner.GetTagByIdAsync(request, cancellationToken));
+    public Task<Result<TagResponse>> GetTagByIdAsync(GetTagByIdRequest request, CancellationToken cancellationToken) =>
+        ExecuteWithLoggingAsync(request, () => inner.GetTagByIdAsync(request, cancellationToken));
 
-    public Task<Result<PagedResult<TagListResponse>>> GetPagedTagsAsync(GetPagedTagsRequest request,
-        CancellationToken cancellationToken)
-        => ExecuteWithLoggingAsync(request, () => inner.GetPagedTagsAsync(request, cancellationToken));
+    public Task<Result<PagedResult<TagListResponse>>> GetPagedTagsAsync(
+        GetPagedTagsRequest request,
+        CancellationToken cancellationToken
+    ) => ExecuteWithLoggingAsync(request, () => inner.GetPagedTagsAsync(request, cancellationToken));
 
-    public Task<Result> CreateTagAsync(CreateTagRequest request, CancellationToken cancellationToken)
-        => ExecuteWithLoggingAsync(request, () => inner.CreateTagAsync(request, cancellationToken));
+    public Task<Result> CreateTagAsync(CreateTagRequest request, CancellationToken cancellationToken) =>
+        ExecuteWithLoggingAsync(request, () => inner.CreateTagAsync(request, cancellationToken));
 
-    public Task<Result> UpdateTagAsync(UpdateTagRequest request, CancellationToken cancellationToken)
-        => ExecuteWithLoggingAsync(request, () => inner.UpdateTagAsync(request, cancellationToken));
+    public Task<Result> UpdateTagAsync(UpdateTagRequest request, CancellationToken cancellationToken) =>
+        ExecuteWithLoggingAsync(request, () => inner.UpdateTagAsync(request, cancellationToken));
 
-    public Task<Result> DeleteTagAsync(DeleteTagRequest request, CancellationToken cancellationToken)
-        => ExecuteWithLoggingAsync(request, () => inner.DeleteTagAsync(request, cancellationToken));
+    public Task<Result> DeleteTagAsync(DeleteTagRequest request, CancellationToken cancellationToken) =>
+        ExecuteWithLoggingAsync(request, () => inner.DeleteTagAsync(request, cancellationToken));
 
-    private async Task<TResult> ExecuteWithLoggingAsync<TResult>(
-        object request,
-        Func<Task<TResult>> action)
+    private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object request, Func<Task<TResult>> action)
         where TResult : Result
     {
         var requestName = request.GetType().Name;
@@ -38,12 +34,16 @@ public class LoggingTagServiceDecorator(
 
         TResult result = await action();
 
-        if (result.IsSuccess)
+        if(result.IsSuccess)
+        {
             logger.LogInformation("Completed request {RequestName}", requestName);
+        }
         else
         {
-            using (LogContext.PushProperty("Errors", result.Error, true))
+            using(LogContext.PushProperty("Errors", result.Error, true))
+            {
                 logger.LogError("Completed request {@RequestName} with errors", requestName);
+            }
         }
 
         return result;

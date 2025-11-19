@@ -35,13 +35,15 @@ public class UpdateCategoryAsyncTest
         {
             Id = Guid.CreateVersion7(),
             Name = "Category Name",
-            ImageUrl = "image.png"
+            ImageUrl = "image.png",
         };
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock
+            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
             .Returns((Category)null!);
 
-        _eventDispatcherMock.DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
+        _eventDispatcherMock
+            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
             .Returns(Task.CompletedTask);
 
         // Act
@@ -53,10 +55,10 @@ public class UpdateCategoryAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _categoryRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
 
-        await _eventDispatcherMock.DidNotReceive()
+        await _eventDispatcherMock
+            .DidNotReceive()
             .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
     }
 
@@ -68,23 +70,22 @@ public class UpdateCategoryAsyncTest
         {
             Id = Guid.CreateVersion7(),
             Name = "Category Name",
-            ImageUrl = "image.png"
+            ImageUrl = "image.png",
         };
 
         Category brand = new CategoryFaker().Generate();
 
         brand.Name = request.Name;
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
-            .Returns(brand);
+        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(brand);
 
         _categoryRepositoryMock.Update(Arg.Any<Category>());
 
-        _eventDispatcherMock.DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
+        _eventDispatcherMock
+            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
             .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
         Result result = await _categoryService.UpdateCategoryAsync(request, CancellationToken.None);
@@ -94,16 +95,12 @@ public class UpdateCategoryAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBeNull();
 
-        await _categoryRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1)
-            .CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
 
-        _categoryRepositoryMock.Received(1)
-            .Update(Arg.Any<Category>());
+        _categoryRepositoryMock.Received(1).Update(Arg.Any<Category>());
 
-        await _eventDispatcherMock.Received(1)
-            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
+        await _eventDispatcherMock.Received(1).DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
     }
 }

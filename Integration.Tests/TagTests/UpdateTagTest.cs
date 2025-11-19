@@ -24,10 +24,10 @@ public class UpdateTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
     {
         await factory.ResetDatabaseAsync();
 
-        var token = CustomWebApplicationFactory
-            .GenerateJwtToken(permissions: [PermissionType.AddEditDelete.ToString()]);
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var token = CustomWebApplicationFactory.GenerateJwtToken(
+            permissions: [PermissionType.AddEditDelete.ToString()]
+        );
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -64,8 +64,10 @@ public class UpdateTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         StringContent form = CreateJsonContent("New Name");
 
         // Act
-        HttpResponseMessage response =
-            await _client.PutAsync(TagRoutes.Update.Replace("{id:guid}", tag.Id.ToString()), form);
+        HttpResponseMessage response = await _client.PutAsync(
+            TagRoutes.Update.Replace("{id:guid}", tag.Id.ToString()),
+            form
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -93,12 +95,13 @@ public class UpdateTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         StringContent form = CreateJsonContent("New Name");
 
         var token = CustomWebApplicationFactory.GenerateJwtToken();
-        factory.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        HttpResponseMessage response =
-            await _client.PutAsync(TagRoutes.Update.Replace("{id:guid}", tag.Id.ToString()), form);
+        HttpResponseMessage response = await _client.PutAsync(
+            TagRoutes.Update.Replace("{id:guid}", tag.Id.ToString()),
+            form
+        );
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -119,10 +122,7 @@ public class UpdateTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 
     private static StringContent CreateJsonContent(string name)
     {
-        var payload = new
-        {
-            Name = name
-        };
+        var payload = new { Name = name };
 
         var json = JsonSerializer.Serialize(payload);
 

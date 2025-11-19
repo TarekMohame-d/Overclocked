@@ -1,5 +1,6 @@
 using System.Net;
 using Application.Common.Results;
+using Application.Common.Results.PredefinedErrors;
 using Application.Services.Brand.DTOs.Request;
 using Application.Services.Brand.Events;
 using Application.Services.Brand.Mapping;
@@ -12,20 +13,26 @@ public sealed partial class BrandService
     {
         Domain.Entities.Brand? brand = await brandRepository.GetByIdAsync([request.Id], cancellationToken);
 
-        if (brand is null)
-            return Result.Failure(Errors.BrandNotFound, HttpStatusCode.NotFound);
-
-        if (brand.Name != request.Name)
+        if(brand is null)
         {
-            var exist = await brandRepository
-                .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
+            return Result.Failure(Errors.BrandNotFound, HttpStatusCode.NotFound);
+        }
 
-            if (exist)
+        if(brand.Name != request.Name)
+        {
+            var exist = await brandRepository.AnyAsync(
+                x => x.NormalizedName == request.Name.ToUpper(),
+                cancellationToken
+            );
+
+            if(exist)
+            {
                 return Result.Failure(Errors.BrandNameAlreadyExists, HttpStatusCode.Conflict);
+            }
         }
 
         // Delete old image
-        if (brand.Image != request.ImageUrl)
+        if(brand.Image != request.ImageUrl)
         {
             BrandUpdatedEvent brandUpdatedEvent = new(brand.Image);
             await eventDispatcher.DispatchAsync(brandUpdatedEvent, cancellationToken);

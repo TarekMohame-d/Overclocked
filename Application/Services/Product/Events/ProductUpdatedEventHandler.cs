@@ -4,9 +4,8 @@ using Hangfire;
 
 namespace Application.Services.Product.Events;
 
-public class ProductUpdatedEventHandler(
-    IBackgroundJobClient jobClient,
-    IFileStorageService fileStorageService) : IEventHandler<ProductUpdatedEvent>
+public class ProductUpdatedEventHandler(IBackgroundJobClient jobClient, IFileStorageService fileStorageService)
+    : IEventHandler<ProductUpdatedEvent>
 {
     public Task HandleAsync(ProductUpdatedEvent domainEvent, CancellationToken cancellationToken)
     {
@@ -14,6 +13,6 @@ public class ProductUpdatedEventHandler(
         return Task.CompletedTask;
     }
 
-    public Task Handle(IDomainEvent domainEvent, CancellationToken cancellationToken)
-        => HandleAsync((ProductUpdatedEvent)domainEvent, cancellationToken);
+    public Task Handle(IDomainEvent domainEvent, CancellationToken cancellationToken) =>
+        HandleAsync((ProductUpdatedEvent)domainEvent, cancellationToken);
 }

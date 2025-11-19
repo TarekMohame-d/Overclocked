@@ -8,5 +8,6 @@ public class RolePermissionsRepository : GenericRepository<RolePermission>, IRol
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public RolePermissionsRepository(ApplicationDbContext dbContext) : base(dbContext) => _dbContext = dbContext;
+    public RolePermissionsRepository(ApplicationDbContext dbContext)
+        : base(dbContext) => _dbContext = dbContext;
 }

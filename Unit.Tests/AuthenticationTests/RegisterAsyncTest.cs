@@ -1,4 +1,5 @@
 using System.Net;
+using Application.Abstraction.DomainServices;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
@@ -27,6 +28,7 @@ public class RegisterAsyncTest
     private readonly IUserRepository _userRepositoryMock;
     private readonly IRolePermissionsRepository _rolePermissionsRepositoryMock;
     private readonly ITokenReaderService _tokenReaderServiceMock;
+    private readonly ICartService _cartServiceMock;
 
     public RegisterAsyncTest()
     {
@@ -40,10 +42,21 @@ public class RegisterAsyncTest
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _rolePermissionsRepositoryMock = Substitute.For<IRolePermissionsRepository>();
         _tokenReaderServiceMock = Substitute.For<ITokenReaderService>();
+        _cartServiceMock = Substitute.For<ICartService>();
 
-        _authenticationService = new AuthenticationService(_userRepositoryMock, _rolePermissionsRepositoryMock, _unitOfWorkMock, _passwordHasherMock,
-            _eventDispatcherMock, _emailConfirmationCodeHasherMock, _emailConfirmationCodeServiceMock,
-            _tokenProviderMock, _refreshTokenServiceMock, _tokenReaderServiceMock);
+        _authenticationService = new AuthenticationService(
+            _userRepositoryMock,
+            _rolePermissionsRepositoryMock,
+            _unitOfWorkMock,
+            _passwordHasherMock,
+            _eventDispatcherMock,
+            _emailConfirmationCodeHasherMock,
+            _emailConfirmationCodeServiceMock,
+            _tokenProviderMock,
+            _refreshTokenServiceMock,
+            _tokenReaderServiceMock,
+            _cartServiceMock
+        );
     }
 
     [Fact]
@@ -56,23 +69,20 @@ public class RegisterAsyncTest
             Password = "password",
             PhoneNumber = "1234567890",
             FirstName = "first name",
-            LastName = "last name"
+            LastName = "last name",
         };
 
         User user = new UserFaker().Generate();
 
-        _userRepositoryMock.AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>())
-            .Returns(user);
+        _userRepositoryMock.AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>()).Returns(user);
 
         _emailConfirmationCodeServiceMock
             .CreateEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns("code");
 
-        _eventDispatcherMock.DispatchAsync(Arg.Any<UserRegisteredEvent>())
-            .Returns(Task.CompletedTask);
+        _eventDispatcherMock.DispatchAsync(Arg.Any<UserRegisteredEvent>()).Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
-            .Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
         Result result = await _authenticationService.RegisterAsync(request, CancellationToken.None);
@@ -81,16 +91,14 @@ public class RegisterAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        await _userRepositoryMock.Received(1)
-            .AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
+        await _userRepositoryMock.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1)
-            .CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
 
-        await _eventDispatcherMock.Received(1)
-            .DispatchAsync(Arg.Any<UserRegisteredEvent>());
+        await _eventDispatcherMock.Received(1).DispatchAsync(Arg.Any<UserRegisteredEvent>());
 
-        await _emailConfirmationCodeServiceMock.Received(1)
+        await _emailConfirmationCodeServiceMock
+            .Received(1)
             .CreateEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 }

@@ -8,19 +8,21 @@ namespace Application.Services.Authentication.Helpers;
 public class RefreshTokenService(
     ITokenProvider tokenProvider,
     IRefreshTokenHasher refreshTokenHasher,
-    IRefreshTokenRepository refreshTokenRepository)
-    : IRefreshTokenService
+    IRefreshTokenRepository refreshTokenRepository
+) : IRefreshTokenService
 {
     private const int RefreshTokenBaseDays = 14;
 
     public async Task<(string refreshToken, DateTime expiredAt)> CreateRefreshTokenAsync(
         Guid userId,
         string deviceId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         await refreshTokenRepository.DeleteWhereAsync(
             x => x.UserId == userId && x.DeviceId == deviceId,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken
+        );
 
         var token = tokenProvider.GenerateRefreshToken();
         var tokenHash = refreshTokenHasher.Hash(token);
@@ -31,7 +33,7 @@ public class RefreshTokenService(
             TokenHash = tokenHash,
             UserId = userId,
             DeviceId = deviceId,
-            ExpiredAt = expiredAt
+            ExpiredAt = expiredAt,
         };
         await refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
 
@@ -41,12 +43,17 @@ public class RefreshTokenService(
     public async Task<(string refreshToken, DateTime expiredAt)> UpdateRefreshTokenAsync(
         Guid userId,
         string deviceId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        RefreshToken? existingToken = await refreshTokenRepository.SingleOrDefaultAsync(
-            x => x.UserId == userId && x.DeviceId == deviceId,
-            cancellationToken: cancellationToken) ?? throw new InvalidOperationException(
-                "Expected refresh token not found during update. Race condition or unexpected deletion.");
+        RefreshToken? existingToken =
+            await refreshTokenRepository.SingleOrDefaultAsync(
+                x => x.UserId == userId && x.DeviceId == deviceId,
+                cancellationToken: cancellationToken
+            )
+            ?? throw new InvalidOperationException(
+                "Expected refresh token not found during update. Race condition or unexpected deletion."
+            );
 
         var token = tokenProvider.GenerateRefreshToken();
         var tokenHash = refreshTokenHasher.Hash(token);
@@ -61,13 +68,20 @@ public class RefreshTokenService(
         return (token, expiredAt);
     }
 
-    public async Task<bool> VerifyRefreshTokenAsync(Guid userId, string deviceId, string refreshToken,
-        CancellationToken cancellationToken = default)
+    public async Task<bool> VerifyRefreshTokenAsync(
+        Guid userId,
+        string deviceId,
+        string refreshToken,
+        CancellationToken cancellationToken = default
+    )
     {
-        RefreshToken? existingToken = await refreshTokenRepository.SingleOrDefaultAsync(x => x.UserId == userId
-        && x.DeviceId == deviceId, cancellationToken: cancellationToken);
+        RefreshToken? existingToken = await refreshTokenRepository.SingleOrDefaultAsync(
+            x => x.UserId == userId && x.DeviceId == deviceId,
+            cancellationToken: cancellationToken
+        );
 
-        return existingToken is not null && existingToken.ExpiredAt > DateTime.UtcNow
+        return existingToken is not null
+            && existingToken.ExpiredAt > DateTime.UtcNow
             && refreshTokenHasher.Verify(refreshToken, existingToken.TokenHash);
     }
 }

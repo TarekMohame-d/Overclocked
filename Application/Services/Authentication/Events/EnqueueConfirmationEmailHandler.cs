@@ -4,9 +4,7 @@ using Hangfire;
 
 namespace Application.Services.Authentication.Events;
 
-public class EnqueueConfirmationEmailHandler(
-    IBackgroundJobClient jobClient,
-    IEmailService emailService)
+public class EnqueueConfirmationEmailHandler(IBackgroundJobClient jobClient, IEmailService emailService)
     : IEventHandler<UserRegisteredEvent>
 {
     public Task HandleAsync(UserRegisteredEvent domainEvent, CancellationToken cancellationToken)

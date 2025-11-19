@@ -22,8 +22,11 @@ public class GetAllCategoriesAsyncTest
     {
         _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
 
-        _categoryService = new CategoryService(_categoryRepositoryMock, Substitute.For<IUnitOfWork>(),
-            Substitute.For<IEventDispatcher>());
+        _categoryService = new CategoryService(
+            _categoryRepositoryMock,
+            Substitute.For<IUnitOfWork>(),
+            Substitute.For<IEventDispatcher>()
+        );
     }
 
     [Fact]
@@ -35,12 +38,13 @@ public class GetAllCategoriesAsyncTest
 
         IEnumerable<CategoryListResponse> categoryListResponses = brands.ToDto();
 
-        _categoryRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>())
-            .Returns(brands);
+        _categoryRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(brands);
 
         // Act
-        Result<IEnumerable<CategoryListResponse>> result =
-            await _categoryService.GetAllCategoriesAsync(request, CancellationToken.None);
+        Result<IEnumerable<CategoryListResponse>> result = await _categoryService.GetAllCategoriesAsync(
+            request,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -50,8 +54,7 @@ public class GetAllCategoriesAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         categoryListResponses.ShouldBeEquivalentTo(result.Data);
 
-        await _categoryRepositoryMock.Received(1)
-            .GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1).GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -60,12 +63,13 @@ public class GetAllCategoriesAsyncTest
         // Arrange
         var request = new GetAllCategoriesRequest();
 
-        _categoryRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>())
-            .Returns([]);
+        _categoryRepositoryMock.GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns([]);
 
         // Act
-        Result<IEnumerable<CategoryListResponse>> result =
-            await _categoryService.GetAllCategoriesAsync(request, CancellationToken.None);
+        Result<IEnumerable<CategoryListResponse>> result = await _categoryService.GetAllCategoriesAsync(
+            request,
+            CancellationToken.None
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -75,7 +79,6 @@ public class GetAllCategoriesAsyncTest
         result.Data.Count().ShouldBe(0);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _categoryRepositoryMock.Received(1)
-            .GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1).GetAllAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>());
     }
 }

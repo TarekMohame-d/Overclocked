@@ -22,14 +22,15 @@ public class CacheService : ICacheService
         return cachedData is not null ? JsonSerializer.Deserialize<T>(cachedData) : default;
     }
 
-    public async Task SetAsync<T>(string key, T value, TimeSpan expiration = default,
-        CancellationToken cancellationToken = default)
+    public async Task SetAsync<T>(
+        string key,
+        T value,
+        TimeSpan expiration = default,
+        CancellationToken cancellationToken = default
+    )
     {
         var json = JsonSerializer.Serialize(value);
-        var options = new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = expiration
-        };
+        var options = new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = expiration };
 
         await _cache.SetStringAsync(key, json, options, cancellationToken);
     }
@@ -52,7 +53,7 @@ public class CacheService : ICacheService
     {
         IEnumerable<string> keys = await GetSetMembersAsync(setKey);
 
-        if (!keys.Any())
+        if(!keys.Any())
             return;
 
         IEnumerable<Task> removalTasks = keys.Select(x => RemoveAsync(x, cancellationToken));

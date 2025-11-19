@@ -9,19 +9,24 @@ namespace Application.Services.Authentication.Helpers;
 
 public class EmailConfirmationCodeService(
     IEmailConfirmationCodeHasher emailConfirmationCodeHasher,
-    IEmailConfirmationCodeRepository emailConfirmationCodeRepository)
-    : IEmailConfirmationCodeService
+    IEmailConfirmationCodeRepository emailConfirmationCodeRepository
+) : IEmailConfirmationCodeService
 {
-    public async Task<EmailConfirmationCode?> GetEmailConfirmationCodeAsync(Guid userId,
-        CancellationToken cancellationToken = default)
+    public async Task<EmailConfirmationCode?> GetEmailConfirmationCodeAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default
+    )
     {
-        return await emailConfirmationCodeRepository
-            .SingleOrDefaultAsync(x => x.UserId == userId,
-                cancellationToken: cancellationToken);
+        return await emailConfirmationCodeRepository.SingleOrDefaultAsync(
+            x => x.UserId == userId,
+            cancellationToken: cancellationToken
+        );
     }
 
-    public async Task<string> CreateEmailConfirmationCodeAsync(Guid userId,
-        CancellationToken cancellationToken = default)
+    public async Task<string> CreateEmailConfirmationCodeAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default
+    )
     {
         var plainCode = GenerateVerificationCode();
         var codeHash = emailConfirmationCodeHasher.Hash(plainCode);
@@ -31,7 +36,7 @@ public class EmailConfirmationCodeService(
             CodeHash = codeHash,
             UserId = userId,
             ExpiredAt = DateTime.UtcNow.AddMinutes(10),
-            IsUsed = false
+            IsUsed = false,
         };
 
         await emailConfirmationCodeRepository.AddAsync(confirmationCode, cancellationToken);
@@ -65,7 +70,7 @@ public class EmailConfirmationCodeService(
 
         var builder = new StringBuilder(length);
 
-        for (var i = 0; i < length; i++)
+        for(var i = 0; i < length; i++)
         {
             // Get a cryptographically secure random index
             var index = RandomNumberGenerator.GetInt32(0, ValidChars.Length);
