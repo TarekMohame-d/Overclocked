@@ -3,6 +3,7 @@ using Application.Abstraction.DomainServices;
 using Application.Abstraction.Messaging;
 using Application.Services.Authentication.Decorators;
 using Application.Services.Brand.Decorators;
+using Application.Services.Cart.Decorators;
 using Application.Services.Category.Decorators;
 using Application.Services.Product.Decorators;
 using Application.Services.Tag.Decorators;
@@ -21,39 +22,41 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(
             Assembly.GetExecutingAssembly(),
             includeInternalTypes: true,
-            lifetime: ServiceLifetime.Scoped);
+            lifetime: ServiceLifetime.Scoped
+        );
 
         services.AddHangfire(config =>
         {
             config.UsePostgreSqlStorage(
                 bootstrapper =>
-                {
-                    bootstrapper.UseNpgsqlConnection(configuration.GetConnectionString("DefaultConnection"));
-                },
+                    bootstrapper.UseNpgsqlConnection(configuration.GetConnectionString("DefaultConnection")),
                 new PostgreSqlStorageOptions
                 {
-                    SchemaName = "hangfire"
+                    SchemaName = "hangfire",
                     // optionally tune other settings:
                     // QueuePollInterval = TimeSpan.FromSeconds(15),
                     // InvisibilityTimeout = TimeSpan.FromMinutes(30),
                     // TablePrefix = "hf_",
-                });
+                }
+            );
         });
         services.AddHangfireServer();
 
-        services.Scan(scan => scan
-            .FromAssemblyOf<IBrandService>()
-            .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Service")))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
+        services.Scan(scan =>
+            scan.FromAssemblyOf<IBrandService>()
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Service")))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+        );
 
         services.AddScoped<IEventDispatcher, EventDispatcher>();
 
-        services.Scan(scan => scan
-            .FromAssemblyOf<IEventHandler>()
-            .AddClasses(classes => classes.AssignableTo(typeof(IEventHandler<>)))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
+        services.Scan(scan =>
+            scan.FromAssemblyOf<IEventHandler>()
+                .AddClasses(classes => classes.AssignableTo(typeof(IEventHandler<>)))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+        );
 
         services.Decorate<IBrandService, CachingBrandServiceDecorator>();
         services.Decorate<IBrandService, LoggingBrandServiceDecorator>();
@@ -68,6 +71,7 @@ public static class DependencyInjection
         services.Decorate<IProductService, LoggingProductServiceDecorator>();
 
         services.Decorate<IAuthenticationService, LoggingAuthenticationServiceDecorator>();
+        services.Decorate<ICartService, LoggingCartServiceDecorator>();
 
         return services;
     }
