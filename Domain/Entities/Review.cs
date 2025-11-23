@@ -4,13 +4,13 @@ namespace Domain.Entities;
 
 public class Review : Entity
 {
-    public Guid UserId { get; set; }
-    public Guid ProductId { get; set; }
+    public required Guid UserId { get; set; }
+    public required Guid ProductId { get; set; }
     public required string Comment { get; set; }
-    public int Rating { get; set; }
+    public required int Rating { get; set; }
 
     // Navigation Properties
-    public User User { get; set; } = null!;
-    public Product Product { get; set; } = null!;
-    public ReviewReply ReviewReply { get; set; } = null!;
+    public User? User { get; set; }
+    public Product? Product { get; set; }
+    public ReviewReply? ReviewReply { get; set; }
 }

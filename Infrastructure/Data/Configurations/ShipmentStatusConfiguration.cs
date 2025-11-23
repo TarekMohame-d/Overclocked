@@ -11,19 +11,25 @@ public class ShipmentStatusConfiguration : IEntityTypeConfiguration<ShipmentStat
     {
         // Attributes
         builder.HasKey(ss => ss.Id);
-        builder.Property(ss => ss.Id).ValueGeneratedNever().IsRequired();
-        builder.Property(ss => ss.Name).HasMaxLength(50).IsRequired();
+        builder.Property(ss => ss.Id)
+            .ValueGeneratedNever().
+            IsRequired();
+
+        builder.Property(ss => ss.Name)
+            .HasMaxLength(50)
+            .IsRequired();
 
         // Relationships
 
         // Indexes
-        builder.HasIndex(ss => ss.Name).IsUnique();
+        builder.HasIndex(ss => ss.Name)
+            .IsUnique();
 
         // Seed Data
         builder.HasData(GenerateShipmentStatus());
     }
 
-    private IEnumerable<ShipmentStatus> GenerateShipmentStatus()
+    private static IEnumerable<ShipmentStatus> GenerateShipmentStatus()
     {
         return Enum.GetValues<ShipmentStatusType>()
             .Select(role => new ShipmentStatus { Id = (int)role, Name = role.ToString() });

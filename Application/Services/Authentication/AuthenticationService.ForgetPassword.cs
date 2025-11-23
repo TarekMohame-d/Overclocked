@@ -13,14 +13,13 @@ public sealed partial class AuthenticationService
         // TODO: refactor to use user service instead of directly using user repository
         User? user = await userRepository.SingleOrDefaultAsync(
             x => x.Email == request.Email,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         if(user is null)
             return Result.Success(); // to not expose user existence
 
         EmailConfirmationCode? emailConfirmationCode =
-            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, cancellationToken)
+            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, false, cancellationToken)
             ?? throw new EmailConfirmationCodeNotExistException(user.Id);
 
         var code = emailConfirmationCodeService.UpdateEmailConfirmationCode(emailConfirmationCode);

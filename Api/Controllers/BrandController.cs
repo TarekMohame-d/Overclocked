@@ -29,10 +29,8 @@ public class BrandController(IBrandService brandServices) : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var request = new GetAllBrandsRequest();
-        Result<IEnumerable<BrandListResponse>> response = await brandServices.GetAllBrandsAsync(
-            request,
-            cancellationToken
-        );
+        Result<IEnumerable<BrandListResponse>> response = await brandServices
+            .GetAllBrandsAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -55,8 +53,7 @@ public class BrandController(IBrandService brandServices) : ControllerBase
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
         [FromBody] UpdateBrandRequestBody request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         UpdateBrandRequest updateBrandRequest = new()
         {
@@ -75,8 +72,7 @@ public class BrandController(IBrandService brandServices) : ControllerBase
     [Route(BrandRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var request = new DeleteBrandRequest { Id = id };
-        Result response = await brandServices.DeleteBrandAsync(request, cancellationToken);
+        Result response = await brandServices.DeleteBrandAsync(id, cancellationToken);
 
         return response.ToActionResult();
     }

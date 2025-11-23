@@ -16,8 +16,6 @@
                 "ms-dotnettools.csdevkit",
                 "formulahendry.code-runner",
                 "streetsidesoftware.code-spell-checker",
-                "ms-azuretools.vscode-containers",
-                "ms-azuretools.vscode-docker",
                 "mhutchie.git-graph",
                 "donjayamanne.githistory",
                 "codezombiech.gitignore",
@@ -37,8 +35,6 @@
                 "reflectiondm.ClassyNaming",
                 "ryanluker.vscode-coverage-gutters",
                 "sidp.strict-whitespace",
-                "yzhang.markdown-all-in-one",
-                "DavidAnson.vscode-markdownlint",
                 "jongrant.csharpsortusings",
                 "pflannery.vscode-versionlens"
             ]

@@ -11,24 +11,27 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
     {
         // Attributes
         builder.HasKey(rp => new { rp.RoleId, rp.PermissionId });
-        builder.Property(rp => rp.PermissionId).IsRequired();
-        builder.Property(rp => rp.RoleId).IsRequired();
+
+        builder.Property(rp => rp.PermissionId)
+            .IsRequired();
+
+        builder.Property(rp => rp.RoleId)
+            .IsRequired();
 
         // Relationships
-        builder
-            .HasOne(rp => rp.Permission)
+        builder.HasOne(rp => rp.Permission)
             .WithMany(p => p.RolePermissions)
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder
-            .HasOne(rp => rp.Role)
+        builder.HasOne(rp => rp.Role)
             .WithMany(r => r.RolePermissions)
             .HasForeignKey(rp => rp.RoleId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
         builder.HasIndex(rp => rp.PermissionId);
+
         builder.HasIndex(rp => rp.RoleId);
 
         // Seed data
@@ -53,8 +56,7 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
         list.AddRange(
             allPermissions
                 .Where(p => p > PermissionType.DeactivateUsers)
-                .Select(p => new RolePermission { RoleId = Admin, PermissionId = (int)p })
-        );
+                .Select(p => new RolePermission { RoleId = Admin, PermissionId = (int)p }));
 
         // DataEntry
         list.Add(new RolePermission { RoleId = DataEntry, PermissionId = (int)PermissionType.AddEditDelete });

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Net;
 using Application.Abstraction.Repositories;
 using Application.Common.Results;
@@ -29,7 +30,11 @@ public class UpdateTagAsyncTest
         // Arrange
         var request = new UpdateTagRequest { Id = Guid.CreateVersion7(), Name = "Tag Name" };
 
-        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns((Tag)null!);
+        _tagRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Tag, bool>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns((Tag)null!);
 
         // Act
         Result result = await _tagService.UpdateTagAsync(request, CancellationToken.None);
@@ -40,11 +45,15 @@ public class UpdateTagAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _tagRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _tagRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Tag, bool>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task UpdateTagAsync_When_TagExist_Should_ReturnSuccess()
+    public async Task UpdateTagAsync_Should_ReturnSuccess_When_TagExist()
     {
         // Arrange
         var request = new UpdateTagRequest { Id = Guid.CreateVersion7(), Name = "Tag Name" };
@@ -53,11 +62,14 @@ public class UpdateTagAsyncTest
 
         tag.Name = request.Name;
 
-        _tagRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(tag);
+        _tagRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Tag, bool>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(tag);
 
-        _tagRepositoryMock.Update(Arg.Any<Tag>());
-
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
 
         // Act
         Result result = await _tagService.UpdateTagAsync(request, CancellationToken.None);
@@ -67,10 +79,94 @@ public class UpdateTagAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBeNull();
 
-        await _tagRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _tagRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Tag, bool>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
+    }
 
-        _tagRepositoryMock.Received(1).Update(Arg.Any<Tag>());
+    [Fact]
+    public async Task UpdateTagAsync_Should_ReturnFailure_When_TagExistAndNameChangedAndNameIsNotUnique()
+    {
+        // Arrange
+        var request = new UpdateTagRequest
+        {
+            Id = Guid.CreateVersion7(),
+            Name = "Tag Name"
+        };
+
+        Tag tag = new TagFaker().Generate();
+
+        _tagRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Tag, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(tag);
+
+        _tagRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Tag, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        // Act
+        Result result = await _tagService.UpdateTagAsync(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
+        result.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        result.Error.ShouldNotBeNull();
+
+        await _tagRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Tag, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+
+        await _tagRepositoryMock.Received(1)
+            .AnyAsync(Arg.Any<Expression<Func<Tag, bool>>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateTagAsyncc_Should_ReturnSuccess_When_TagExistAndNameChangedAndNameIsUnique()
+    {
+        // Arrange
+        var request = new UpdateTagRequest
+        {
+            Id = Guid.CreateVersion7(),
+            Name = "Tag Name"
+        };
+
+        Tag tag = new TagFaker().Generate();
+
+        _tagRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Tag, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(tag);
+
+        _tagRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Tag, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        // Act
+        Result result = await _tagService.UpdateTagAsync(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.Error.ShouldBeNull();
+
+        await _tagRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Tag, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+
+        await _tagRepositoryMock.Received(1)
+            .AnyAsync(Arg.Any<Expression<Func<Tag, bool>>>(), Arg.Any<CancellationToken>());
+
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
     }
 }

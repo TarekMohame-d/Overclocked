@@ -12,11 +12,10 @@ public sealed partial class AuthenticationService(
     IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher,
     IEventDispatcher eventDispatcher,
-    IEmailConfirmationCodeHasher emailConfirmationCodeHasher,
     IEmailConfirmationCodeService emailConfirmationCodeService,
     ITokenProvider tokenProvider,
     IRefreshTokenService refreshTokenService,
     ITokenReaderService tokenReaderService,
-    ICartService cartService
-) : IAuthenticationService
-{ }
+    ICartService cartService,
+    IWishlistService wishlistService)
+    : IAuthenticationService;

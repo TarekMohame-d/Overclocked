@@ -18,16 +18,12 @@ public class CreateCategoryRequestValidator : AbstractValidator<CreateCategoryRe
             .WithMessage("{PropertyName} is required and must not be empty or whitespace.")
             .MaximumLength(50)
             .WithMessage("{PropertyName} must not exceed 50 characters.")
-            .MustAsync(
-                async (name, cancellation) =>
-                {
-                    var exists = await _categoryRepository.AnyAsync(
-                        x => x.NormalizedName == name.ToUpper(),
-                        cancellation
-                    );
-                    return !exists;
-                }
-            )
+            .MustAsync(async (name, cancellation) =>
+            {
+                var exists = await _categoryRepository.AnyAsync(x => x.NormalizedName == name.ToUpper(), cancellation);
+
+                return !exists;
+            })
             .WithMessage("{PropertyName} already exists.");
 
         RuleFor(x => x.ImageUrl)
@@ -38,21 +34,17 @@ public class CreateCategoryRequestValidator : AbstractValidator<CreateCategoryRe
             .WithMessage("{PropertyName} must be a valid image file (jpg, jpeg, png).")
             .Must(url =>
                 Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)
-            )
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
             .WithMessage("{PropertyName} must be a valid URL.")
             .Must(url => url.StartsWith("https://res.cloudinary.com/over-clocked/", StringComparison.OrdinalIgnoreCase))
             .WithMessage("{PropertyName} must be hosted on res.cloudinary.com/over-clocked.");
     }
 
-    private static bool ValidateImageExtension(string? imageUrl)
+    private static bool ValidateImageExtension(string imageUrl)
     {
-        if(string.IsNullOrWhiteSpace(imageUrl))
-            return false;
-
         string[] validExtensions = [".jpg", ".jpeg", ".png"];
-        var extension = Path.GetExtension(imageUrl).ToLowerInvariant();
+        var extension = Path.GetExtension(imageUrl) ?? null;
 
-        return validExtensions.Contains(extension);
+        return extension is not null && validExtensions.Contains(extension);
     }
 }

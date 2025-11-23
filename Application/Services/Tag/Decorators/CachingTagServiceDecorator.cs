@@ -12,13 +12,13 @@ namespace Application.Services.Tag.Decorators;
 public class CachingTagServiceDecorator(
     ITagService inner,
     ICacheService cacheService,
-    ILogger<CachingTagServiceDecorator> logger
-) : ITagService
+    ILogger<CachingTagServiceDecorator> logger)
+    : ITagService
 {
     public Task<Result<PagedResult<TagListResponse>>> GetPagedTagsAsync(
         GetPagedTagsRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithCacheAsync(request, inner.GetPagedTagsAsync, cancellationToken);
+        CancellationToken cancellationToken) =>
+            ExecuteWithCacheAsync(request, inner.GetPagedTagsAsync, cancellationToken);
 
     public Task<Result<TagResponse>> GetTagByIdAsync(GetTagByIdRequest request, CancellationToken cancellationToken) =>
         ExecuteWithCacheAsync(request, inner.GetTagByIdAsync, cancellationToken);
@@ -28,9 +28,7 @@ public class CachingTagServiceDecorator(
         Result result = await inner.CreateTagAsync(request, cancellationToken);
 
         if(result.IsSuccess)
-        {
             await cacheService.RemoveKeysInSetAsync(CacheKeys.TagSet, cancellationToken);
-        }
 
         return result;
     }
@@ -48,13 +46,13 @@ public class CachingTagServiceDecorator(
         return result;
     }
 
-    public async Task<Result> DeleteTagAsync(DeleteTagRequest request, CancellationToken cancellationToken)
+    public async Task<Result> DeleteTagAsync(Guid tagId, CancellationToken cancellationToken)
     {
-        Result result = await inner.DeleteTagAsync(request, cancellationToken);
+        Result result = await inner.DeleteTagAsync(tagId, cancellationToken);
 
         if(result.IsSuccess)
         {
-            await cacheService.RemoveAsync(CacheKeys.Tag(request.Id.ToString()), cancellationToken);
+            await cacheService.RemoveAsync(CacheKeys.Tag(tagId.ToString()), cancellationToken);
             await cacheService.RemoveKeysInSetAsync(CacheKeys.TagSet, cancellationToken);
         }
 
@@ -64,8 +62,7 @@ public class CachingTagServiceDecorator(
     private async Task<Result<T>> ExecuteWithCacheAsync<T, TRequest>(
         TRequest request,
         Func<TRequest, CancellationToken, Task<Result<T>>> action,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
         where TRequest : ICachedRequest
     {
         var requestName = request.GetType().Name;

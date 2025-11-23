@@ -9,8 +9,8 @@ namespace Application.Services.Authentication.Decorators;
 
 public class LoggingAuthenticationServiceDecorator(
     IAuthenticationService inner,
-    ILogger<LoggingAuthenticationServiceDecorator> logger
-) : IAuthenticationService
+    ILogger<LoggingAuthenticationServiceDecorator> logger)
+    : IAuthenticationService
 {
     public Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(request, () => inner.RegisterAsync(request, cancellationToken));
@@ -23,8 +23,8 @@ public class LoggingAuthenticationServiceDecorator(
 
     public Task<Result> ResendEmailConfirmationCodeAsync(
         ResendEmailConfirmationCodeRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync(request, () => inner.ResendEmailConfirmationCodeAsync(request, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.ResendEmailConfirmationCodeAsync(request, cancellationToken));
 
     public Task<Result> ForgetPasswordAsync(ForgetPasswordRequest request, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(request, () => inner.ForgetPasswordAsync(request, cancellationToken));
@@ -34,8 +34,8 @@ public class LoggingAuthenticationServiceDecorator(
 
     public Task<Result<AuthResponse>> RefreshTokenAsync(
         RefreshTokenRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync(request, () => inner.RefreshTokenAsync(request, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.RefreshTokenAsync(request, cancellationToken));
 
     private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object request, Func<Task<TResult>> action)
         where TResult : Result

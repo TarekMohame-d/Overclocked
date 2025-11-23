@@ -9,5 +9,6 @@ public class ResendEmailConfirmationCodeValidationTestCases
         yield return ["   "];
         yield return [new string('a', 105)];
         yield return ["wrong-email-formate"];
+        yield return ["temp@temp"];
     }
 }

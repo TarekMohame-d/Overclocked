@@ -7,18 +7,20 @@ using Serilog.Context;
 
 namespace Application.Services.Product.Decorators;
 
-public class LoggingProductServiceDecorator(IProductService inner, ILogger<LoggingProductServiceDecorator> logger)
+public class LoggingProductServiceDecorator(
+    IProductService inner,
+    ILogger<LoggingProductServiceDecorator> logger)
     : IProductService
 {
     public Task<Result<ProductResponse>> GetProductByIdAsync(
         GetProductByIdRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync(request, () => inner.GetProductByIdAsync(request, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.GetProductByIdAsync(request, cancellationToken));
 
     public Task<Result<PagedResult<ProductListResponse>>> GetPagedProductsAsync(
         GetPagedProductsRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync(request, () => inner.GetPagedProductsAsync(request, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.GetPagedProductsAsync(request, cancellationToken));
 
     public Task<Result> CreateProductAsync(CreateProductRequest request, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(request, () => inner.CreateProductAsync(request, cancellationToken));
@@ -26,13 +28,13 @@ public class LoggingProductServiceDecorator(IProductService inner, ILogger<Loggi
     public Task<Result> UpdateProductAsync(UpdateProductRequest request, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(request, () => inner.UpdateProductAsync(request, cancellationToken));
 
-    public Task<Result> DeleteProductAsync(DeleteProductRequest request, CancellationToken cancellationToken) =>
-        ExecuteWithLoggingAsync(request, () => inner.DeleteProductAsync(request, cancellationToken));
+    public Task<Result> DeleteProductAsync(Guid productID, CancellationToken cancellationToken) =>
+        ExecuteWithLoggingAsync("DeleteProductRequest", () => inner.DeleteProductAsync(productID, cancellationToken));
 
     private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object request, Func<Task<TResult>> action)
         where TResult : Result
     {
-        var requestName = request.GetType().Name;
+        var requestName = request as string ?? request.GetType().Name;
         logger.LogInformation("Processing request {RequestName}", requestName);
 
         TResult result = await action();

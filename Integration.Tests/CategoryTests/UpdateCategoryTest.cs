@@ -69,10 +69,8 @@ public class UpdateCategoryTest(CustomWebApplicationFactory factory) : IAsyncLif
         StringContent form = CreateJsonContent("New Name", category.Image);
 
         // Act
-        HttpResponseMessage response = await _client.PutAsync(
-            CategoryRoutes.Update.Replace("{id:guid}", category.Id.ToString()),
-            form
-        );
+        HttpResponseMessage response = await _client.
+            PutAsync(CategoryRoutes.Update.Replace("{id:guid}", category.Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);

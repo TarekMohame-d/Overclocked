@@ -15,8 +15,7 @@ public sealed partial class AuthenticationService
         // TODO: refactor to use user service instead of directly using user repository
         User? user = await userRepository.SingleOrDefaultAsync(
             x => x.Email == request.Email,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         var passwordHash =
             user?.PasswordHash
@@ -36,8 +35,7 @@ public sealed partial class AuthenticationService
 
         IEnumerable<RolePermission> rolePermissions = await rolePermissionsRepository.WhereAsync(
             x => x.RoleId == user.RoleId,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         IEnumerable<string> permissions = rolePermissions.Select(x => ((PermissionType)x.PermissionId).ToString());
 
@@ -52,11 +50,8 @@ public sealed partial class AuthenticationService
 
         var accessToken = tokenProvider.GenerateToken(tokenClaims);
 
-        (var refreshToken, DateTime expiredAt) = await refreshTokenService.CreateRefreshTokenAsync(
-            user.Id,
-            request.DeviceId,
-            cancellationToken
-        );
+        (var refreshToken, DateTime expiredAt) = await refreshTokenService
+            .CreateRefreshTokenAsync(user.Id, request.DeviceId, cancellationToken);
 
         var authResponse = new AuthResponse
         {

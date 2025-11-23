@@ -13,8 +13,7 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
     public UpdateProductRequestValidator(
         IBrandRepository brandRepository,
         ICategoryRepository categoryRepository,
-        ITagRepository tagRepository
-    )
+        ITagRepository tagRepository)
     {
         _brandRepository = brandRepository;
         _categoryRepository = categoryRepository;
@@ -38,19 +37,19 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("{PropertyName} is required.")
-            .MustAsync(
-                async (id, cancellation) => await _categoryRepository.GetByIdAsync([id], cancellation) is not null
-            )
+            .MustAsync(async (id, cancellation) =>
+                await _categoryRepository.GetByIdAsync([id], cancellation) is not null)
             .WithMessage("{PropertyName}: {PropertyValue} does not exist.");
 
         RuleFor(x => x.Thumbnail)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("{PropertyName} is required.")
+            .Must(ValidateImageExtension)
+            .WithMessage("{PropertyName} must be a valid image file (jpg, jpeg, png).")
             .Must(url =>
                 Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)
-            )
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
             .WithMessage("{PropertyName} must be a valid HTTP/HTTPS URL.")
             .Must(url => url.StartsWith("https://res.cloudinary.com/over-clocked/", StringComparison.OrdinalIgnoreCase))
             .WithMessage("{PropertyName} must be hosted on res.cloudinary.com/over-clocked.");
@@ -62,11 +61,17 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
             .MaximumLength(500)
             .WithMessage("{PropertyName} must not exceed 500 characters.");
 
-        RuleFor(x => x.Price).GreaterThan(0).WithMessage("{PropertyName} must be greater than 0.");
+        RuleFor(x => x.Price)
+            .GreaterThan(0)
+            .WithMessage("{PropertyName} must be greater than 0.");
 
-        RuleFor(x => x.Stock).GreaterThanOrEqualTo(0).WithMessage("{PropertyName} cannot be negative.");
+        RuleFor(x => x.Stock)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("{PropertyName} cannot be negative.");
 
-        RuleFor(x => x.Discount).InclusiveBetween(0m, 0.99m).WithMessage("{PropertyName} must be between 0 and 0.99.");
+        RuleFor(x => x.Discount)
+            .InclusiveBetween(0m, 0.99m)
+            .WithMessage("{PropertyName} must be between 0 and 0.99.");
 
         ValidateTags();
 
@@ -78,63 +83,59 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
     private void ValidateTags()
     {
         RuleFor(x => x.Tags)
-            .CustomAsync(
-                async (tags, context, cancellation) =>
+            .CustomAsync(async (tags, context, cancellation) =>
+            {
+                if(tags is null || !tags.Any())
                 {
-                    if(tags is null || !tags.Any())
-                    {
-                        context.AddFailure("Tags", "At least one tag is required.");
-                        return;
-                    }
-
-                    IEnumerable<Guid> existingIds = (
-                        await _tagRepository.WhereAsync(t => tags.Contains(t.Id), cancellationToken: cancellation)
-                    ).Select(t => t.Id);
-
-                    var missingTags = tags.Except(existingIds).ToList();
-
-                    if(missingTags.Count != 0)
-                    {
-                        context.AddFailure(
-                            "Tags",
-                            $"The following tags do not exist: {string.Join(", ", missingTags)}"
-                        );
-                    }
+                    context.AddFailure("Tags", "At least one tag is required.");
+                    return;
                 }
-            );
+
+                IEnumerable<Guid> existingIds = (await _tagRepository.WhereAsync(t =>
+                    tags.Contains(t.Id), cancellationToken: cancellation)).Select(t => t.Id);
+
+                var missingTags = tags.Except(existingIds).ToList();
+
+                if(missingTags.Count != 0)
+                {
+                    context.AddFailure("Tags",
+                    $"The following tags do not exist: [\n{string.Join(",\n", missingTags)}");
+                }
+            });
     }
 
     private void ValidateImages()
     {
         RuleFor(x => x.Images)
-            .Custom(
-                (images, context) =>
+            .Custom((images, context) =>
+            {
+                var invalidUrls = images!
+                    .Where(url =>
+                        !Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult)
+                        || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
+                    .ToList();
+
+                var invalidHosts = images!
+                    .Where(url =>
+                        !url.StartsWith("https://res.cloudinary.com/over-clocked/", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if(invalidHosts.Count != 0 || invalidUrls.Count != 0)
                 {
-                    var invalidUrls = images!
-                        .Where(url =>
-                            !Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult)
-                            || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)
-                        )
-                        .ToList();
-
-                    var invalidHosts = images!
-                        .Where(url =>
-                            !url.StartsWith(
-                                "https://res.cloudinary.com/over-clocked/",
-                                StringComparison.OrdinalIgnoreCase
-                            )
-                        )
-                        .ToList();
-
-                    if(invalidHosts.Count != 0 || invalidUrls.Count != 0)
-                    {
-                        context.AddFailure(
-                            "Images",
-                            "Image URLs must be valid HTTP/HTTPS URLs hosted on res.cloudinary.com/over-clocked."
-                        );
-                    }
+                    context.AddFailure(
+                        "Images",
+                        "Image URLs must be valid HTTP/HTTPS URLs hosted on res.cloudinary.com/over-clocked.");
                 }
-            )
+
+                var invalidExtensions = images!
+                    .Where(url => !ValidateImageExtension(url))
+                    .ToList();
+
+                if(invalidExtensions.Count != 0)
+                {
+                    context.AddFailure("Images", "Image URLs must have one of the following extensions: .jpg, .jpeg, .png.");
+                }
+            })
             .When(x => x.Images is not null && x.Images!.Any());
     }
 
@@ -164,8 +165,7 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
                     {
                         context.AddFailure(
                             "Specification",
-                            "Name and Value are required and must not exceed 50 and 300 characters respectively."
-                        );
+                            "Name and Value are required and must not exceed 50 and 300 characters respectively.");
                     }
 
                     var duplicateNames = specs
@@ -179,10 +179,17 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
                     {
                         context.AddFailure(
                             "Specification",
-                            "Name must be unique. Duplicate names: " + string.Join(", ", duplicateNames)
-                        );
+                            "Name must be unique. Duplicate names: " + string.Join(", ", duplicateNames));
                     }
                 }
             );
+    }
+
+    private static bool ValidateImageExtension(string imageUrl)
+    {
+        string[] validExtensions = [".jpg", ".jpeg", ".png"];
+        var extension = Path.GetExtension(imageUrl) ?? null;
+
+        return extension is not null && validExtensions.Contains(extension);
     }
 }

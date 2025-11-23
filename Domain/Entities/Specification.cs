@@ -4,9 +4,9 @@ namespace Domain.Entities;
 
 public class Specification : Entity
 {
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; set; }
     public required string Name { get; set; }
-    public string NormalizedName { get; set; } = default!;
+    public string NormalizedName { get; } = string.Empty;
     public required string Value { get; set; }
 
     // Navigation Properties

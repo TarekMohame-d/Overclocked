@@ -5,6 +5,9 @@ using Application.Common.Results;
 using Application.Services.Product;
 using Application.Services.Product.DTOs.Request;
 using Application.Services.Product.DTOs.Response;
+using ArchitectureTests.FakeData;
+using Domain.Entities;
+using MockQueryable;
 using NSubstitute;
 using Shouldly;
 
@@ -21,19 +24,38 @@ public class GetProductByIdAsyncTest
         _productService = new ProductService(
             _productRepositoryMock,
             Substitute.For<IUnitOfWork>(),
-            Substitute.For<IEventDispatcher>()
-        );
+            Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
     public async Task GetProductByIdAsync_Should_ReturnProduct_When_ProductExists()
     {
         // Arrange
-        _productRepositoryMock
-            .GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(Substitute.For<ProductResponse>());
+        List<Product> products = new ProductFaker().Generate(3);
+        Category category = new CategoryFaker().Generate();
+        Brand brand = new BrandFaker().Generate();
+        var specification = new Specification()
+        {
+            ProductId = products[0].Id,
+            Name = "Key",
+            Value = "Value"
+        };
 
-        var request = new GetProductByIdRequest { Id = Guid.NewGuid() };
+        products[0].Category = category;
+        products[0].Brand = brand;
+        products[0].TagProducts.Add(new TagProduct()
+        {
+            ProductId = products[0].Id,
+            TagId = Guid.NewGuid()
+        });
+        products[0].Specifications.Add(specification);
+
+        IQueryable<Product> mockQueryable = products.BuildMock();
+
+        _productRepositoryMock.Query()
+            .Returns(mockQueryable);
+
+        var request = new GetProductByIdRequest { Id = products[0].Id };
 
         // Act
         Result<ProductResponse> result = await _productService.GetProductByIdAsync(request, CancellationToken.None);
@@ -42,16 +64,20 @@ public class GetProductByIdAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.Data.ShouldNotBeNull();
 
-        await _productRepositoryMock.Received(1).GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+        _productRepositoryMock.Received(1)
+            .Query();
     }
 
     [Fact]
     public async Task GetProductByIdAsync_Should_ReturnFailure_When_ProductDoesNotExist()
     {
         // Arrange
-        _productRepositoryMock
-            .GetProductDetailsAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns((ProductResponse)null!);
+        List<Product> products = new ProductFaker().Generate(3);
+
+        IQueryable<Product> mockQueryable = products.BuildMock();
+
+        _productRepositoryMock.Query()
+            .Returns(mockQueryable);
 
         var request = new GetProductByIdRequest { Id = Guid.NewGuid() };
 
@@ -60,7 +86,11 @@ public class GetProductByIdAsyncTest
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
+        result.Data.ShouldBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.ShouldNotBeNull();
+
+        _productRepositoryMock.Received(1)
+            .Query();
     }
 }

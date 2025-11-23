@@ -4,15 +4,8 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Repositories;
 
-public class EmailConfirmationCodeRepository
-    : GenericRepository<EmailConfirmationCode>,
-        IEmailConfirmationCodeRepository
+public class EmailConfirmationCodeRepository(ApplicationDbContext dbContext)
+        : GenericRepository<EmailConfirmationCode>(dbContext), IEmailConfirmationCodeRepository
 {
-    private readonly ApplicationDbContext _dbContext;
 
-    public EmailConfirmationCodeRepository(ApplicationDbContext dbContext)
-        : base(dbContext)
-    {
-        _dbContext = dbContext;
-    }
 }

@@ -5,8 +5,8 @@ namespace Domain.Entities;
 
 public class Refund : Entity
 {
-    public Guid? OrderId { get; set; }
-    public int StatusId { get; set; }
+    public required Guid OrderId { get; set; }
+    public int StatusId { get; private set; }
     public RefundStatusType RefundStatusType
     {
         get => (RefundStatusType)StatusId;
@@ -18,5 +18,5 @@ public class Refund : Entity
     // Navigation properties
     public Order? Order { get; set; }
     public RefundStatus? RefundStatus { get; set; }
-    public ICollection<RefundItem>? RefundItems { get; set; }
+    public ICollection<RefundItem> RefundItems { get; set; } = [];
 }

@@ -6,7 +6,12 @@ namespace Application.Services.Category.Mapping;
 
 public static class CategoryMapping
 {
-    public static CategoryEntity ToEntity(this CreateCategoryRequest request) => new CategoryEntity { Name = request.Name, Image = request.ImageUrl };
+    public static CategoryEntity ToEntity(this CreateCategoryRequest request) =>
+        new()
+        {
+            Name = request.Name,
+            Image = request.ImageUrl
+        };
 
     public static void UpdateFrom(this CategoryEntity entity, UpdateCategoryRequest request)
     {

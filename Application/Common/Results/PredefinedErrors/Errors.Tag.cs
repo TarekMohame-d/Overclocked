@@ -7,6 +7,5 @@ public static partial class Errors
     public static readonly Error TagNameAlreadyExists = new(
         nameof(TagNameAlreadyExists),
         ErrorType.Conflict,
-        "Tag name already exists."
-    );
+        "Tag name already exists.");
 }

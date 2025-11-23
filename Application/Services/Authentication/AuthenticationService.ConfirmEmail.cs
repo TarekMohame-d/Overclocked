@@ -13,40 +13,36 @@ public sealed partial class AuthenticationService
     {
         // TODO: refactor to use user service instead of directly using user repository
         User? user = await userRepository.SingleOrDefaultAsync(
-            x => x.Email.ToLower() == request.Email.ToLower(),
-            cancellationToken: cancellationToken
-        );
+            x => x.Email == request.Email,
+            asNoTracking: false,
+            cancellationToken);
 
         if(user is null)
             return Result.Failure(Errors.InvalidConfirmationCodeCredentials);
 
         EmailConfirmationCode emailConfirmationCode =
-            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, cancellationToken)
+            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, false, cancellationToken)
             ?? throw new EmailConfirmationCodeNotExistException(user.Id);
 
         if(user.EmailConfirmed || emailConfirmationCode.IsUsed)
-        {
             return Result.Failure(Errors.EmailAlreadyConfirmed, HttpStatusCode.Conflict);
-        }
 
         if(emailConfirmationCode.ExpiredAt < DateTime.UtcNow)
             return Result.Failure(Errors.EmailConfirmationCodeExpired);
 
-        var isValid = emailConfirmationCodeHasher.Verify(request.Code, emailConfirmationCode.CodeHash);
+        var isValid = emailConfirmationCodeService
+            .VerifyEmailConfirmationCode(request.Code, emailConfirmationCode.CodeHash);
 
         if(!isValid)
             return Result.Failure(Errors.InvalidConfirmationCodeCredentials);
 
-        emailConfirmationCode.IsUsed = true;
-        emailConfirmationCode.UpdatedAt = DateTime.UtcNow;
         emailConfirmationCodeService.InvalidateEmailConfirmationCode(emailConfirmationCode);
 
         user.EmailConfirmed = true;
         user.UpdatedAt = DateTime.UtcNow;
-        userRepository.Update(user);
 
-        // TODO: Implement Create user cart and wishlist
         await cartService.CreateCartAsync(user.Id, cancellationToken);
+        await wishlistService.CreateWishlistAsync(user.Id, cancellationToken);
 
         await unitOfWork.CompleteAsync(cancellationToken);
 

@@ -2,8 +2,8 @@
 
 public class RolePermission
 {
-    public int RoleId { get; set; }
-    public int PermissionId { get; set; }
+    public required int RoleId { get; set; }
+    public required int PermissionId { get; set; }
 
     // Navigation Properties
     public Role? Role { get; set; }

@@ -26,8 +26,7 @@ public class GetPagedProductsAsyncTest
         _productService = new ProductService(
             _productRepositoryMock,
             Substitute.For<IUnitOfWork>(),
-            Substitute.For<IEventDispatcher>()
-        );
+            Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
@@ -46,15 +45,12 @@ public class GetPagedProductsAsyncTest
 
         IQueryable<Product> mockQueryable = products.BuildMock();
 
-        _productRepositoryMock
-            .GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>())
+        _productRepositoryMock.GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>())
             .Returns(mockQueryable);
 
         // Act
-        Result<PagedResult<ProductListResponse>> result = await _productService.GetPagedProductsAsync(
-            request,
-            CancellationToken.None
-        );
+        Result<PagedResult<ProductListResponse>> result = await _productService
+            .GetPagedProductsAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -63,7 +59,8 @@ public class GetPagedProductsAsyncTest
         products.Count.ShouldBe(result.Data.Items.Count);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        _productRepositoryMock.Received(1).GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>());
+        _productRepositoryMock.Received(1)
+            .GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>());
     }
 
     [Fact]
@@ -76,24 +73,22 @@ public class GetPagedProductsAsyncTest
 
         IQueryable<Product> mockQueryable = products.BuildMock();
 
-        _productRepositoryMock
-            .GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>())
+        _productRepositoryMock.GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>())
             .Returns(mockQueryable);
 
         // Act
-        Result<PagedResult<ProductListResponse>> result = await _productService.GetPagedProductsAsync(
-            request,
-            CancellationToken.None
-        );
+        Result<PagedResult<ProductListResponse>> result = await _productService
+            .GetPagedProductsAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Data.ShouldNotBeNull();
         result.Error.ShouldBeNull();
         result.Data.Items.ShouldBeEmpty();
-        result.Data.Items.Count().ShouldBe(0);
+        result.Data.Items.Count.ShouldBe(0);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        _productRepositoryMock.Received(1).GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>());
+        _productRepositoryMock.Received(1)
+            .GetProductsQuery(Arg.Any<ProductSortField>(), Arg.Any<SortDirection>());
     }
 }

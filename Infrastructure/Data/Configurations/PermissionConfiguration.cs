@@ -11,13 +11,19 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
     {
         // Attributes
         builder.HasKey(p => p.Id);
-        builder.Property(p => p.Id).ValueGeneratedNever().IsRequired();
-        builder.Property(p => p.Name).HasMaxLength(50).IsRequired();
+        builder.Property(p => p.Id)
+            .ValueGeneratedNever()
+            .IsRequired();
+
+        builder.Property(p => p.Name)
+            .HasMaxLength(50)
+            .IsRequired();
 
         // Relationships
 
         // Indexes
-        builder.HasIndex(p => p.Name).IsUnique();
+        builder.HasIndex(p => p.Name)
+            .IsUnique();
 
         // Seed data
         builder.HasData(GeneratePermissions());

@@ -6,15 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class TagRepository : GenericRepository<Tag>, ITagRepository
+public class TagRepository(ApplicationDbContext context) : GenericRepository<Tag>(context), ITagRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public TagRepository(ApplicationDbContext context)
-        : base(context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public IQueryable<Tag> GetTagsQuery(TagSortField sortBy, SortDirection direction)
     {
@@ -25,7 +19,7 @@ public class TagRepository : GenericRepository<Tag>, ITagRepository
         return query;
     }
 
-    private IQueryable<Tag> ApplySorting(IQueryable<Tag> query, TagSortField sortBy, SortDirection direction)
+    private static IQueryable<Tag> ApplySorting(IQueryable<Tag> query, TagSortField sortBy, SortDirection direction)
     {
         var isDescending = direction == SortDirection.Desc;
 

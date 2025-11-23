@@ -1,7 +1,3 @@
 namespace Domain.Exceptions;
 
-public class FileDeleteFailedException : Exception
-{
-    public FileDeleteFailedException(string message)
-        : base(message) { }
-}
+public class FileDeleteFailedException(string message) : Exception(message);

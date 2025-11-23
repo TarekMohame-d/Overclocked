@@ -11,10 +11,10 @@ public sealed partial class BrandService
 {
     public async Task<Result<BrandResponse>> GetBrandByIdAsync(
         GetBrandByIdRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        Domain.Entities.Brand? brand = await brandRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Brand? brand = await brandRepository
+            .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
 
         return brand?.ToDto() ?? Result<BrandResponse>.Failure(Errors.BrandNotFound, HttpStatusCode.NotFound);
     }

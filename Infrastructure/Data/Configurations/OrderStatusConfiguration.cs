@@ -11,18 +11,22 @@ public class OrderStatusConfiguration : IEntityTypeConfiguration<OrderStatus>
     {
         // Attributes
         builder.HasKey(os => os.Id);
-        builder.Property(os => os.Name).HasMaxLength(50).IsRequired();
+
+        builder.Property(os => os.Name)
+            .HasMaxLength(50)
+            .IsRequired();
 
         // Relationships
 
         // Indexes
-        builder.HasIndex(os => os.Name).IsUnique();
+        builder.HasIndex(os => os.Name)
+            .IsUnique();
 
         // Seed Data
         builder.HasData(GenerateOrderStatus());
     }
 
-    private IEnumerable<OrderStatus> GenerateOrderStatus()
+    private static IEnumerable<OrderStatus> GenerateOrderStatus()
     {
         return Enum.GetValues<OrderStatusType>()
             .Select(role => new OrderStatus { Id = (int)role, Name = role.ToString() });

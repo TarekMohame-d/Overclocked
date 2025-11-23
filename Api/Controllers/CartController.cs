@@ -24,10 +24,8 @@ public class CartController(ICartService cartService) : ControllerBase
         {
             return Unauthorized();
         }
-        Result<IEnumerable<CartItemResponse>> response = await cartService.GetCartItemsAsync(
-            (Guid)userId,
-            cancellationToken
-        );
+        Result<CartItemResponse> response = await cartService
+            .GetCartItemsAsync((Guid)userId, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -57,8 +55,7 @@ public class CartController(ICartService cartService) : ControllerBase
     [Route(CartRoutes.UpdateCartItem)]
     public async Task<IActionResult> UpdateCartItem(
         [FromBody] UpdateCartItemRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
         if(userId == null)

@@ -12,8 +12,7 @@ public sealed partial class AuthenticationService
 {
     public async Task<Result<AuthResponse>> RefreshTokenAsync(
         RefreshTokenRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         IDictionary<string, string>? claims = tokenReaderService.GetClaimsFromToken(request.AccessToken);
 
@@ -24,19 +23,14 @@ public sealed partial class AuthenticationService
         claims.TryGetValue(ClaimsConstants.DeviceId, out var deviceId);
 
         if(string.IsNullOrEmpty(nameIdentifier) || string.IsNullOrEmpty(deviceId))
-        {
             return Result<AuthResponse>.Failure(Errors.InvalidAccessToken);
-        }
 
         if(!Guid.TryParse(claims[ClaimsConstants.NameIdentifier], out Guid userId))
-        {
             return Result<AuthResponse>.Failure(Errors.InvalidAccessToken);
-        }
 
         User? user = await userRepository.SingleOrDefaultAsync(
             x => x.Id == userId,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         if(user is null)
             return Result<AuthResponse>.Failure(Errors.InvalidAccessToken);
@@ -45,16 +39,14 @@ public sealed partial class AuthenticationService
             userId,
             deviceId,
             request.RefreshToken,
-            cancellationToken
-        );
+            cancellationToken);
 
         if(!isRefreshTokenValid)
             return Result<AuthResponse>.Failure(Errors.InvalidRefreshToken);
 
         IEnumerable<RolePermission> rolePermissions = await rolePermissionsRepository.WhereAsync(
             x => x.RoleId == user.RoleId,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         IEnumerable<string> permissions = rolePermissions.Select(x => ((PermissionType)x.PermissionId).ToString());
 
@@ -72,8 +64,7 @@ public sealed partial class AuthenticationService
         (var refreshToken, DateTime expiredAt) = await refreshTokenService.UpdateRefreshTokenAsync(
             userId,
             deviceId,
-            cancellationToken
-        );
+            cancellationToken);
 
         var authResponse = new AuthResponse
         {

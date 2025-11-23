@@ -3,6 +3,7 @@ using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
 using Application.Services.Authentication.Helpers.Interfaces;
 using Domain.Entities;
+using Domain.Exceptions;
 using Hangfire;
 
 namespace Application.Services.Authentication.Events;
@@ -11,16 +12,16 @@ public class EmailNotConfirmedEventHandler(
     IEmailConfirmationCodeService emailConfirmationCodeService,
     IUnitOfWork unitOfWork,
     IBackgroundJobClient jobClient,
-    IEmailService emailService
-) : IEventHandler<EmailNotConfirmedEvent>
+    IEmailService emailService)
+    : IEventHandler<EmailNotConfirmedEvent>
 {
     public async Task HandleAsync(EmailNotConfirmedEvent domainEvent, CancellationToken cancellationToken)
     {
-        EmailConfirmationCode emailConfirmationCode =
-            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(domainEvent.UserId, cancellationToken)
-            ?? throw new Exception("Confirmation code not found");
+        EmailConfirmationCode emailConfirmationCode = await emailConfirmationCodeService
+                .GetEmailConfirmationCodeAsync(domainEvent.UserId, false, cancellationToken)
+            ?? throw new EmailConfirmationCodeNotExistException(domainEvent.UserId);
 
-        // Check if the code is expired and generate a new one
+        // Check if the code is expired and generate a new one (5 min. before expiration)
         if(emailConfirmationCode.ExpiredAt <= DateTime.UtcNow.AddMinutes(5))
         {
             var code = emailConfirmationCodeService.UpdateEmailConfirmationCode(emailConfirmationCode);

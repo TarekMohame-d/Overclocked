@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Net;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
@@ -38,11 +39,11 @@ public class UpdateBrandAsyncTest
             ImageUrl = "image.png",
         };
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns((Brand)null!);
-
-        _eventDispatcherMock
-            .DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None)
-            .Returns(Task.CompletedTask);
+        _brandRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Brand, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns((Brand)null!);
 
         // Act
         Result result = await _brandServices.UpdateBrandAsync(request, CancellationToken.None);
@@ -53,13 +54,15 @@ public class UpdateBrandAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _brandRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
-
-        await _eventDispatcherMock.DidNotReceive().DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None);
+        await _brandRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Brand, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task UpdateBrandAsync_Should_ReturnSuccess_When_BrandExist()
+    public async Task UpdateBrandAsync_Should_ReturnSuccess_When_BrandExistAndNameIsSame()
     {
         // Arrange
         var request = new UpdateBrandRequest
@@ -73,15 +76,17 @@ public class UpdateBrandAsyncTest
 
         brand.Name = request.Name;
 
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(brand);
+        _brandRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Brand, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(brand);
 
-        _brandRepositoryMock.Update(Arg.Any<Brand>());
-
-        _eventDispatcherMock
-            .DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None)
+        _eventDispatcherMock.DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None)
             .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
 
         // Act
         Result result = await _brandServices.UpdateBrandAsync(request, CancellationToken.None);
@@ -91,12 +96,105 @@ public class UpdateBrandAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBeNull();
 
-        await _brandRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _brandRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Brand, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
 
-        _brandRepositoryMock.Received(1).Update(Arg.Any<Brand>());
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None);
+    }
 
-        await _eventDispatcherMock.Received(1).DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None);
+    [Fact]
+    public async Task UpdateBrandAsync_Should_ReturnFailure_When_BrandExistAndNameChangedAndNameIsNotUnique()
+    {
+        // Arrange
+        var request = new UpdateBrandRequest
+        {
+            Id = Guid.CreateVersion7(),
+            Name = "Brand Name",
+            ImageUrl = "image.png",
+        };
+
+        Brand brand = new BrandFaker().Generate();
+
+        _brandRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Brand, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(brand);
+
+        _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        // Act
+        Result result = await _brandServices.UpdateBrandAsync(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
+        result.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        result.Error.ShouldNotBeNull();
+
+        await _brandRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Brand, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+
+        await _brandRepositoryMock.Received(1)
+            .AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateBrandAsync_Should_ReturnSuccess_When_BrandExistAndNameChangedAndNameIsUnique()
+    {
+        // Arrange
+        var request = new UpdateBrandRequest
+        {
+            Id = Guid.CreateVersion7(),
+            Name = "Brand Name",
+            ImageUrl = "image.png",
+        };
+
+        Brand brand = new BrandFaker().Generate();
+
+        _brandRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Brand, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(brand);
+
+        _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        _eventDispatcherMock.DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        Result result = await _brandServices.UpdateBrandAsync(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.Error.ShouldBeNull();
+
+        await _brandRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Brand, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+
+        await _brandRepositoryMock.Received(1)
+            .AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>());
+
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
+
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<BrandUpdatedEvent>(), CancellationToken.None);
     }
 }

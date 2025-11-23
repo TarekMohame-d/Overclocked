@@ -24,7 +24,7 @@ public class GetCartItemsTest(CustomWebApplicationFactory factory) : IAsyncLifet
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task DeleteCartItem_Should_ReturnSuccess_When_DataIsValid()
+    public async Task GetCartItems_Should_ReturnSuccess_When_DataIsValid()
     {
         // Arrange
         User user = await SeedDatabaseAsync(10);
@@ -38,15 +38,13 @@ public class GetCartItemsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        Result<IEnumerable<CartItemResponse>>? result = await response.Content.ReadFromJsonAsync<
-            Result<IEnumerable<CartItemResponse>>
-        >();
+        Result<CartItemResponse>? result = await response.Content.ReadFromJsonAsync<Result<CartItemResponse>>();
 
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Data.ShouldNotBeNull();
-        result.Data.Count().ShouldBe(2);
+        result.Data.CartItems.Count().ShouldBe(2);
     }
 
     private async Task<User> SeedDatabaseAsync(int quantity = 10)
@@ -58,9 +56,19 @@ public class GetCartItemsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         Product product2 = new ProductFaker().Generate();
         var cart = new Cart { User = user, UserId = user.Id };
 
-        cart.CartItems.Add(new CartItem { ProductId = product.Id, Quantity = 2 });
+        cart.CartItems.Add(new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = product.Id,
+            Quantity = 2
+        });
 
-        cart.CartItems.Add(new CartItem { ProductId = product2.Id, Quantity = 1 });
+        cart.CartItems.Add(new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = product2.Id,
+            Quantity = 1
+        });
 
         var role = new Role { Name = "Customer", Id = 4 };
 

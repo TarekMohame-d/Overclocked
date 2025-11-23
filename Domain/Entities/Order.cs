@@ -5,10 +5,10 @@ namespace Domain.Entities;
 
 public class Order : Entity
 {
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; init; }
     public decimal ShippingCost { get; set; }
-    public decimal TotalPrice { get; set; }
-    public int StatusId { get; set; }
+    public decimal TotalPrice { get; }
+    public int StatusId { get; private set; }
     public OrderStatusType OrderStatusType
     {
         get => (OrderStatusType)StatusId;
@@ -19,7 +19,7 @@ public class Order : Entity
     public User? User { get; set; }
     public Payment? Payment { get; set; }
     public OrderStatus? OrderStatus { get; set; }
-    public ICollection<OrderItem>? OrderItems { get; set; }
-    public ICollection<Shipment>? Shipments { get; set; }
     public Refund? Refund { get; set; }
+    public ICollection<OrderItem> OrderItems { get; set; } = [];
+    public ICollection<Shipment> Shipments { get; set; } = [];
 }

@@ -12,36 +12,35 @@ public class LoggingCartServiceDecorator(ICartService inner, ILogger<LoggingCart
     public Task<Result> CreateCartAsync(Guid userId, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync("CreateCart", () => inner.CreateCartAsync(userId, cancellationToken));
 
-    public Task<Result<IEnumerable<CartItemResponse>>> GetCartItemsAsync(
+    public Task<Result<CartItemResponse>> GetCartItemsAsync(
         Guid userId,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync("GetCartItems", () => inner.GetCartItemsAsync(userId, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync("GetCartItemsRequest", () => inner.GetCartItemsAsync(userId, cancellationToken));
 
     public Task<Result> AddCartItemAsync(
         Guid userId,
         AddCartItemRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync(request, () => inner.AddCartItemAsync(userId, request, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.AddCartItemAsync(userId, request, cancellationToken));
 
     public Task<Result> UpdateCartItemAsync(
         Guid userId,
         UpdateCartItemRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync(request, () => inner.UpdateCartItemAsync(userId, request, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.UpdateCartItemAsync(userId, request, cancellationToken));
 
     public Task<Result> DeleteCartItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(
-            "DeleteCartItem",
-            () => inner.DeleteCartItemAsync(userId, productId, cancellationToken)
-        );
+            "DeleteCartItemRequest",
+            () => inner.DeleteCartItemAsync(userId, productId, cancellationToken));
 
     public Task<Result> ClearCartAsync(Guid userId, CancellationToken cancellationToken) =>
-        ExecuteWithLoggingAsync("ClearCart", () => inner.ClearCartAsync(userId, cancellationToken));
+        ExecuteWithLoggingAsync("ClearCartRequest", () => inner.ClearCartAsync(userId, cancellationToken));
 
     private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object request, Func<Task<TResult>> action)
         where TResult : Result
     {
-        var requestName = request.GetType().Name;
+        var requestName = request as string ?? request.GetType().Name;
         logger.LogInformation("Processing request {RequestName}", requestName);
 
         TResult result = await action();

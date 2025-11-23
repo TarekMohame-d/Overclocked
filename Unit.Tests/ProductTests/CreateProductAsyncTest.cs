@@ -24,8 +24,7 @@ public class CreateProductAsyncTest
         _productService = new ProductService(
             _productRepositoryMock,
             _unitOfWorkMock,
-            Substitute.For<IEventDispatcher>()
-        );
+            Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
@@ -48,9 +47,11 @@ public class CreateProductAsyncTest
 
         Product product = new ProductFaker().Generate();
 
-        _productRepositoryMock.AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>()).Returns(product);
+        _productRepositoryMock.AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>())
+            .Returns(product);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
 
         // Act
         Result result = await _productService.CreateProductAsync(request, CancellationToken.None);
@@ -59,8 +60,10 @@ public class CreateProductAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        await _productRepositoryMock.Received(1).AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>());
+        await _productRepositoryMock.Received(1)
+            .AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
     }
 }

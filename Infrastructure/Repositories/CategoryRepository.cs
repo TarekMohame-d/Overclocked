@@ -4,13 +4,8 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Repositories;
 
-public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
+public class CategoryRepository(ApplicationDbContext dbContext)
+    : GenericRepository<Category>(dbContext), ICategoryRepository
 {
-    private readonly ApplicationDbContext _dbContext;
 
-    public CategoryRepository(ApplicationDbContext dbContext)
-        : base(dbContext)
-    {
-        _dbContext = dbContext;
-    }
 }

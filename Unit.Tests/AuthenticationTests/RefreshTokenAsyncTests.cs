@@ -19,7 +19,6 @@ namespace Unit.Tests.AuthenticationTests;
 public class RefreshTokenAsyncTests
 {
     private readonly AuthenticationService _authenticationService;
-    private readonly IEmailConfirmationCodeHasher _emailConfirmationCodeHasherMock;
     private readonly IEmailConfirmationCodeService _emailConfirmationCodeServiceMock;
     private readonly IEventDispatcher _eventDispatcherMock;
     private readonly IPasswordHasher _passwordHasherMock;
@@ -30,11 +29,11 @@ public class RefreshTokenAsyncTests
     private readonly IRolePermissionsRepository _rolePermissionsRepositoryMock;
     private readonly ITokenReaderService _tokenReaderServiceMock;
     private readonly ICartService _cartServiceMock;
+    private readonly IWishlistService _wishlistServiceMock;
 
     public RefreshTokenAsyncTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
-        _emailConfirmationCodeHasherMock = Substitute.For<IEmailConfirmationCodeHasher>();
         _emailConfirmationCodeServiceMock = Substitute.For<IEmailConfirmationCodeService>();
         _eventDispatcherMock = Substitute.For<IEventDispatcher>();
         _passwordHasherMock = Substitute.For<IPasswordHasher>();
@@ -44,6 +43,7 @@ public class RefreshTokenAsyncTests
         _rolePermissionsRepositoryMock = Substitute.For<IRolePermissionsRepository>();
         _tokenReaderServiceMock = Substitute.For<ITokenReaderService>();
         _cartServiceMock = Substitute.For<ICartService>();
+        _wishlistServiceMock = Substitute.For<IWishlistService>();
 
         _authenticationService = new AuthenticationService(
             _userRepositoryMock,
@@ -51,22 +51,23 @@ public class RefreshTokenAsyncTests
             _unitOfWorkMock,
             _passwordHasherMock,
             _eventDispatcherMock,
-            _emailConfirmationCodeHasherMock,
             _emailConfirmationCodeServiceMock,
             _tokenProviderMock,
             _refreshTokenServiceMock,
             _tokenReaderServiceMock,
-            _cartServiceMock
+            _cartServiceMock,
+            _wishlistServiceMock
         );
     }
 
     [Fact]
-    public async Task RefreshTokenAsync_When_AccessTokenIsInvalid_ShouldReturnFailure()
+    public async Task RefreshTokenAsync_Should_ReturnFailure_When_AccessTokenIsInvalid()
     {
         // Arrange
         var request = new RefreshTokenRequest { AccessToken = "access-token", RefreshToken = "refresh-token" };
 
-        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>()).Returns((IDictionary<string, string>)null!);
+        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>())
+            .Returns((IDictionary<string, string>)null!);
 
         // Act
         Result result = await _authenticationService.RefreshTokenAsync(request, CancellationToken.None);
@@ -77,22 +78,23 @@ public class RefreshTokenAsyncTests
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        _tokenReaderServiceMock.Received(1).GetClaimsFromToken(Arg.Any<string>());
+        _tokenReaderServiceMock.Received(1)
+            .GetClaimsFromToken(Arg.Any<string>());
     }
 
     [Fact]
-    public async Task RefreshTokenAsync_When_UserIdIsNotGuid_ShouldReturnFailure()
+    public async Task RefreshTokenAsync_Should_ReturnFailure_When_UserIdIsNotGuid()
     {
         // Arrange
         var request = new RefreshTokenRequest { AccessToken = "access-token", RefreshToken = "refresh-token" };
 
-        IDictionary<string, string> cliams = new Dictionary<string, string>
+        IDictionary<string, string> claims = new Dictionary<string, string>
         {
             { ClaimsConstants.NameIdentifier, "1" },
             { ClaimsConstants.DeviceId, "cf:3d:35:08:e9:df" },
         };
 
-        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>()).Returns(cliams);
+        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>()).Returns(claims);
 
         // Act
         Result result = await _authenticationService.RefreshTokenAsync(request, CancellationToken.None);
@@ -103,21 +105,23 @@ public class RefreshTokenAsyncTests
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        _tokenReaderServiceMock.Received(1).GetClaimsFromToken(Arg.Any<string>());
+        _tokenReaderServiceMock.Received(1)
+            .GetClaimsFromToken(Arg.Any<string>());
     }
 
     [Fact]
-    public async Task RefreshTokenAsync_When_DeviceIdIsNullOrEmpty_ShouldReturnFailure()
+    public async Task RefreshTokenAsync_Should_ReturnFailure_When_DeviceIdIsNullOrEmpty()
     {
         // Arrange
         var request = new RefreshTokenRequest { AccessToken = "access-token", RefreshToken = "refresh-token" };
 
-        IDictionary<string, string> cliams = new Dictionary<string, string>
+        IDictionary<string, string> claims = new Dictionary<string, string>
         {
             { ClaimsConstants.NameIdentifier, Guid.NewGuid().ToString() },
         };
 
-        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>()).Returns(cliams);
+        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>())
+            .Returns(claims);
 
         // Act
         Result result = await _authenticationService.RefreshTokenAsync(request, CancellationToken.None);
@@ -128,28 +132,27 @@ public class RefreshTokenAsyncTests
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        _tokenReaderServiceMock.Received(1).GetClaimsFromToken(Arg.Any<string>());
+        _tokenReaderServiceMock.Received(1)
+            .GetClaimsFromToken(Arg.Any<string>());
     }
 
     [Fact]
-    public async Task RefreshTokenAsync_When_UserNotFound_ShouldReturnFailure()
+    public async Task RefreshTokenAsync_Should_ReturnFailure_When_UserNotFound()
     {
         // Arrange
         var request = new RefreshTokenRequest { AccessToken = "access-token", RefreshToken = "refresh-token" };
 
-        IDictionary<string, string> cliams = new Dictionary<string, string>
+        IDictionary<string, string> claims = new Dictionary<string, string>
         {
             { ClaimsConstants.NameIdentifier, Guid.NewGuid().ToString() },
             { ClaimsConstants.DeviceId, "cf:3d:35:08:e9:df" },
         };
 
-        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>()).Returns(cliams);
+        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>()).Returns(claims);
 
-        _userRepositoryMock
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            )
+        _userRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>())
             .Returns((User)null!);
 
         // Act
@@ -161,44 +164,40 @@ public class RefreshTokenAsyncTests
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        _tokenReaderServiceMock.Received(1).GetClaimsFromToken(Arg.Any<string>());
+        _tokenReaderServiceMock.Received(1)
+            .GetClaimsFromToken(Arg.Any<string>());
 
-        await _userRepositoryMock
-            .Received(1)
+        await _userRepositoryMock.Received(1)
             .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            );
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task RefreshTokenAsync_When_RefreshTokenIsInvalid_ShouldReturnFailure()
+    public async Task RefreshTokenAsync_Should_ReturnFailure_When_RefreshTokenIsInvalid()
     {
         // Arrange
         var request = new RefreshTokenRequest { AccessToken = "access-token", RefreshToken = "refresh-token" };
 
-        IDictionary<string, string> cliams = new Dictionary<string, string>
+        IDictionary<string, string> claims = new Dictionary<string, string>
         {
             { ClaimsConstants.NameIdentifier, Guid.NewGuid().ToString() },
             { ClaimsConstants.DeviceId, "cf:3d:35:08:e9:df" },
         };
 
-        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>()).Returns(cliams);
+        _tokenReaderServiceMock.GetClaimsFromToken(Arg.Any<string>())
+            .Returns(claims);
 
-        _userRepositoryMock
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            )
+        _userRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>())
             .Returns(new UserFaker().Generate());
 
-        _refreshTokenServiceMock
-            .VerifyRefreshTokenAsync(
-                Arg.Any<Guid>(),
-                Arg.Any<string>(),
-                request.RefreshToken,
-                Arg.Any<CancellationToken>()
-            )
+        _refreshTokenServiceMock.VerifyRefreshTokenAsync(
+            Arg.Any<Guid>(),
+            Arg.Any<string>(),
+            request.RefreshToken,
+            Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
@@ -210,22 +209,19 @@ public class RefreshTokenAsyncTests
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
-        _tokenReaderServiceMock.Received(1).GetClaimsFromToken(Arg.Any<string>());
+        _tokenReaderServiceMock.Received(1)
+            .GetClaimsFromToken(Arg.Any<string>());
 
-        await _userRepositoryMock
-            .Received(1)
+        await _userRepositoryMock.Received(1)
             .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            );
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>());
 
-        await _refreshTokenServiceMock
-            .Received(1)
+        await _refreshTokenServiceMock.Received(1)
             .VerifyRefreshTokenAsync(
-                Arg.Any<Guid>(),
-                Arg.Any<string>(),
-                request.RefreshToken,
-                Arg.Any<CancellationToken>()
-            );
+            Arg.Any<Guid>(),
+            Arg.Any<string>(),
+            request.RefreshToken,
+            Arg.Any<CancellationToken>());
     }
 }

@@ -7,6 +7,5 @@ public static partial class Errors
     public static readonly Error BrandNameAlreadyExists = new(
         nameof(BrandNameAlreadyExists),
         ErrorType.Conflict,
-        "Brand name already exists."
-    );
+        "Brand name already exists.");
 }

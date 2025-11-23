@@ -4,7 +4,7 @@ namespace Domain.Entities;
 
 public class RefreshToken : Entity
 {
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
     public required string DeviceId { get; set; }
     public required string TokenHash { get; set; }
     public required DateTime ExpiredAt { get; set; }

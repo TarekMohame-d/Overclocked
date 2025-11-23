@@ -8,12 +8,13 @@ public sealed partial class CartService
     public async Task<Result> ClearCartAsync(Guid userId, CancellationToken cancellationToken)
     {
         Domain.Entities.Cart? cart =
-            await cartRepository.GetCartWithItemsAsync(userId, cancellationToken)
+            await cartRepository.SingleOrDefaultAsync(
+                x => x.UserId == userId,
+                cancellationToken: cancellationToken)
             ?? throw new CartNotFoundException(userId);
 
-        cart.CLearCart();
-
-        await unitOfWork.CompleteAsync(cancellationToken);
+        await cartItemRepository
+            .DeleteWhereAsync(x => x.CartId == cart.Id, cancellationToken);
 
         return Result.Success();
     }

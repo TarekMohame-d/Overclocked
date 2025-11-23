@@ -21,7 +21,8 @@ public class UpdateProductValidationTestCases
         yield return ["ftp://example.com/image.jpg"];
         yield return ["www.example.com/image.jpg"];
         yield return ["https://www.example.com/image.jpg"]; // wrong host
-        yield return ["https://res.cloudinary.com/over-clocked.txt"]; // invalid URL path
+        yield return ["https://res.cloudinary.com/over-clocked/image.txt"]; // invalid URL path
+        yield return ["ftp://res.cloudinary.com/over-clocked/image.png"]; // invalid URL path
     }
 
     public static IEnumerable<object[]> InvalidDescriptionCases()
@@ -52,7 +53,8 @@ public class UpdateProductValidationTestCases
 
     public static IEnumerable<object[]> InvalidImagesCases()
     {
-        yield return [new[] { "https://res.cloudinary.com/over-clocked.txt" }];
+        yield return [new[] { "https://res.cloudinary.com/over-clocked/image.txt" }];
+        yield return [new[] { "ftp://res.cloudinary.com/over-clocked/image.png" }];
         yield return [new[] { "not-a-url" }];
         yield return [new[] { "ftp://example.com/image.jpg" }];
         yield return [new[] { "www.example.com/image.jpg" }];

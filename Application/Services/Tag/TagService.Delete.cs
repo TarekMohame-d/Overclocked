@@ -1,15 +1,14 @@
 using System.Net;
 using Application.Common.Results;
 using Application.Common.Results.PredefinedErrors;
-using Application.Services.Tag.DTOs.Request;
 
 namespace Application.Services.Tag;
 
 public sealed partial class TagService
 {
-    public async Task<Result> DeleteTagAsync(DeleteTagRequest request, CancellationToken cancellationToken)
+    public async Task<Result> DeleteTagAsync(Guid tagId, CancellationToken cancellationToken)
     {
-        Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([tagId], cancellationToken);
 
         if(tag is null)
             return Result.Failure(Errors.TagNotFound, HttpStatusCode.NotFound);

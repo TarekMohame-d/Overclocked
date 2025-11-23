@@ -18,13 +18,11 @@ public class CreateTagRequestValidator : AbstractValidator<CreateTagRequest>
             .WithMessage("{PropertyName} is required and must not be empty or whitespace.")
             .MaximumLength(50)
             .WithMessage("{PropertyName} must not exceed 50 characters.")
-            .MustAsync(
-                async (name, cancellation) =>
-                {
-                    var exists = await _tagRepository.AnyAsync(x => x.NormalizedName == name.ToUpper(), cancellation);
-                    return !exists;
-                }
-            )
+            .MustAsync(async (name, cancellation) =>
+            {
+                var exists = await _tagRepository.AnyAsync(x => x.NormalizedName == name.ToUpper(), cancellation);
+                return !exists;
+            })
             .WithMessage("{PropertyName} already exists.");
     }
 }

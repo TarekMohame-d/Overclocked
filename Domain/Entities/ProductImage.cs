@@ -4,7 +4,7 @@ namespace Domain.Entities;
 
 public class ProductImage : Entity
 {
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; set; }
     public required string Image { get; set; }
 
     // Navigation Properties

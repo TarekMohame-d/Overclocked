@@ -11,10 +11,10 @@ public sealed partial class TagService
 {
     public async Task<Result<TagResponse>> GetTagByIdAsync(
         GetTagByIdRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Tag? tag = await tagRepository
+            .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
 
         return tag?.ToDto() ?? Result<TagResponse>.Failure(Errors.TagNotFound, HttpStatusCode.NotFound);
     }
