@@ -24,6 +24,7 @@ public class DeleteProductAsyncTest
         _productRepositoryMock = Substitute.For<IProductRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _eventDispatcherMock = Substitute.For<IEventDispatcher>();
+
         _productService = new ProductService(_productRepositoryMock, _unitOfWorkMock, _eventDispatcherMock);
     }
 
@@ -31,12 +32,13 @@ public class DeleteProductAsyncTest
     public async Task DeleteProductAsync_Should_ReturnFailure_When_ProductDoesNotExists()
     {
         // Arrange
-        var request = new DeleteProductRequest { Id = Guid.CreateVersion7() };
+        var productId = Guid.CreateVersion7();
 
-        _productRepositoryMock.GetProductWithImagesAsync(request.Id, CancellationToken.None).Returns((Product)null!);
+        _productRepositoryMock.GetProductWithImagesAsync(productId, CancellationToken.None)
+            .Returns((Product)null!);
 
         // Act
-        Result result = await _productService.DeleteProductAsync(request, CancellationToken.None);
+        Result result = await _productService.DeleteProductAsync(productId, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -44,21 +46,22 @@ public class DeleteProductAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _productRepositoryMock.Received(1).GetProductWithImagesAsync(request.Id, CancellationToken.None);
+        await _productRepositoryMock.Received(1)
+            .GetProductWithImagesAsync(productId, CancellationToken.None);
     }
 
     [Fact]
     public async Task DeleteProductAsync_Should_ReturnSuccess_When_ProductExistsAndNoProductImages()
     {
         // Arrange
-        var request = new DeleteProductRequest { Id = Guid.CreateVersion7() };
+        var productId = Guid.CreateVersion7();
 
         Product product = new ProductFaker().Generate();
 
-        _productRepositoryMock.GetProductWithImagesAsync(request.Id, CancellationToken.None).Returns(product);
+        _productRepositoryMock.GetProductWithImagesAsync(productId, CancellationToken.None)
+            .Returns(product);
 
-        _eventDispatcherMock
-            .DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>())
+        _eventDispatcherMock.DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
         _productRepositoryMock.Delete(Arg.Any<Product>());
@@ -66,21 +69,23 @@ public class DeleteProductAsyncTest
         _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
-        Result result = await _productService.DeleteProductAsync(request, CancellationToken.None);
+        Result result = await _productService.DeleteProductAsync(productId, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _productRepositoryMock.Received(1).GetProductWithImagesAsync(request.Id, CancellationToken.None);
+        await _productRepositoryMock.Received(1)
+            .GetProductWithImagesAsync(productId, CancellationToken.None);
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
 
-        _productRepositoryMock.Received(1).Delete(Arg.Any<Product>());
+        _productRepositoryMock.Received(1)
+            .Delete(Arg.Any<Product>());
 
-        await _eventDispatcherMock
-            .DidNotReceive()
+        await _eventDispatcherMock.DidNotReceive()
             .DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>());
     }
 
@@ -88,45 +93,47 @@ public class DeleteProductAsyncTest
     public async Task DeleteProductAsync_Should_ReturnSuccess_When_ProductExistsAndHasProductImages()
     {
         // Arrange
-        var request = new DeleteProductRequest { Id = Guid.CreateVersion7() };
+        var productId = Guid.CreateVersion7();
 
         Product product = new ProductFaker().Generate();
         product.ProductImages =
         [
             new ProductImage
             {
-                Id = Guid.CreateVersion7(),
                 Image = "image.png",
                 ProductId = product.Id,
             },
         ];
 
-        _productRepositoryMock.GetProductWithImagesAsync(request.Id, CancellationToken.None).Returns(product);
+        _productRepositoryMock.GetProductWithImagesAsync(productId, CancellationToken.None)
+            .Returns(product);
 
-        _eventDispatcherMock
-            .DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>())
+        _eventDispatcherMock.DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
         _productRepositoryMock.Delete(Arg.Any<Product>());
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
 
         // Act
-        Result result = await _productService.DeleteProductAsync(request, CancellationToken.None);
+        Result result = await _productService.DeleteProductAsync(productId, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBeNull();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _productRepositoryMock.Received(1).GetProductWithImagesAsync(request.Id, CancellationToken.None);
+        await _productRepositoryMock.Received(1)
+            .GetProductWithImagesAsync(productId, CancellationToken.None);
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
 
-        _productRepositoryMock.Received(1).Delete(Arg.Any<Product>());
+        _productRepositoryMock.Received(1)
+            .Delete(Arg.Any<Product>());
 
-        await _eventDispatcherMock
-            .Received(1)
+        await _eventDispatcherMock.Received(1)
             .DispatchAsync(Arg.Any<ProductDeletedEvent>(), Arg.Any<CancellationToken>());
     }
 }

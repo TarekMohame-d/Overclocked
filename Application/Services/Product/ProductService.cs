@@ -7,5 +7,5 @@ namespace Application.Services.Product;
 public sealed partial class ProductService(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
-    IEventDispatcher eventDispatcher
-) : IProductService;
+    IEventDispatcher eventDispatcher)
+    : IProductService;

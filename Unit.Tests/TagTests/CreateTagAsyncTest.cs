@@ -31,7 +31,8 @@ public class CreateTagAsyncTest
 
         Tag tag = new TagFaker().Generate();
 
-        _tagRepositoryMock.AddAsync(Arg.Any<Tag>(), Arg.Any<CancellationToken>()).Returns(tag);
+        _tagRepositoryMock.AddAsync(Arg.Any<Tag>(), Arg.Any<CancellationToken>())
+            .Returns(tag);
 
         _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
@@ -42,8 +43,10 @@ public class CreateTagAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        await _tagRepositoryMock.Received(1).AddAsync(Arg.Any<Tag>(), Arg.Any<CancellationToken>());
+        await _tagRepositoryMock.Received(1)
+            .AddAsync(Arg.Any<Tag>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
     }
 }

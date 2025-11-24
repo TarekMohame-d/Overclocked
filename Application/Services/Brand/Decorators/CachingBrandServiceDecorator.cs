@@ -12,27 +12,25 @@ namespace Application.Services.Brand.Decorators;
 public class CachingBrandServiceDecorator(
     IBrandService inner,
     ICacheService cacheService,
-    ILogger<CachingBrandServiceDecorator> logger
-) : IBrandService
+    ILogger<CachingBrandServiceDecorator> logger)
+    : IBrandService
 {
     public Task<Result<IEnumerable<BrandListResponse>>> GetAllBrandsAsync(
         GetAllBrandsRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithCacheAsync(request, inner.GetAllBrandsAsync, cancellationToken);
+        CancellationToken cancellationToken) =>
+            ExecuteWithCacheAsync(request, inner.GetAllBrandsAsync, cancellationToken);
 
     public Task<Result<BrandResponse>> GetBrandByIdAsync(
         GetBrandByIdRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithCacheAsync(request, inner.GetBrandByIdAsync, cancellationToken);
+        CancellationToken cancellationToken) =>
+            ExecuteWithCacheAsync(request, inner.GetBrandByIdAsync, cancellationToken);
 
     public async Task<Result> CreateBrandAsync(CreateBrandRequest request, CancellationToken cancellationToken)
     {
         Result result = await inner.CreateBrandAsync(request, cancellationToken);
 
         if(result.IsSuccess)
-        {
             await cacheService.RemoveAsync(CacheKeys.AllBrands, cancellationToken);
-        }
 
         return result;
     }
@@ -50,13 +48,13 @@ public class CachingBrandServiceDecorator(
         return result;
     }
 
-    public async Task<Result> DeleteBrandAsync(DeleteBrandRequest request, CancellationToken cancellationToken)
+    public async Task<Result> DeleteBrandAsync(Guid brandId, CancellationToken cancellationToken)
     {
-        Result result = await inner.DeleteBrandAsync(request, cancellationToken);
+        Result result = await inner.DeleteBrandAsync(brandId, cancellationToken);
 
         if(result.IsSuccess)
         {
-            await cacheService.RemoveAsync(CacheKeys.Brand(request.Id.ToString()), cancellationToken);
+            await cacheService.RemoveAsync(CacheKeys.Brand(brandId.ToString()), cancellationToken);
             await cacheService.RemoveAsync(CacheKeys.AllBrands, cancellationToken);
         }
 
@@ -66,8 +64,7 @@ public class CachingBrandServiceDecorator(
     private async Task<Result<T>> ExecuteWithCacheAsync<T, TRequest>(
         TRequest request,
         Func<TRequest, CancellationToken, Task<Result<T>>> action,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
         where TRequest : ICachedRequest
     {
         var requestName = request.GetType().Name;

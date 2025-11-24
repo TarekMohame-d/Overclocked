@@ -858,10 +858,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<Guid?>("InvoiceItemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("OrderItemId")
+                    b.Property<Guid>("OrderItemId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Quantity")
@@ -1459,33 +1456,12 @@ namespace Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("019a497f-e294-71ac-8f28-6f772f4289e1"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "overclocked.cor@gmail.com",
-                            EmailConfirmed = true,
-                            FirstName = "Super",
-                            IsActive = true,
-                            LastName = "Admin",
-                            PasswordHash = "83F0B98915AA027B1D0A55E018181ACC2BDD9088F085A9832CE2081337BC4743-42C24EE7A22304068F0F8745D27B3C38",
-                            Phone = "011xxxxxx24",
-                            RoleId = 1,
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Wishlist", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasDefaultValueSql("NOW()");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -1727,7 +1703,9 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.OrderItem", "OrderItem")
                         .WithOne()
-                        .HasForeignKey("Domain.Entities.RefundItem", "OrderItemId");
+                        .HasForeignKey("Domain.Entities.RefundItem", "OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.Refund", "Refund")
                         .WithMany("RefundItems")
@@ -1975,8 +1953,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Review", b =>
                 {
-                    b.Navigation("ReviewReply")
-                        .IsRequired();
+                    b.Navigation("ReviewReply");
                 });
 
             modelBuilder.Entity("Domain.Entities.Role", b =>

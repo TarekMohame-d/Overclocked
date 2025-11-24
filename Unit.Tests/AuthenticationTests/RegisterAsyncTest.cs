@@ -18,7 +18,6 @@ namespace Unit.Tests.AuthenticationTests;
 public class RegisterAsyncTest
 {
     private readonly AuthenticationService _authenticationService;
-    private readonly IEmailConfirmationCodeHasher _emailConfirmationCodeHasherMock;
     private readonly IEmailConfirmationCodeService _emailConfirmationCodeServiceMock;
     private readonly IEventDispatcher _eventDispatcherMock;
     private readonly IPasswordHasher _passwordHasherMock;
@@ -29,11 +28,11 @@ public class RegisterAsyncTest
     private readonly IRolePermissionsRepository _rolePermissionsRepositoryMock;
     private readonly ITokenReaderService _tokenReaderServiceMock;
     private readonly ICartService _cartServiceMock;
+    private readonly IWishlistService _wishlistServiceMock;
 
     public RegisterAsyncTest()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
-        _emailConfirmationCodeHasherMock = Substitute.For<IEmailConfirmationCodeHasher>();
         _emailConfirmationCodeServiceMock = Substitute.For<IEmailConfirmationCodeService>();
         _eventDispatcherMock = Substitute.For<IEventDispatcher>();
         _passwordHasherMock = Substitute.For<IPasswordHasher>();
@@ -43,6 +42,7 @@ public class RegisterAsyncTest
         _rolePermissionsRepositoryMock = Substitute.For<IRolePermissionsRepository>();
         _tokenReaderServiceMock = Substitute.For<ITokenReaderService>();
         _cartServiceMock = Substitute.For<ICartService>();
+        _wishlistServiceMock = Substitute.For<IWishlistService>();
 
         _authenticationService = new AuthenticationService(
             _userRepositoryMock,
@@ -50,17 +50,16 @@ public class RegisterAsyncTest
             _unitOfWorkMock,
             _passwordHasherMock,
             _eventDispatcherMock,
-            _emailConfirmationCodeHasherMock,
             _emailConfirmationCodeServiceMock,
             _tokenProviderMock,
             _refreshTokenServiceMock,
             _tokenReaderServiceMock,
-            _cartServiceMock
+            _cartServiceMock,
+            _wishlistServiceMock
         );
     }
-
     [Fact]
-    public async Task RegisterAsync_When_ThereIsNoError_ShouldReturnSuccess()
+    public async Task RegisterAsync_Should_ReturnSuccess_When_ThereIsNoError()
     {
         // Arrange
         var request = new RegisterRequest
@@ -74,15 +73,18 @@ public class RegisterAsyncTest
 
         User user = new UserFaker().Generate();
 
-        _userRepositoryMock.AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>()).Returns(user);
+        _userRepositoryMock.AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>())
+            .Returns(user);
 
         _emailConfirmationCodeServiceMock
             .CreateEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns("code");
 
-        _eventDispatcherMock.DispatchAsync(Arg.Any<UserRegisteredEvent>()).Returns(Task.CompletedTask);
+        _eventDispatcherMock.DispatchAsync(Arg.Any<UserRegisteredEvent>())
+            .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
 
         // Act
         Result result = await _authenticationService.RegisterAsync(request, CancellationToken.None);
@@ -91,14 +93,16 @@ public class RegisterAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        await _userRepositoryMock.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
+        await _userRepositoryMock.Received(1)
+            .AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
 
-        await _eventDispatcherMock.Received(1).DispatchAsync(Arg.Any<UserRegisteredEvent>());
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<UserRegisteredEvent>());
 
-        await _emailConfirmationCodeServiceMock
-            .Received(1)
+        await _emailConfirmationCodeServiceMock.Received(1)
             .CreateEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 }

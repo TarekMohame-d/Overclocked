@@ -2,4 +2,4 @@
 
 namespace Application.Abstraction.Repositories;
 
-public interface IBrandRepository : IGenericRepository<Brand> { }
+public interface IBrandRepository : IGenericRepository<Brand>;

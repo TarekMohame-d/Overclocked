@@ -12,13 +12,13 @@ public class LoggingBrandServiceDecorator(IBrandService inner, ILogger<LoggingBr
 {
     public Task<Result<BrandResponse>> GetBrandByIdAsync(
         GetBrandByIdRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync(request, () => inner.GetBrandByIdAsync(request, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.GetBrandByIdAsync(request, cancellationToken));
 
     public Task<Result<IEnumerable<BrandListResponse>>> GetAllBrandsAsync(
         GetAllBrandsRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithLoggingAsync(request, () => inner.GetAllBrandsAsync(request, cancellationToken));
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.GetAllBrandsAsync(request, cancellationToken));
 
     public Task<Result> CreateBrandAsync(CreateBrandRequest request, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(request, () => inner.CreateBrandAsync(request, cancellationToken));
@@ -26,13 +26,13 @@ public class LoggingBrandServiceDecorator(IBrandService inner, ILogger<LoggingBr
     public Task<Result> UpdateBrandAsync(UpdateBrandRequest request, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(request, () => inner.UpdateBrandAsync(request, cancellationToken));
 
-    public Task<Result> DeleteBrandAsync(DeleteBrandRequest request, CancellationToken cancellationToken) =>
-        ExecuteWithLoggingAsync(request, () => inner.DeleteBrandAsync(request, cancellationToken));
+    public Task<Result> DeleteBrandAsync(Guid brandId, CancellationToken cancellationToken) =>
+        ExecuteWithLoggingAsync("DeleteBrandRequest", () => inner.DeleteBrandAsync(brandId, cancellationToken));
 
     private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object request, Func<Task<TResult>> action)
         where TResult : Result
     {
-        var requestName = request.GetType().Name;
+        var requestName = request as string ?? request.GetType().Name;
         logger.LogInformation("Processing request {RequestName}", requestName);
 
         TResult result = await action();

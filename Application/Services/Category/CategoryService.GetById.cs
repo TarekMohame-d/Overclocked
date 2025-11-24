@@ -14,7 +14,8 @@ public sealed partial class CategoryService
         CancellationToken cancellationToken
     )
     {
-        Domain.Entities.Category? category = await categoryRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Category? category = await categoryRepository
+            .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
 
         return category?.ToDto() ?? Result<CategoryResponse>.Failure(Errors.CategoryNotFound, HttpStatusCode.NotFound);
     }

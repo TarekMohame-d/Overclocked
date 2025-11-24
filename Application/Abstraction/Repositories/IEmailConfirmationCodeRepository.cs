@@ -2,4 +2,4 @@ using Domain.Entities;
 
 namespace Application.Abstraction.Repositories;
 
-public interface IEmailConfirmationCodeRepository : IGenericRepository<EmailConfirmationCode> { }
+public interface IEmailConfirmationCodeRepository : IGenericRepository<EmailConfirmationCode>;

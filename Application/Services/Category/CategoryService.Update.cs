@@ -11,38 +11,33 @@ public sealed partial class CategoryService
 {
     public async Task<Result> UpdateCategoryAsync(UpdateCategoryRequest request, CancellationToken cancellationToken)
     {
-        Domain.Entities.Category? category = await categoryRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Category? category = await categoryRepository
+            .SingleOrDefaultAsync(x => x.Id == request.Id, asNoTracking: false, cancellationToken);
 
         if(category is null)
-        {
             return Result.Failure(Errors.CategoryNotFound, HttpStatusCode.NotFound);
-        }
+
+        var oldImageUrl = category.Image;
 
         if(category.Name != request.Name)
         {
-            var exist = await categoryRepository.AnyAsync(
-                x => x.NormalizedName == request.Name.ToUpper(),
-                cancellationToken
-            );
+            var exist = await categoryRepository
+                .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
 
             if(exist)
-            {
                 return Result.Failure(Errors.CategoryNameAlreadyExists, HttpStatusCode.Conflict);
-            }
-        }
-
-        // Delete old image
-        if(category.Image != request.ImageUrl)
-        {
-            CategoryUpdatedEvent categoryUpdatedEvent = new(category.Image);
-            await eventDispatcher.DispatchAsync(categoryUpdatedEvent, cancellationToken);
         }
 
         category.UpdateFrom(request);
 
-        categoryRepository.Update(category);
-
         await unitOfWork.CompleteAsync(cancellationToken);
+
+        // Delete old image if new image is different
+        if(oldImageUrl != request.ImageUrl)
+        {
+            CategoryUpdatedEvent categoryUpdatedEvent = new(category.Image);
+            await eventDispatcher.DispatchAsync(categoryUpdatedEvent, cancellationToken);
+        }
 
         return Result.Success();
     }

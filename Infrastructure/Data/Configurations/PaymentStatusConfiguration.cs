@@ -11,19 +11,25 @@ public class PaymentStatusConfiguration : IEntityTypeConfiguration<PaymentStatus
     {
         // Attributes
         builder.HasKey(ps => ps.Id);
-        builder.Property(ps => ps.Id).ValueGeneratedNever().IsRequired();
-        builder.Property(ps => ps.Name).HasMaxLength(50).IsRequired();
+        builder.Property(ps => ps.Id).
+            ValueGeneratedNever()
+            .IsRequired();
+
+        builder.Property(ps => ps.Name)
+            .HasMaxLength(50)
+            .IsRequired();
 
         // Relationships
 
         // Indexes
-        builder.HasIndex(ps => ps.Name).IsUnique();
+        builder.HasIndex(ps => ps.Name)
+            .IsUnique();
 
         // Seed Data
         builder.HasData(GeneratePaymentStatus());
     }
 
-    private IEnumerable<PaymentStatus> GeneratePaymentStatus()
+    private static IEnumerable<PaymentStatus> GeneratePaymentStatus()
     {
         return Enum.GetValues<PaymentStatusType>()
             .Select(role => new PaymentStatus { Id = (int)role, Name = role.ToString() });

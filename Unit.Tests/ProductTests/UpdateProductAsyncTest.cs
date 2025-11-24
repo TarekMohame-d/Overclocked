@@ -43,13 +43,12 @@ public class UpdateProductAsyncTest
             Price = 100,
             Stock = 10,
             Thumbnail = "Thumbnail",
-            Specification = [new UpdateProductRequest.Specs { Name = "Name", Value = "Value" }],
+            Specification = [new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" }],
             Tags = [Guid.NewGuid()],
             Images = null,
         };
 
-        _productRepositoryMock
-            .GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock.GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns((Product)null!);
 
         // Act
@@ -61,13 +60,12 @@ public class UpdateProductAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _productRepositoryMock
-            .Received(1)
+        await _productRepositoryMock.Received(1)
             .GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task UpdateProductAsync_Should_ReturnSuccess_When_ProductExistAndNameChanged()
+    public async Task UpdateProductAsync_Should_ReturnSuccess_When_ProductExistAndNameChangedAndNameIsUnique()
     {
         // Arrange
         Product product = new ProductFaker().Generate();
@@ -83,14 +81,14 @@ public class UpdateProductAsyncTest
             Price = 100,
             Stock = 10,
             Thumbnail = "Thumbnail",
-            Specification = [new UpdateProductRequest.Specs { Name = "Name", Value = "Value" }],
+            Specification = [new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" }],
             Tags = [Guid.NewGuid()],
         };
 
-        _productRepositoryMock.GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(product);
+        _productRepositoryMock.GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(product);
 
-        _productRepositoryMock
-            .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), Arg.Any<CancellationToken>())
+        _productRepositoryMock.AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
@@ -103,25 +101,21 @@ public class UpdateProductAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBeNull();
 
-        await _productRepositoryMock
-            .Received(1)
+        await _productRepositoryMock.Received(1)
             .GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
 
-        _productRepositoryMock.Received(1).Update(Arg.Any<Product>());
-
-        await _productRepositoryMock
-            .Received(1)
+        await _productRepositoryMock.Received(1)
             .AnyAsync(Arg.Any<Expression<Func<Product, bool>>>(), Arg.Any<CancellationToken>());
 
-        await _eventDispatcherMock
-            .DidNotReceive()
+        await _eventDispatcherMock.DidNotReceive()
             .DispatchAsync(Arg.Any<ProductUpdatedEvent>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task UpdateProductAsync_Should_ReturnSuccess_When_ProductExistAndNameAlreadyExist()
+    public async Task UpdateProductAsync_Should_ReturnSuccess_When_ProductExistAndNameChangedAndNameIsNotUnique()
     {
         // Arrange
         Product product = new ProductFaker().Generate();
@@ -137,17 +131,15 @@ public class UpdateProductAsyncTest
             Price = 100,
             Stock = 10,
             Thumbnail = "Thumbnail",
-            Specification = [new UpdateProductRequest.Specs { Name = "Name", Value = "Value" }],
+            Specification = [new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" }],
             Tags = [Guid.NewGuid()],
         };
 
-        _productRepositoryMock.GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(product);
+        _productRepositoryMock.GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(product);
 
-        _productRepositoryMock
-            .AnyAsync(Arg.Any<Expression<Func<Product, bool>>>(), Arg.Any<CancellationToken>())
+        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Product, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
-
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
         Result result = await _productService.UpdateProductAsync(request, CancellationToken.None);
@@ -158,20 +150,15 @@ public class UpdateProductAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.Conflict);
 
-        await _productRepositoryMock
-            .Received(1)
+        await _productRepositoryMock.Received(1)
             .GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.DidNotReceive().CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.DidNotReceive()
+            .CompleteAsync(Arg.Any<CancellationToken>());
 
-        _productRepositoryMock.DidNotReceive().Update(Arg.Any<Product>());
+        await _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Product, bool>>>(), Arg.Any<CancellationToken>());
 
-        await _productRepositoryMock
-            .Received(1)
-            .AnyAsync(Arg.Any<Expression<Func<Product, bool>>>(), Arg.Any<CancellationToken>());
-
-        await _eventDispatcherMock
-            .DidNotReceive()
+        await _eventDispatcherMock.DidNotReceive()
             .DispatchAsync(Arg.Any<ProductUpdatedEvent>(), Arg.Any<CancellationToken>());
     }
 
@@ -186,19 +173,16 @@ public class UpdateProductAsyncTest
             new ProductImage
             {
                 Image = "image1.png",
-                Id = Guid.NewGuid(),
                 ProductId = product.Id,
             },
             new ProductImage
             {
                 Image = "image2.png",
-                Id = Guid.NewGuid(),
                 ProductId = product.Id,
             },
             new ProductImage
             {
                 Image = "image3.png",
-                Id = Guid.NewGuid(),
                 ProductId = product.Id,
             },
         ];
@@ -214,18 +198,19 @@ public class UpdateProductAsyncTest
             Price = 100,
             Stock = 10,
             Thumbnail = "Thumbnail",
-            Specification = [new UpdateProductRequest.Specs { Name = "Name", Value = "Value" }],
+            Specification = [new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" }],
             Tags = [Guid.NewGuid()],
             Images = ["image1.png", "image2.png", "image4.png"],
         };
 
-        _productRepositoryMock.GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(product);
+        _productRepositoryMock.GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(product);
 
-        _eventDispatcherMock
-            .DispatchAsync(Arg.Any<ProductUpdatedEvent>(), Arg.Any<CancellationToken>())
+        _eventDispatcherMock.DispatchAsync(Arg.Any<ProductUpdatedEvent>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
 
         // Act
         Result result = await _productService.UpdateProductAsync(request, CancellationToken.None);
@@ -235,20 +220,16 @@ public class UpdateProductAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBeNull();
 
-        await _productRepositoryMock
-            .Received(1)
+        await _productRepositoryMock.Received(1)
             .GetProductForUpdateAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
 
-        _productRepositoryMock.Received(1).Update(Arg.Any<Product>());
-
-        await _productRepositoryMock
-            .DidNotReceive()
+        await _productRepositoryMock.DidNotReceive()
             .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), Arg.Any<CancellationToken>());
 
-        await _eventDispatcherMock
-            .Received(1)
+        await _eventDispatcherMock.Received(1)
             .DispatchAsync(Arg.Any<ProductUpdatedEvent>(), Arg.Any<CancellationToken>());
     }
 }

@@ -29,10 +29,8 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var request = new GetAllCategoriesRequest();
-        Result<IEnumerable<CategoryListResponse>> response = await categoryServices.GetAllCategoriesAsync(
-            request,
-            cancellationToken
-        );
+        Result<IEnumerable<CategoryListResponse>> response = await categoryServices
+            .GetAllCategoriesAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -43,8 +41,7 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
     [Route(CategoryRoutes.Create)]
     public async Task<IActionResult> Create(
         [FromBody] CreateCategoryRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         Result response = await categoryServices.CreateCategoryAsync(request, cancellationToken);
 
@@ -58,8 +55,7 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
         [FromBody] UpdateCategoryRequestBody request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         UpdateCategoryRequest updateCategoryRequest = new()
         {
@@ -78,8 +74,7 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
     [Route(CategoryRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var request = new DeleteCategoryRequest { Id = id };
-        Result response = await categoryServices.DeleteCategoryAsync(request, cancellationToken);
+        Result response = await categoryServices.DeleteCategoryAsync(id, cancellationToken);
 
         return response.ToActionResult();
     }

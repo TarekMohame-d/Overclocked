@@ -7,6 +7,7 @@ using Application.Services.Cart.Decorators;
 using Application.Services.Category.Decorators;
 using Application.Services.Product.Decorators;
 using Application.Services.Tag.Decorators;
+using Application.Services.Wishlist.Decorators;
 using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -21,9 +22,8 @@ public static class DependencyInjection
     {
         services.AddValidatorsFromAssembly(
             Assembly.GetExecutingAssembly(),
-            includeInternalTypes: true,
-            lifetime: ServiceLifetime.Scoped
-        );
+            lifetime: ServiceLifetime.Scoped,
+            includeInternalTypes: true);
 
         services.AddHangfire(config =>
         {
@@ -37,8 +37,7 @@ public static class DependencyInjection
                     // QueuePollInterval = TimeSpan.FromSeconds(15),
                     // InvisibilityTimeout = TimeSpan.FromMinutes(30),
                     // TablePrefix = "hf_",
-                }
-            );
+                });
         });
         services.AddHangfireServer();
 
@@ -46,8 +45,7 @@ public static class DependencyInjection
             scan.FromAssemblyOf<IBrandService>()
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Service")))
                 .AsImplementedInterfaces()
-                .WithScopedLifetime()
-        );
+                .WithScopedLifetime());
 
         services.AddScoped<IEventDispatcher, EventDispatcher>();
 
@@ -55,8 +53,7 @@ public static class DependencyInjection
             scan.FromAssemblyOf<IEventHandler>()
                 .AddClasses(classes => classes.AssignableTo(typeof(IEventHandler<>)))
                 .AsImplementedInterfaces()
-                .WithScopedLifetime()
-        );
+                .WithScopedLifetime());
 
         services.Decorate<IBrandService, CachingBrandServiceDecorator>();
         services.Decorate<IBrandService, LoggingBrandServiceDecorator>();
@@ -72,6 +69,7 @@ public static class DependencyInjection
 
         services.Decorate<IAuthenticationService, LoggingAuthenticationServiceDecorator>();
         services.Decorate<ICartService, LoggingCartServiceDecorator>();
+        services.Decorate<IWishlistService, LoggingWishlistServiceDecorator>();
 
         return services;
     }

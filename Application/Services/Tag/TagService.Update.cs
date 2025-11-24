@@ -10,27 +10,22 @@ public sealed partial class TagService
 {
     public async Task<Result> UpdateTagAsync(UpdateTagRequest request, CancellationToken cancellationToken)
     {
-        Domain.Entities.Tag? tag = await tagRepository.GetByIdAsync([request.Id], cancellationToken);
+        Domain.Entities.Tag? tag = await tagRepository
+            .SingleOrDefaultAsync(x => x.Id == request.Id, asNoTracking: false, cancellationToken);
 
         if(tag is null)
             return Result.Failure(Errors.TagNotFound, HttpStatusCode.NotFound);
 
         if(tag.Name != request.Name)
         {
-            var exist = await tagRepository.AnyAsync(
-                x => x.NormalizedName == request.Name.ToUpper(),
-                cancellationToken
-            );
+            var exist = await tagRepository
+                .AnyAsync(x => x.NormalizedName == request.Name.ToUpper(), cancellationToken);
 
             if(exist)
-            {
                 return Result.Failure(Errors.TagNameAlreadyExists, HttpStatusCode.Conflict);
-            }
         }
 
         tag.UpdateFrom(request);
-
-        tagRepository.Update(tag);
 
         await unitOfWork.CompleteAsync(cancellationToken);
 

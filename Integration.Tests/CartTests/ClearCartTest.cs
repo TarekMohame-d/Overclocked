@@ -1,8 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
 using Api.Routing;
 using Application.Common.Results;
 using ArchitectureTests.FakeData;
@@ -45,7 +43,8 @@ public class ClearCartTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        Cart? cartDb = await dbContext.Carts.Include(x => x.CartItems).SingleOrDefaultAsync(x => x.UserId == user.Id);
+        Cart? cartDb = await dbContext.Carts.Include(x => x.CartItems)
+            .SingleOrDefaultAsync(x => x.UserId == user.Id);
 
         cartDb.ShouldNotBeNull();
         cartDb.CartItems.Count.ShouldBe(0);
@@ -64,7 +63,12 @@ public class ClearCartTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         Product product = new ProductFaker().Generate();
         var cart = new Cart { User = user, UserId = user.Id };
 
-        cart.CartItems.Add(new CartItem { ProductId = product.Id, Quantity = 2 });
+        cart.CartItems.Add(new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = product.Id,
+            Quantity = 2
+        });
 
         var role = new Role { Name = "Customer", Id = 4 };
 

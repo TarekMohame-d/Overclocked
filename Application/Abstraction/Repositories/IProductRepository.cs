@@ -6,7 +6,6 @@ namespace Application.Abstraction.Repositories;
 
 public interface IProductRepository : IGenericRepository<Product>
 {
-    Task<ProductResponse?> GetProductDetailsAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Product?> GetProductForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Product?> GetProductWithImagesAsync(Guid id, CancellationToken cancellationToken = default);
 

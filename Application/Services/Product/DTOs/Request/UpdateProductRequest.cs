@@ -24,4 +24,23 @@ public record UpdateProductRequestBody
 public record UpdateProductRequest : UpdateProductRequestBody
 {
     public required Guid Id { get; init; }
+
+    public static UpdateProductRequest FromBody(UpdateProductRequestBody request, Guid id)
+    {
+        return new UpdateProductRequest
+        {
+            Id = id,
+            BrandId = request.BrandId,
+            CategoryId = request.CategoryId,
+            Name = request.Name,
+            Thumbnail = request.Thumbnail,
+            Description = request.Description,
+            Price = request.Price,
+            Stock = request.Stock,
+            Discount = request.Discount,
+            Tags = request.Tags,
+            Specification = request.Specification,
+            Images = request.Images
+        };
+    }
 }

@@ -62,7 +62,7 @@ public class UpdateCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
     }
 
     [Fact]
-    public async Task AddCartItem_Should_ReturnFailure_When_QuantityIsInvalid()
+    public async Task UpdateCartItem_Should_ReturnFailure_When_QuantityIsInvalid()
     {
         // Arrange
         (User user, Product product, Cart cart) = await SeedDatabaseAsync(10);
@@ -83,9 +83,8 @@ public class UpdateCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        CartItem? cartItem = await dbContext.CartItems.SingleOrDefaultAsync(x =>
-            x.CartId == cart.Id && x.ProductId == product.Id
-        );
+        CartItem? cartItem = await dbContext.CartItems
+            .SingleOrDefaultAsync(x => x.CartId == cart.Id && x.ProductId == product.Id);
 
         cartItem.ShouldNotBeNull();
 
@@ -103,7 +102,12 @@ public class UpdateCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
         Product product = new ProductFaker().Generate();
         var cart = new Cart { User = user, UserId = user.Id };
 
-        cart.CartItems.Add(new CartItem { ProductId = product.Id, Quantity = 2 });
+        cart.CartItems.Add(new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = product.Id,
+            Quantity = 2
+        });
 
         var role = new Role { Name = "Customer", Id = 4 };
 

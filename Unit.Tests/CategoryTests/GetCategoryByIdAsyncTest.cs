@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Net;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
@@ -24,8 +25,7 @@ public class GetCategoryByIdAsyncTest
         _categoryService = new CategoryService(
             _categoryRepositoryMock,
             Substitute.For<IUnitOfWork>(),
-            Substitute.For<IEventDispatcher>()
-        );
+            Substitute.For<IEventDispatcher>());
     }
 
     [Fact]
@@ -37,7 +37,10 @@ public class GetCategoryByIdAsyncTest
         Category brand = new CategoryFaker().Generate();
         CategoryResponse brandDto = brand.ToDto();
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(brand);
+        _categoryRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>())
+            .Returns(brand);
 
         // Act
         Result<CategoryResponse> result = await _categoryService.GetCategoryByIdAsync(request, CancellationToken.None);
@@ -50,7 +53,10 @@ public class GetCategoryByIdAsyncTest
         result.Data.ShouldNotBeNull();
         brandDto.ShouldBeEquivalentTo(result.Data);
 
-        await _categoryRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -60,8 +66,9 @@ public class GetCategoryByIdAsyncTest
         var brandId = Guid.CreateVersion7();
         var request = new GetCategoryByIdRequest { Id = brandId };
 
-        _categoryRepositoryMock
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>())
             .Returns((Category)null!);
 
         // Act
@@ -74,6 +81,9 @@ public class GetCategoryByIdAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _categoryRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 }

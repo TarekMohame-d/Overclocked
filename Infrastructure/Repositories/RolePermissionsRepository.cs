@@ -4,10 +4,8 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Repositories;
 
-public class RolePermissionsRepository : GenericRepository<RolePermission>, IRolePermissionsRepository
+public class RolePermissionsRepository(ApplicationDbContext dbContext)
+    : GenericRepository<RolePermission>(dbContext), IRolePermissionsRepository
 {
-    private readonly ApplicationDbContext _dbContext;
 
-    public RolePermissionsRepository(ApplicationDbContext dbContext)
-        : base(dbContext) => _dbContext = dbContext;
 }

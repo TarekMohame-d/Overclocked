@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Net;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
@@ -38,13 +39,11 @@ public class UpdateCategoryAsyncTest
             ImageUrl = "image.png",
         };
 
-        _categoryRepositoryMock
-            .GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>())
+        _categoryRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
             .Returns((Category)null!);
-
-        _eventDispatcherMock
-            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
-            .Returns(Task.CompletedTask);
 
         // Act
         Result result = await _categoryService.UpdateCategoryAsync(request, CancellationToken.None);
@@ -55,15 +54,15 @@ public class UpdateCategoryAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
-        await _categoryRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
-
-        await _eventDispatcherMock
-            .DidNotReceive()
-            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
+        await _categoryRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task UpdateCategoryAsync_Should_ReturnSuccess_When_CategoryExist()
+    public async Task UpdateCategoryAsync_Should_ReturnSuccess_When_CategoryExistAndNameIsSame()
     {
         // Arrange
         var request = new UpdateCategoryRequest
@@ -73,19 +72,21 @@ public class UpdateCategoryAsyncTest
             ImageUrl = "image.png",
         };
 
-        Category brand = new CategoryFaker().Generate();
+        Category category = new CategoryFaker().Generate();
 
-        brand.Name = request.Name;
+        category.Name = request.Name;
 
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>()).Returns(brand);
+        _categoryRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(category);
 
-        _categoryRepositoryMock.Update(Arg.Any<Category>());
-
-        _eventDispatcherMock
-            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
+        _eventDispatcherMock.DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None)
             .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
 
         // Act
         Result result = await _categoryService.UpdateCategoryAsync(request, CancellationToken.None);
@@ -95,12 +96,102 @@ public class UpdateCategoryAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBeNull();
 
-        await _categoryRepositoryMock.Received(1).GetByIdAsync(Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        await _categoryRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
 
-        _categoryRepositoryMock.Received(1).Update(Arg.Any<Category>());
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
+    }
 
-        await _eventDispatcherMock.Received(1).DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
+    [Fact]
+    public async Task UpdateCategoryAsync_Should_ReturnFailure_When_CategoryExistAndNameChangedAndNameIsNotUnique()
+    {
+        // Arrange
+        var request = new UpdateCategoryRequest
+        {
+            Id = Guid.CreateVersion7(),
+            Name = "Category Name",
+            ImageUrl = "image.png",
+        };
+
+        Category category = new CategoryFaker().Generate();
+
+        _categoryRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(category);
+
+        _categoryRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Category, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        // Act
+        Result result = await _categoryService.UpdateCategoryAsync(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
+        result.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        result.Error.ShouldNotBeNull();
+
+        await _categoryRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+
+        await _categoryRepositoryMock.Received(1)
+            .AnyAsync(Arg.Any<Expression<Func<Category, bool>>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateCategoryAsync_Should_ReturnSuccess_When_CategoryExistAndNameChangedAndNameIsUnique()
+    {
+        // Arrange
+        var request = new UpdateCategoryRequest
+        {
+            Id = Guid.CreateVersion7(),
+            Name = "Category Name",
+            ImageUrl = "image.png",
+        };
+
+        Category category = new CategoryFaker().Generate();
+
+        _categoryRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>())
+            .Returns(category);
+
+        _categoryRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Category, bool>>>(), Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        // Act
+        Result result = await _categoryService.UpdateCategoryAsync(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+        result.Error.ShouldBeNull();
+
+        await _categoryRepositoryMock.Received(1)
+            .SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<Category, bool>>>(),
+            asNoTracking: Arg.Any<bool>(),
+            Arg.Any<CancellationToken>());
+
+        await _categoryRepositoryMock.Received(1)
+            .AnyAsync(Arg.Any<Expression<Func<Category, bool>>>(), Arg.Any<CancellationToken>());
+
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
+
+        await _eventDispatcherMock.Received(1)
+            .DispatchAsync(Arg.Any<CategoryUpdatedEvent>(), CancellationToken.None);
     }
 }

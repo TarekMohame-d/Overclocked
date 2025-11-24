@@ -19,7 +19,6 @@ namespace Unit.Tests.AuthenticationTests;
 public class ResendEmailConfirmationCodeAsyncTest
 {
     private readonly AuthenticationService _authenticationService;
-    private readonly IEmailConfirmationCodeHasher _emailConfirmationCodeHasherMock;
     private readonly IEmailConfirmationCodeService _emailConfirmationCodeServiceMock;
     private readonly IEventDispatcher _eventDispatcherMock;
     private readonly IPasswordHasher _passwordHasherMock;
@@ -30,11 +29,11 @@ public class ResendEmailConfirmationCodeAsyncTest
     private readonly IRolePermissionsRepository _rolePermissionsRepositoryMock;
     private readonly ITokenReaderService _tokenReaderServiceMock;
     private readonly ICartService _cartServiceMock;
+    private readonly IWishlistService _wishlistServiceMock;
 
     public ResendEmailConfirmationCodeAsyncTest()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
-        _emailConfirmationCodeHasherMock = Substitute.For<IEmailConfirmationCodeHasher>();
         _emailConfirmationCodeServiceMock = Substitute.For<IEmailConfirmationCodeService>();
         _eventDispatcherMock = Substitute.For<IEventDispatcher>();
         _passwordHasherMock = Substitute.For<IPasswordHasher>();
@@ -44,6 +43,7 @@ public class ResendEmailConfirmationCodeAsyncTest
         _rolePermissionsRepositoryMock = Substitute.For<IRolePermissionsRepository>();
         _tokenReaderServiceMock = Substitute.For<ITokenReaderService>();
         _cartServiceMock = Substitute.For<ICartService>();
+        _wishlistServiceMock = Substitute.For<IWishlistService>();
 
         _authenticationService = new AuthenticationService(
             _userRepositoryMock,
@@ -51,26 +51,24 @@ public class ResendEmailConfirmationCodeAsyncTest
             _unitOfWorkMock,
             _passwordHasherMock,
             _eventDispatcherMock,
-            _emailConfirmationCodeHasherMock,
             _emailConfirmationCodeServiceMock,
             _tokenProviderMock,
             _refreshTokenServiceMock,
             _tokenReaderServiceMock,
-            _cartServiceMock
+            _cartServiceMock,
+            _wishlistServiceMock
         );
     }
 
     [Fact]
-    public async Task ResendEmailConfirmationCodeAsync_When_EmailNotExist_ShouldReturnSuccess()
+    public async Task ResendEmailConfirmationCodeAsync_Should_ReturnSuccess_When_EmailNotExist()
     {
         // Arrange
         var request = new ResendEmailConfirmationCodeRequest { Email = "email@gmail.com" };
 
-        _userRepositoryMock
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            )
+        _userRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>())
             .Returns((User)null!);
 
         // Act
@@ -80,27 +78,24 @@ public class ResendEmailConfirmationCodeAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _userRepositoryMock
-            .Received(1)
+        await _userRepositoryMock.Received(1)
             .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            );
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ResendEmailConfirmationCodeAsync_When_EmailAlreadyConfirmed_ShouldReturnFailure()
+    public async Task ResendEmailConfirmationCodeAsync_Should_ReturnFailure_When_EmailAlreadyConfirmed()
     {
         // Arrange
         var request = new ResendEmailConfirmationCodeRequest { Email = "email@gmail.com" };
 
         User user = new UserFaker().Generate();
         user.EmailConfirmed = true;
-        _userRepositoryMock
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            )
+
+        _userRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>())
             .Returns(user);
 
         // Act
@@ -112,31 +107,28 @@ public class ResendEmailConfirmationCodeAsyncTest
         result.Error.ShouldNotBeNull();
         result.Error.Type.ShouldBe(ErrorType.Conflict);
 
-        await _userRepositoryMock
-            .Received(1)
+        await _userRepositoryMock.Received(1)
             .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            );
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ResendEmailConfirmationCodeAsync_When_EmailConfirmationCodeNotExist_ShouldCreateAndReturnSuccess()
+    public async Task ResendEmailConfirmationCodeAsync_Should_CreateAndReturnSuccess_When_ConfirmationCodeNotExist()
     {
         // Arrange
         var request = new ResendEmailConfirmationCodeRequest { Email = "email@gmail.com" };
 
         User user = new UserFaker().Generate();
         user.EmailConfirmed = false;
-        _userRepositoryMock
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            )
+
+        _userRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>())
             .Returns(user);
 
         _emailConfirmationCodeServiceMock
-            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
             .Returns((EmailConfirmationCode)null!);
 
         _emailConfirmationCodeServiceMock
@@ -147,7 +139,8 @@ public class ResendEmailConfirmationCodeAsyncTest
             .DispatchAsync(Arg.Any<ResendEmailConfirmationCodeEvent>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>())
+            .Returns(1);
 
         // Act
         Result result = await _authenticationService.ResendEmailConfirmationCodeAsync(request, CancellationToken.None);
@@ -156,55 +149,53 @@ public class ResendEmailConfirmationCodeAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _userRepositoryMock
-            .Received(1)
+        await _userRepositoryMock.Received(1)
             .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            );
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>());
 
-        await _emailConfirmationCodeServiceMock
-            .Received(1)
-            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+        await _emailConfirmationCodeServiceMock.Received(1)
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
 
-        await _emailConfirmationCodeServiceMock
-            .Received(1)
+        await _emailConfirmationCodeServiceMock.Received(1)
             .CreateEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
-        await _eventDispatcherMock
-            .Received(1)
+        await _eventDispatcherMock.Received(1)
             .DispatchAsync(Arg.Any<ResendEmailConfirmationCodeEvent>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ResendEmailConfirmationCodeAsync_When_EmailConfirmationCodeExist_ShouldRefreshItAndReturnSuccess()
+    public async Task ResendEmailConfirmationCodeAsync_Should_RefreshAndReturnSuccess_When_ConfirmationCodeExist()
     {
         // Arrange
         var request = new ResendEmailConfirmationCodeRequest { Email = "email@gmail.com" };
 
         User user = new UserFaker().Generate();
         user.EmailConfirmed = false;
-        _userRepositoryMock
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            )
+
+        _userRepositoryMock.SingleOrDefaultAsync(
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>())
             .Returns(user);
 
         EmailConfirmationCode emailConfirmationCode = new EmailConfirmationCodeFaker().Generate();
+
         _emailConfirmationCodeServiceMock
-            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
             .Returns(emailConfirmationCode);
 
-        _emailConfirmationCodeServiceMock.UpdateEmailConfirmationCode(Arg.Any<EmailConfirmationCode>()).Returns("code");
+        _emailConfirmationCodeServiceMock.UpdateEmailConfirmationCode(Arg.Any<EmailConfirmationCode>())
+            .Returns("code");
 
         _eventDispatcherMock
             .DispatchAsync(Arg.Any<ResendEmailConfirmationCodeEvent>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).Returns(1);
+        _unitOfWorkMock.CompleteAsync(Arg.Any<CancellationToken>()).
+            Returns(1);
 
         // Act
         Result result = await _authenticationService.ResendEmailConfirmationCodeAsync(request, CancellationToken.None);
@@ -213,23 +204,21 @@ public class ResendEmailConfirmationCodeAsyncTest
         result.IsSuccess.ShouldBeTrue();
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _userRepositoryMock
-            .Received(1)
+        await _userRepositoryMock.Received(1)
             .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<User, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>()
-            );
+            Arg.Any<Expression<Func<User, bool>>>(),
+            cancellationToken: Arg.Any<CancellationToken>());
 
-        await _emailConfirmationCodeServiceMock
-            .Received(1)
-            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+        await _emailConfirmationCodeServiceMock.Received(1)
+            .GetEmailConfirmationCodeAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
 
-        _emailConfirmationCodeServiceMock.Received(1).UpdateEmailConfirmationCode(Arg.Any<EmailConfirmationCode>());
+        _emailConfirmationCodeServiceMock.Received(1)
+            .UpdateEmailConfirmationCode(Arg.Any<EmailConfirmationCode>());
 
-        await _eventDispatcherMock
-            .Received(1)
+        await _eventDispatcherMock.Received(1)
             .DispatchAsync(Arg.Any<ResendEmailConfirmationCodeEvent>(), Arg.Any<CancellationToken>());
 
-        await _unitOfWorkMock.Received(1).CompleteAsync(Arg.Any<CancellationToken>());
+        await _unitOfWorkMock.Received(1)
+            .CompleteAsync(Arg.Any<CancellationToken>());
     }
 }

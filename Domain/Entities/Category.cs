@@ -5,9 +5,9 @@ namespace Domain.Entities;
 public class Category : Entity
 {
     public required string Name { get; set; }
-    public string NormalizedName { get; set; } = default!;
+    public string NormalizedName { get; } = string.Empty;
     public required string Image { get; set; }
 
     // Navigation Properties
-    public ICollection<Product>? Products { get; set; }
+    public ICollection<Product> Products { get; set; } = [];
 }

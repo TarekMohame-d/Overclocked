@@ -13,22 +13,21 @@ public sealed partial class AuthenticationService
         // TODO: refactor to use user service instead of directly using user repository
         User? user = await userRepository.SingleOrDefaultAsync(
             x => x.Email == request.Email,
-            cancellationToken: cancellationToken
-        );
+            asNoTracking: false,
+            cancellationToken);
 
         if(user is null)
             return Result.Failure(Errors.InvalidResetPasswordCredentials);
 
         EmailConfirmationCode emailConfirmationCode =
-            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, cancellationToken)
+            await emailConfirmationCodeService.GetEmailConfirmationCodeAsync(user.Id, false, cancellationToken)
             ?? throw new EmailConfirmationCodeNotExistException(user.Id);
 
         if(emailConfirmationCode.ExpiredAt < DateTime.UtcNow || emailConfirmationCode.IsUsed)
-        {
             return Result.Failure(Errors.EmailConfirmationCodeExpired);
-        }
 
-        var isValid = emailConfirmationCodeHasher.Verify(request.Code, emailConfirmationCode.CodeHash);
+        var isValid = emailConfirmationCodeService
+            .VerifyEmailConfirmationCode(request.Code, emailConfirmationCode.CodeHash);
 
         if(!isValid)
             return Result.Failure(Errors.InvalidResetPasswordCredentials);
@@ -36,10 +35,7 @@ public sealed partial class AuthenticationService
         user.PasswordHash = passwordHasher.Hash(request.Password);
         user.EmailConfirmed = true;
         user.UpdatedAt = DateTime.UtcNow;
-        userRepository.Update(user);
 
-        emailConfirmationCode.IsUsed = true;
-        emailConfirmationCode.UpdatedAt = DateTime.UtcNow;
         emailConfirmationCodeService.InvalidateEmailConfirmationCode(emailConfirmationCode);
 
         await unitOfWork.CompleteAsync(cancellationToken);

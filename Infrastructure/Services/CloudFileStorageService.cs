@@ -13,7 +13,11 @@ public class CloudFileStorageService : IFileStorageService
 
     public CloudFileStorageService(IOptions<CloudinarySettings> settings)
     {
-        var account = new Account(settings.Value.CloudName, settings.Value.ApiKey, settings.Value.ApiSecret);
+        var account = new Account(
+            settings.Value.CloudName,
+            settings.Value.ApiKey,
+            settings.Value.ApiSecret);
+
         _cloudinary = new Cloudinary(account);
     }
 
@@ -27,17 +31,21 @@ public class CloudFileStorageService : IFileStorageService
             throw new FileDeleteFailedException($"Invalid public Id for file: {fileUrl}");
         }
 
-        var deletionParams = new DeletionParams(publicId) { PublicId = publicId, Invalidate = true };
+        var deletionParams = new DeletionParams(publicId)
+        {
+            PublicId = publicId,
+            Invalidate = true
+        };
 
         await _cloudinary.DestroyAsync(deletionParams);
     }
 
     public async Task DeleteFilesAsync(IEnumerable<string> fileUrls, CancellationToken cancellationToken = default)
     {
-        IEnumerable<string> publicIds = ExtractPublicIds(fileUrls);
+        var publicIds = ExtractPublicIds(fileUrls).ToList();
         var delResParams = new DelResParams
         {
-            PublicIds = publicIds.ToList(),
+            PublicIds = publicIds,
             Invalidate = true,
             All = true,
         };

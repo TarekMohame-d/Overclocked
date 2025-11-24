@@ -10,20 +10,26 @@ public class PaymentMethodConfiguration : IEntityTypeConfiguration<PaymentMethod
     public void Configure(EntityTypeBuilder<PaymentMethod> builder)
     {
         // Attributes
-        builder.HasKey(PM => PM.Id);
-        builder.Property(PM => PM.Id).ValueGeneratedNever().IsRequired();
-        builder.Property(PM => PM.Name).HasMaxLength(50).IsRequired();
+        builder.HasKey(pm => pm.Id);
+        builder.Property(pm => pm.Id)
+            .ValueGeneratedNever()
+            .IsRequired();
+
+        builder.Property(pm => pm.Name)
+            .HasMaxLength(50)
+            .IsRequired();
 
         // Relationships
 
         // Indexes
-        builder.HasIndex(PM => PM.Name).IsUnique();
+        builder.HasIndex(pm => pm.Name)
+            .IsUnique();
 
         // Seed Data
         builder.HasData(GeneratePaymentMethod());
     }
 
-    private IEnumerable<PaymentMethod> GeneratePaymentMethod()
+    private static IEnumerable<PaymentMethod> GeneratePaymentMethod()
     {
         return Enum.GetValues<PaymentMethodType>()
             .Select(role => new PaymentMethod { Id = (int)role, Name = role.ToString() });

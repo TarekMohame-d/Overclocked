@@ -2,6 +2,7 @@ using Application.Abstraction.Repositories;
 using Application.Abstraction.Services;
 using Application.Services.Authentication.Helpers.Interfaces;
 using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Application.Services.Authentication.Helpers;
 
@@ -16,26 +17,35 @@ public class RefreshTokenService(
     public async Task<(string refreshToken, DateTime expiredAt)> CreateRefreshTokenAsync(
         Guid userId,
         string deviceId,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        await refreshTokenRepository.DeleteWhereAsync(
+        RefreshToken? refreshToken = await refreshTokenRepository.SingleOrDefaultAsync(
             x => x.UserId == userId && x.DeviceId == deviceId,
-            cancellationToken: cancellationToken
-        );
+            asNoTracking: false,
+            cancellationToken: cancellationToken);
 
         var token = tokenProvider.GenerateRefreshToken();
         var tokenHash = refreshTokenHasher.Hash(token);
         DateTime expiredAt = DateTime.UtcNow.AddDays(RefreshTokenBaseDays);
 
-        var refreshToken = new RefreshToken
+        if(refreshToken is not null)
         {
-            TokenHash = tokenHash,
-            UserId = userId,
-            DeviceId = deviceId,
-            ExpiredAt = expiredAt,
-        };
-        await refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
+            refreshToken.TokenHash = tokenHash;
+            refreshToken.ExpiredAt = expiredAt;
+            refreshToken.UpdatedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            refreshToken = new()
+            {
+                TokenHash = tokenHash,
+                UserId = userId,
+                DeviceId = deviceId,
+                ExpiredAt = expiredAt
+            };
+
+            await refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
+        }
 
         return (token, expiredAt);
     }
@@ -43,27 +53,21 @@ public class RefreshTokenService(
     public async Task<(string refreshToken, DateTime expiredAt)> UpdateRefreshTokenAsync(
         Guid userId,
         string deviceId,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        RefreshToken? existingToken =
-            await refreshTokenRepository.SingleOrDefaultAsync(
-                x => x.UserId == userId && x.DeviceId == deviceId,
-                cancellationToken: cancellationToken
-            )
-            ?? throw new InvalidOperationException(
-                "Expected refresh token not found during update. Race condition or unexpected deletion."
-            );
+        RefreshToken? refreshToken = await refreshTokenRepository.SingleOrDefaultAsync(
+            x => x.UserId == userId && x.DeviceId == deviceId,
+            asNoTracking: false,
+            cancellationToken: cancellationToken)
+            ?? throw new RefreshTokenNotExistException(userId, deviceId);
 
         var token = tokenProvider.GenerateRefreshToken();
         var tokenHash = refreshTokenHasher.Hash(token);
         DateTime expiredAt = DateTime.UtcNow.AddDays(RefreshTokenBaseDays);
 
-        existingToken.TokenHash = tokenHash;
-        existingToken.ExpiredAt = expiredAt;
-        existingToken.UpdatedAt = DateTime.UtcNow;
-
-        refreshTokenRepository.Update(existingToken);
+        refreshToken.TokenHash = tokenHash;
+        refreshToken.ExpiredAt = expiredAt;
+        refreshToken.UpdatedAt = DateTime.UtcNow;
 
         return (token, expiredAt);
     }
@@ -72,13 +76,11 @@ public class RefreshTokenService(
         Guid userId,
         string deviceId,
         string refreshToken,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         RefreshToken? existingToken = await refreshTokenRepository.SingleOrDefaultAsync(
             x => x.UserId == userId && x.DeviceId == deviceId,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         return existingToken is not null
             && existingToken.ExpiredAt > DateTime.UtcNow

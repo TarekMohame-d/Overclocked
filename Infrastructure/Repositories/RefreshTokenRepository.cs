@@ -4,10 +4,8 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Repositories;
 
-public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshTokenRepository
+public class RefreshTokenRepository(ApplicationDbContext dbContext)
+    : GenericRepository<RefreshToken>(dbContext), IRefreshTokenRepository
 {
-    private readonly ApplicationDbContext _dbContext;
 
-    public RefreshTokenRepository(ApplicationDbContext dbContext)
-        : base(dbContext) => _dbContext = dbContext;
 }

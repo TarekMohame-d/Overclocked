@@ -4,10 +4,10 @@ namespace Domain.Entities;
 
 public class EmailConfirmationCode : Entity
 {
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
     public required string CodeHash { get; set; }
     public bool IsUsed { get; set; } = false;
-    public DateTime ExpiredAt { get; set; }
+    public required DateTime ExpiredAt { get; set; }
 
     // Navigation Properties
     public User? User { get; set; }

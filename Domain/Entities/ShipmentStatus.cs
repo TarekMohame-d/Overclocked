@@ -2,9 +2,9 @@
 
 public class ShipmentStatus
 {
-    public int Id { get; set; }
+    public required int Id { get; set; }
     public required string Name { get; set; }
 
     // Navigation Properties
-    public ICollection<Shipment>? Shipments { get; set; }
+    public ICollection<Shipment> Shipments { get; set; } = [];
 }

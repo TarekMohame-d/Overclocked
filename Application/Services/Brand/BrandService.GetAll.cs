@@ -9,17 +9,11 @@ public sealed partial class BrandService
 {
     public async Task<Result<IEnumerable<BrandListResponse>>> GetAllBrandsAsync(
         GetAllBrandsRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        IEnumerable<BrandListResponse> result = [];
-        IEnumerable<Domain.Entities.Brand> brands = await brandRepository.GetAllAsync(
-            cancellationToken: cancellationToken
-        );
+        IEnumerable<Domain.Entities.Brand> brands = await brandRepository
+            .GetAllAsync(cancellationToken: cancellationToken);
 
-        if(brands.Any())
-            result = brands.ToDto();
-
-        return Result<IEnumerable<BrandListResponse>>.Success(result);
+        return Result<IEnumerable<BrandListResponse>>.Success(brands.ToDto());
     }
 }

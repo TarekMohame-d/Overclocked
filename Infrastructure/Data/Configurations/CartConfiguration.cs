@@ -10,17 +10,21 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
     {
         // Attributes
         builder.HasKey(c => c.Id);
-        builder.Property(c => c.Id).ValueGeneratedNever().IsRequired();
-        builder.Property(c => c.UserId).IsRequired();
+        builder.Property(c => c.Id)
+            .ValueGeneratedNever()
+            .IsRequired();
+
+        builder.Property(c => c.UserId)
+            .IsRequired();
 
         // Relationships
-        builder
-            .HasOne(c => c.User)
+        builder.HasOne(c => c.User)
             .WithOne(u => u.Cart)
             .HasForeignKey<Cart>(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
-        builder.HasIndex(c => c.UserId).IsUnique();
+        builder.HasIndex(c => c.UserId)
+            .IsUnique();
     }
 }

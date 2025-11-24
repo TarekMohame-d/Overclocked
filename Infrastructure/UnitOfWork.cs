@@ -22,13 +22,11 @@ public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork, IAsyncDispo
 
     public async Task<IDbTransaction> BeginTransactionAsync(
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        IDbContextTransaction transaction = await context.Database.BeginTransactionAsync(
-            isolationLevel,
-            cancellationToken
-        );
+        IDbContextTransaction transaction = await context.Database
+            .BeginTransactionAsync(isolationLevel, cancellationToken);
+
         _transaction = transaction;
 
         return transaction.GetDbTransaction();

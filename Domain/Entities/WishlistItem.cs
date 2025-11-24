@@ -4,8 +4,8 @@ namespace Domain.Entities;
 
 public class WishlistItem : Entity
 {
-    public Guid WishlistId { get; set; }
-    public Guid ProductId { get; set; }
+    public required Guid WishlistId { get; set; }
+    public required Guid ProductId { get; set; }
 
     // Navigation Properties
     public Wishlist? Wishlist { get; set; }

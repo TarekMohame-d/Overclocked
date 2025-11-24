@@ -9,24 +9,23 @@ namespace Application.Services.Authentication.Helpers;
 
 public class EmailConfirmationCodeService(
     IEmailConfirmationCodeHasher emailConfirmationCodeHasher,
-    IEmailConfirmationCodeRepository emailConfirmationCodeRepository
-) : IEmailConfirmationCodeService
+    IEmailConfirmationCodeRepository emailConfirmationCodeRepository)
+    : IEmailConfirmationCodeService
 {
+    public bool VerifyEmailConfirmationCode(string code, string codeHash) =>
+        emailConfirmationCodeHasher.Verify(code, codeHash);
     public async Task<EmailConfirmationCode?> GetEmailConfirmationCodeAsync(
         Guid userId,
-        CancellationToken cancellationToken = default
-    )
+        bool asNoTracking = true,
+        CancellationToken cancellationToken = default)
     {
-        return await emailConfirmationCodeRepository.SingleOrDefaultAsync(
-            x => x.UserId == userId,
-            cancellationToken: cancellationToken
-        );
+        return await emailConfirmationCodeRepository
+            .SingleOrDefaultAsync(x => x.UserId == userId, asNoTracking: asNoTracking, cancellationToken);
     }
 
     public async Task<string> CreateEmailConfirmationCodeAsync(
         Guid userId,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         var plainCode = GenerateVerificationCode();
         var codeHash = emailConfirmationCodeHasher.Hash(plainCode);
@@ -35,8 +34,7 @@ public class EmailConfirmationCodeService(
         {
             CodeHash = codeHash,
             UserId = userId,
-            ExpiredAt = DateTime.UtcNow.AddMinutes(10),
-            IsUsed = false,
+            ExpiredAt = DateTime.UtcNow.AddMinutes(10)
         };
 
         await emailConfirmationCodeRepository.AddAsync(confirmationCode, cancellationToken);
@@ -44,25 +42,24 @@ public class EmailConfirmationCodeService(
         return plainCode;
     }
 
-    public void InvalidateEmailConfirmationCode(EmailConfirmationCode emailConfirmationCode) =>
-        emailConfirmationCodeRepository.Update(emailConfirmationCode);
+    public void InvalidateEmailConfirmationCode(EmailConfirmationCode emailConfirmationCode)
+    {
+        emailConfirmationCode.IsUsed = true;
+        emailConfirmationCode.UpdatedAt = DateTime.UtcNow;
+    }
 
     public string UpdateEmailConfirmationCode(EmailConfirmationCode emailConfirmationCode)
     {
         var plainCode = GenerateVerificationCode();
         var codeHash = emailConfirmationCodeHasher.Hash(plainCode);
+
         emailConfirmationCode.IsUsed = false;
         emailConfirmationCode.ExpiredAt = DateTime.UtcNow.AddMinutes(10);
         emailConfirmationCode.CodeHash = codeHash;
         emailConfirmationCode.UpdatedAt = DateTime.UtcNow;
 
-        emailConfirmationCodeRepository.Update(emailConfirmationCode);
-
         return plainCode;
     }
-
-    public async Task DeleteEmailConfirmationCodeAsync(Guid userId, CancellationToken cancellationToken = default) =>
-        await emailConfirmationCodeRepository.DeleteWhereAsync(x => x.UserId == userId, cancellationToken);
 
     private static string GenerateVerificationCode(int length = 6)
     {

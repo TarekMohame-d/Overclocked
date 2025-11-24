@@ -29,8 +29,7 @@ public class ProductController(IProductService productService) : ControllerBase
     [Route(ProductRoutes.GetAll)]
     public async Task<IActionResult> GetAll(
         [FromQuery] GetPagedProductsQuery query,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         var request = GetPagedProductsRequest.FromQuery(query);
         Result<PagedResult<ProductListResponse>> response = await productService.GetPagedProductsAsync(
@@ -47,8 +46,7 @@ public class ProductController(IProductService productService) : ControllerBase
     [Route(ProductRoutes.Create)]
     public async Task<IActionResult> Create(
         [FromBody] CreateProductRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         Result response = await productService.CreateProductAsync(request, cancellationToken);
 
@@ -62,24 +60,9 @@ public class ProductController(IProductService productService) : ControllerBase
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
         [FromBody] UpdateProductRequestBody request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        UpdateProductRequest updateProductRequest = new()
-        {
-            Id = id,
-            BrandId = request.BrandId,
-            CategoryId = request.CategoryId,
-            Name = request.Name,
-            Thumbnail = request.Thumbnail,
-            Description = request.Description,
-            Price = request.Price,
-            Stock = request.Stock,
-            Discount = request.Discount,
-            Tags = request.Tags,
-            Specification = request.Specification,
-            Images = request.Images,
-        };
+        var updateProductRequest = UpdateProductRequest.FromBody(request, id);
 
         Result response = await productService.UpdateProductAsync(updateProductRequest, cancellationToken);
 
@@ -91,8 +74,7 @@ public class ProductController(IProductService productService) : ControllerBase
     [Route(ProductRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var request = new DeleteProductRequest { Id = id };
-        Result response = await productService.DeleteProductAsync(request, cancellationToken);
+        Result response = await productService.DeleteProductAsync(id, cancellationToken);
 
         return response.ToActionResult();
     }

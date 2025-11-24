@@ -4,8 +4,8 @@ namespace Domain.Entities;
 
 public class ReviewReply : Entity
 {
-    public Guid ReviewId { get; set; }
-    public Guid EmployeeId { get; set; }
+    public required Guid ReviewId { get; set; }
+    public required Guid EmployeeId { get; set; }
     public required string Reply { get; set; }
 
     // Navigation Properties

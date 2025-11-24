@@ -47,9 +47,8 @@ public class AddCartItemTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        CartItem? cartItem = await dbContext.CartItems.SingleOrDefaultAsync(x =>
-            x.CartId == cart.Id && x.ProductId == product.Id
-        );
+        CartItem? cartItem = await dbContext.CartItems
+            .SingleOrDefaultAsync(x => x.CartId == cart.Id && x.ProductId == product.Id);
 
         cartItem.ShouldNotBeNull();
         cartItem.Quantity.ShouldBe(2);
@@ -83,9 +82,8 @@ public class AddCartItemTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        CartItem? cartItem = await dbContext.CartItems.SingleOrDefaultAsync(x =>
-            x.CartId == cart.Id && x.ProductId == product.Id
-        );
+        CartItem? cartItem = await dbContext.CartItems
+            .SingleOrDefaultAsync(x => x.CartId == cart.Id && x.ProductId == product.Id);
 
         cartItem.ShouldBeNull();
 

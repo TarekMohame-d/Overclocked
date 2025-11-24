@@ -4,13 +4,7 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository : GenericRepository<User>, IUserRepository
+public class UserRepository(ApplicationDbContext dbContext) : GenericRepository<User>(dbContext), IUserRepository
 {
-    private readonly ApplicationDbContext _dbContext;
 
-    public UserRepository(ApplicationDbContext dbContext)
-        : base(dbContext)
-    {
-        _dbContext = dbContext;
-    }
 }

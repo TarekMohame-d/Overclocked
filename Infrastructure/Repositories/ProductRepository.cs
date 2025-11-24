@@ -1,9 +1,5 @@
 using Application.Abstraction.Repositories;
 using Application.Common.Enums;
-using Application.Services.Brand.DTOs.Response;
-using Application.Services.Category.DTOs.Response;
-using Application.Services.Product.DTOs.Response;
-using Application.Services.Tag.DTOs.Response;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -11,64 +7,27 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Repositories;
 
 public class ProductRepository(ApplicationDbContext dbContext)
-    : GenericRepository<Product>(dbContext),
-        IProductRepository
+    : GenericRepository<Product>(dbContext), IProductRepository
 {
     private readonly ApplicationDbContext _dbContext = dbContext;
 
-    public async Task<ProductResponse?> GetProductDetailsAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext
-            .Products.AsNoTracking()
-            .Where(p => p.Id == id)
-            .Select(p => new ProductResponse
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Thumbnail = p.Thumbnail,
-                Description = p.Description,
-                Price = p.Price,
-                Discount = p.Discount,
-                Rating = p.Rating,
-                Category = new CategoryResponse
-                {
-                    Id = p.Category!.Id,
-                    Name = p.Category.Name,
-                    ImageUrl = p.Category.Image,
-                },
-                Brand = new BrandResponse
-                {
-                    Id = p.Brand!.Id,
-                    Name = p.Brand.Name,
-                    ImageUrl = p.Brand.Image,
-                },
-                Tags = p.TagProducts.Select(tp => new TagResponse { Id = tp.Tag.Id, Name = tp.Tag.Name }),
-                Specifications = p.Specifications.Select(s => new ProductSpecificationResponse
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Value = s.Value,
-                }),
-                Images = p.ProductImages.Select(i => i.Image),
-            })
-            .SingleOrDefaultAsync(cancellationToken);
-    }
-
     public async Task<Product?> GetProductForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext
-            .Products.Include(p => p.Brand)
+        return await _dbContext.Products
+            .AsTracking()
+            .Include(p => p.Brand)
             .Include(p => p.Category)
             .Include(p => p.TagProducts)
             .Include(p => p.Specifications)
             .Include(p => p.ProductImages)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
     public async Task<Product?> GetProductWithImagesAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext
-            .Products.Include(p => p.ProductImages)
+        return await _dbContext.Products
+            .Include(p => p.ProductImages)
             .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
@@ -78,8 +37,7 @@ public class ProductRepository(ApplicationDbContext dbContext)
         string? search = null,
         string? category = null,
         string? brand = null,
-        Guid? tagId = null
-    )
+        Guid? tagId = null)
     {
         IQueryable<Product> query = _dbContext.Products.AsNoTracking();
 
@@ -94,8 +52,7 @@ public class ProductRepository(ApplicationDbContext dbContext)
         string? search,
         string? category,
         string? brand,
-        Guid? tagId
-    )
+        Guid? tagId)
     {
         // Apply search filter (searches in product name and description)
         if(!string.IsNullOrWhiteSpace(search))
@@ -103,8 +60,7 @@ public class ProductRepository(ApplicationDbContext dbContext)
             var sanitizedSearch = EscapeLikePattern(search);
             query = query.Where(p =>
                 EF.Functions.ILike(p.Name, $"%{sanitizedSearch}%")
-                || EF.Functions.ILike(p.Description, $"%{sanitizedSearch}%")
-            );
+                || EF.Functions.ILike(p.Description, $"%{sanitizedSearch}%"));
         }
 
         // Apply category filter
@@ -132,8 +88,7 @@ public class ProductRepository(ApplicationDbContext dbContext)
     private static IQueryable<Product> ApplySorting(
         IQueryable<Product> query,
         ProductSortField sortBy,
-        SortDirection direction
-    )
+        SortDirection direction)
     {
         var isDescending = direction == SortDirection.Desc;
 
@@ -153,5 +108,6 @@ public class ProductRepository(ApplicationDbContext dbContext)
         };
     }
 
-    private static string EscapeLikePattern(string input) => input.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace("[", "\\[");
+    private static string EscapeLikePattern(string input) =>
+        input.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace("[", "\\[");
 }

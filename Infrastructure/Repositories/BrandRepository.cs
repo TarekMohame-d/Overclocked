@@ -4,13 +4,7 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Repositories;
 
-public class BrandRepository : GenericRepository<Brand>, IBrandRepository
+public class BrandRepository(ApplicationDbContext context) : GenericRepository<Brand>(context), IBrandRepository
 {
-    private readonly ApplicationDbContext _context;
 
-    public BrandRepository(ApplicationDbContext context)
-        : base(context)
-    {
-        _context = context;
-    }
 }

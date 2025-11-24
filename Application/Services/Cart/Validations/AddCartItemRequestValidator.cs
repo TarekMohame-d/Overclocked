@@ -7,7 +7,10 @@ public class AddCartItemRequestValidator : AbstractValidator<AddCartItemRequest>
 {
     public AddCartItemRequestValidator()
     {
-        RuleFor(x => x.ProductId).Cascade(CascadeMode.Stop).NotEmpty().WithMessage("{PropertyName} is required.");
+        RuleFor(x => x.ProductId)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .WithMessage("{PropertyName} is required.");
 
         RuleFor(x => x.Quantity)
             .NotEmpty()

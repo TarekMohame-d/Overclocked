@@ -9,8 +9,7 @@ public sealed partial class ProductService
 {
     public async Task<Result<PagedResult<ProductListResponse>>> GetPagedProductsAsync(
         GetPagedProductsRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         IQueryable<Domain.Entities.Product> productsQuery = productRepository.GetProductsQuery(
             request.SortBy,
@@ -18,16 +17,14 @@ public sealed partial class ProductService
             request.Search,
             request.Category,
             request.Brand,
-            request.TagId
-        );
+            request.TagId);
 
         IQueryable<ProductListResponse> productsDtoQuery = productsQuery.ToDto();
 
         PagedResult<ProductListResponse> pagedResult = await PagedResult<ProductListResponse>.CreateAsync(
             productsDtoQuery,
             request.Page,
-            request.PageSize
-        );
+            request.PageSize);
 
         return Result<PagedResult<ProductListResponse>>.Success(pagedResult);
     }

@@ -27,7 +27,7 @@ public class GetPagedTagsAsyncTest
     }
 
     [Fact]
-    public async Task GetPagedTagsAsync_Should_ReturnTags_WhenTagsExist()
+    public async Task GetPagedTagsAsync_Should_ReturnTags_When_TagsExist()
     {
         // Arrange
         var request = new GetPagedTagsRequest { Page = 1, PageSize = 10 };
@@ -37,13 +37,12 @@ public class GetPagedTagsAsyncTest
 
         IQueryable<Tag> mockQueryable = tags.BuildMock();
 
-        _tagRepositoryMock.GetTagsQuery(Arg.Any<TagSortField>(), Arg.Any<SortDirection>()).Returns(mockQueryable);
+        _tagRepositoryMock.GetTagsQuery(Arg.Any<TagSortField>(), Arg.Any<SortDirection>())
+            .Returns(mockQueryable);
 
         // Act
-        Result<PagedResult<TagListResponse>> result = await _tagService.GetPagedTagsAsync(
-            request,
-            CancellationToken.None
-        );
+        Result<PagedResult<TagListResponse>> result = await _tagService
+            .GetPagedTagsAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -53,11 +52,12 @@ public class GetPagedTagsAsyncTest
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         tagDtos.ShouldBeEquivalentTo(result.Data.Items);
 
-        _tagRepositoryMock.Received(1).GetTagsQuery(Arg.Any<TagSortField>(), Arg.Any<SortDirection>());
+        _tagRepositoryMock.Received(1)
+            .GetTagsQuery(Arg.Any<TagSortField>(), Arg.Any<SortDirection>());
     }
 
     [Fact]
-    public async Task GetPagedTagsAsync_Should_ReturnEmptyList_WhenTagsDoesNotExist()
+    public async Task GetPagedTagsAsync_Should_ReturnEmptyList_When_TagsDoesNotExist()
     {
         // Arrange
         var request = new GetPagedTagsRequest();
@@ -65,13 +65,12 @@ public class GetPagedTagsAsyncTest
         List<Tag> tags = [];
         IQueryable<Tag> mockQueryable = tags.BuildMock();
 
-        _tagRepositoryMock.GetTagsQuery(Arg.Any<TagSortField>(), Arg.Any<SortDirection>()).Returns(mockQueryable);
+        _tagRepositoryMock.GetTagsQuery(Arg.Any<TagSortField>(), Arg.Any<SortDirection>())
+            .Returns(mockQueryable);
 
         // Act
-        Result<PagedResult<TagListResponse>> result = await _tagService.GetPagedTagsAsync(
-            request,
-            CancellationToken.None
-        );
+        Result<PagedResult<TagListResponse>> result = await _tagService
+            .GetPagedTagsAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -81,6 +80,7 @@ public class GetPagedTagsAsyncTest
         result.Data.Items.Count.ShouldBe(0);
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        _tagRepositoryMock.Received(1).GetTagsQuery(Arg.Any<TagSortField>(), Arg.Any<SortDirection>());
+        _tagRepositoryMock.Received(1)
+            .GetTagsQuery(Arg.Any<TagSortField>(), Arg.Any<SortDirection>());
     }
 }

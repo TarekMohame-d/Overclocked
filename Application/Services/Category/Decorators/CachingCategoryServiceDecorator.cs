@@ -12,18 +12,18 @@ namespace Application.Services.Category.Decorators;
 public class CachingCategoryServiceDecorator(
     ICategoryService inner,
     ICacheService cacheService,
-    ILogger<CachingCategoryServiceDecorator> logger
-) : ICategoryService
+    ILogger<CachingCategoryServiceDecorator> logger)
+    : ICategoryService
 {
     public Task<Result<IEnumerable<CategoryListResponse>>> GetAllCategoriesAsync(
         GetAllCategoriesRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithCacheAsync(request, inner.GetAllCategoriesAsync, cancellationToken);
+        CancellationToken cancellationToken) =>
+            ExecuteWithCacheAsync(request, inner.GetAllCategoriesAsync, cancellationToken);
 
     public Task<Result<CategoryResponse>> GetCategoryByIdAsync(
         GetCategoryByIdRequest request,
-        CancellationToken cancellationToken
-    ) => ExecuteWithCacheAsync(request, inner.GetCategoryByIdAsync, cancellationToken);
+        CancellationToken cancellationToken) =>
+            ExecuteWithCacheAsync(request, inner.GetCategoryByIdAsync, cancellationToken);
 
     public async Task<Result> CreateCategoryAsync(CreateCategoryRequest request, CancellationToken cancellationToken)
     {
@@ -50,13 +50,13 @@ public class CachingCategoryServiceDecorator(
         return result;
     }
 
-    public async Task<Result> DeleteCategoryAsync(DeleteCategoryRequest request, CancellationToken cancellationToken)
+    public async Task<Result> DeleteCategoryAsync(Guid categoryId, CancellationToken cancellationToken)
     {
-        Result result = await inner.DeleteCategoryAsync(request, cancellationToken);
+        Result result = await inner.DeleteCategoryAsync(categoryId, cancellationToken);
 
         if(result.IsSuccess)
         {
-            await cacheService.RemoveAsync(CacheKeys.Category(request.Id.ToString()), cancellationToken);
+            await cacheService.RemoveAsync(CacheKeys.Category(categoryId.ToString()), cancellationToken);
             await cacheService.RemoveAsync(CacheKeys.AllCategories, cancellationToken);
         }
 
@@ -66,8 +66,7 @@ public class CachingCategoryServiceDecorator(
     private async Task<Result<T>> ExecuteWithCacheAsync<T, TRequest>(
         TRequest request,
         Func<TRequest, CancellationToken, Task<Result<T>>> action,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
         where TRequest : ICachedRequest
     {
         var requestName = request.GetType().Name;

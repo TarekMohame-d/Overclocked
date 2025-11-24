@@ -4,9 +4,9 @@ namespace Domain.Entities;
 
 public class CartItem : Entity
 {
-    public Guid CartId { get; set; }
-    public Guid ProductId { get; set; }
-    public int Quantity { get; set; }
+    public required Guid CartId { get; init; }
+    public required Guid ProductId { get; init; }
+    public required int Quantity { get; set; }
 
     // Navigation properties
     public Cart? Cart { get; set; }

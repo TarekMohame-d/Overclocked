@@ -5,7 +5,7 @@ namespace Application.Services.Brand.DTOs.Request;
 
 public record GetBrandByIdRequest : ICachedRequest
 {
-    public Guid Id { get; init; }
+    public required Guid Id { get; init; }
     public string CacheKey => CacheKeys.Brand(Id.ToString());
     public string? CacheSetKey => null;
     public TimeSpan SlidingExpiration => TimeSpan.FromMinutes(5);

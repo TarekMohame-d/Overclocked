@@ -15,7 +15,7 @@ public static class UpdateBrandValidationTestCases
         yield return [null!];
         yield return ["https://res.cloudinary.com/over-clocked.txt"]; // invalid extension
         yield return ["not-a-url"]; // invalid format
-        yield return ["ftp://example.com/image.jpg"]; // invalid scheme
+        yield return ["ftp://res.cloudinary.com/over-clocked.jpg"]; // invalid scheme
         yield return ["www.example.com/image.jpg"]; // missing scheme
         yield return ["https://www.example.com/image.jpg"]; // not same host
     }

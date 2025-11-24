@@ -15,7 +15,7 @@ public interface IGenericRepository<T>
     );
     Task<T?> FirstOrDefaultAsync(
         Expression<Func<T, bool>> predicate,
-        Expression<Func<T, object>>[] includes,
+        Func<IQueryable<T>, IQueryable<T>>? include,
         bool asNoTracking = true,
         CancellationToken cancellationToken = default
     );
@@ -26,7 +26,7 @@ public interface IGenericRepository<T>
     );
     Task<T?> SingleOrDefaultAsync(
         Expression<Func<T, bool>> predicate,
-        Expression<Func<T, object>>[] includes,
+        Func<IQueryable<T>, IQueryable<T>>? include,
         bool asNoTracking = true,
         CancellationToken cancellationToken = default
     );
@@ -37,7 +37,7 @@ public interface IGenericRepository<T>
     );
     Task<IEnumerable<T>> WhereAsync(
         Expression<Func<T, bool>> predicate,
-        Expression<Func<T, object>>[] includes,
+        Func<IQueryable<T>, IQueryable<T>>? include,
         bool asNoTracking = true,
         CancellationToken cancellationToken = default
     );
@@ -46,7 +46,7 @@ public interface IGenericRepository<T>
     void Update(T entity);
     void Delete(T entity);
     void DeleteRange(IEnumerable<T> entities);
-    Task DeleteWhereAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<int> DeleteWhereAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
     Task<bool> AnyAsync(CancellationToken cancellationToken = default);
     Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
     Task<int> CountAsync(CancellationToken cancellationToken = default);

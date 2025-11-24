@@ -34,9 +34,8 @@ public class DeleteCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
         factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        HttpResponseMessage response = await _client.DeleteAsync(
-            CartRoutes.DeleteCartItem.Replace("{id:guid}", product.Id.ToString())
-        );
+        HttpResponseMessage response = await _client
+            .DeleteAsync(CartRoutes.DeleteCartItem.Replace("{id:guid}", product.Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -46,7 +45,8 @@ public class DeleteCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        Cart? cartDb = await dbContext.Carts.Include(x => x.CartItems).SingleOrDefaultAsync(x => x.UserId == user.Id);
+        Cart? cartDb = await dbContext.Carts.Include(x => x.CartItems)
+            .SingleOrDefaultAsync(x => x.UserId == user.Id);
 
         cartDb.ShouldNotBeNull();
         cartDb.CartItems.Count.ShouldBe(1);
@@ -67,9 +67,19 @@ public class DeleteCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
         Product product2 = new ProductFaker().Generate();
         var cart = new Cart { User = user, UserId = user.Id };
 
-        cart.CartItems.Add(new CartItem { ProductId = product.Id, Quantity = 2 });
+        cart.CartItems.Add(new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = product.Id,
+            Quantity = 2
+        });
 
-        cart.CartItems.Add(new CartItem { ProductId = product2.Id, Quantity = 1 });
+        cart.CartItems.Add(new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = product2.Id,
+            Quantity = 1
+        });
 
         var role = new Role { Name = "Customer", Id = 4 };
 

@@ -11,7 +11,9 @@ public class ForgetPasswordRequestValidator : AbstractValidator<ForgetPasswordRe
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("{PropertyName} is required.")
-            .EmailAddress()
-            .WithMessage("{PropertyName} is not valid email address.");
+            .Matches(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
+            .WithMessage("{PropertyName} is not valid email address.")
+            .MaximumLength(100)
+            .WithMessage("{PropertyName} must be at most 100 characters long.");
     }
 }

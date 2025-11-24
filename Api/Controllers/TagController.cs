@@ -53,8 +53,7 @@ public class TagController(ITagService tagService) : ControllerBase
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
         [FromBody] UpdateTagRequestBody request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         UpdateTagRequest updateTagRequest = new() { Id = id, Name = request.Name };
 
@@ -68,8 +67,7 @@ public class TagController(ITagService tagService) : ControllerBase
     [Route(TagRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var request = new DeleteTagRequest { Id = id };
-        Result response = await tagService.DeleteTagAsync(request, cancellationToken);
+        Result response = await tagService.DeleteTagAsync(id, cancellationToken);
 
         return response.ToActionResult();
     }

@@ -6,7 +6,12 @@ namespace Application.Services.Brand.Mapping;
 
 public static class BrandMapping
 {
-    public static BrandEntity ToEntity(this CreateBrandRequest request) => new BrandEntity { Name = request.Name, Image = request.ImageUrl };
+    public static BrandEntity ToEntity(this CreateBrandRequest request) =>
+        new()
+        {
+            Name = request.Name,
+            Image = request.ImageUrl
+        };
 
     public static void UpdateFrom(this BrandEntity entity, UpdateBrandRequest request)
     {
