@@ -36,8 +36,7 @@ public class CartController(ICartService cartService) : ControllerBase
     [Route(CartRoutes.AddCartItem)]
     public async Task<IActionResult> AddCartItem(
         [FromBody] AddCartItemRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
         if(userId == null)
@@ -89,7 +88,9 @@ public class CartController(ICartService cartService) : ControllerBase
     {
         Guid? userId = HttpContext.GetUserId();
         if(userId == null)
+        {
             return Unauthorized();
+        }
 
         Result response = await cartService.ClearCartAsync((Guid)userId, cancellationToken);
 
