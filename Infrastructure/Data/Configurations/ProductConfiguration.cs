@@ -44,8 +44,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired();
 
         builder.Property(p => p.Rating)
-            .HasColumnType("double precision")
+            .HasColumnType("decimal(2,1)")
             .HasDefaultValue(0.0);
+
+        builder.Property(p => p.ReviewCount)
+            .HasDefaultValue(0);
 
         builder.Property(p => p.StockQuantity)
             .IsRequired();
@@ -82,10 +85,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasIndex(p => p.Price);
 
         builder.HasIndex(p => p.Rating);
-
-        builder.HasIndex(p => p.Discount);
-
-        builder.HasIndex(p => p.StockQuantity);
 
         builder.HasIndex(p => p.BrandId);
 

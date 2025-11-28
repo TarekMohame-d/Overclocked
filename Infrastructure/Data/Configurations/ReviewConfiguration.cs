@@ -47,6 +47,9 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
+        builder.HasIndex(s => new { s.UserId, s.ProductId })
+            .IsUnique();
+
         builder.HasIndex(r => r.UserId);
 
         builder.HasIndex(r => r.ProductId);

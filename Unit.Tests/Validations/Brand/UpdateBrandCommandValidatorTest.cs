@@ -18,15 +18,14 @@ public class UpdateBrandRequestValidatorTest
         // Arrange
         var validator = new UpdateBrandRequestValidator();
 
-        var request = new UpdateBrandRequest
+        var request = new UpdateBrandRequestBody
         {
-            Id = Guid.CreateVersion7(),
             Name = name!,
             ImageUrl = "https://res.cloudinary.com/over-clocked/image.png",
         };
 
         // Act
-        TestValidationResult<UpdateBrandRequest> result = validator.TestValidate(request);
+        TestValidationResult<UpdateBrandRequestBody> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
@@ -44,15 +43,14 @@ public class UpdateBrandRequestValidatorTest
         // Arrange
         var validator = new UpdateBrandRequestValidator();
 
-        var request = new UpdateBrandRequest
+        var request = new UpdateBrandRequestBody
         {
-            Id = Guid.CreateVersion7(),
             Name = "Brand Name",
             ImageUrl = imageUrl!,
         };
 
         // Act
-        TestValidationResult<UpdateBrandRequest> result = validator.TestValidate(request);
+        TestValidationResult<UpdateBrandRequestBody> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();

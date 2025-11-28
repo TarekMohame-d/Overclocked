@@ -35,7 +35,7 @@ public class DeleteCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
 
         // Act
         HttpResponseMessage response = await _client
-            .DeleteAsync(CartRoutes.DeleteCartItem.Replace("{id:guid}", product.Id.ToString()));
+            .DeleteAsync(CartRoutes.DeleteCartItem.Replace("{id:guid}", cart.CartItems.First().Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);

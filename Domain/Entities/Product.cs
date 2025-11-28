@@ -13,6 +13,7 @@ public class Product : Entity
     public required decimal Price { get; set; }
     public decimal Discount { get; set; } = 0m;
     public double Rating { get; private set; }
+    public int ReviewCount { get; private set; }
     public required int StockQuantity { get; set; }
     public bool IsDeleted { get; set; } = false;
 
@@ -27,16 +28,42 @@ public class Product : Entity
     public ICollection<ProductImage> ProductImages { get; set; } = [];
     public ICollection<Specification> Specifications { get; set; } = [];
 
-    private void CalculateRating()
+    public void CalculateRating(int newReviewRating)
     {
-        if(Reviews.Count == 0)
+        var newRating = ((Rating * ReviewCount) + newReviewRating) / (ReviewCount + 1);
+
+        Rating = Math.Clamp(newRating, 0, 5);
+
+        ReviewCount++;
+    }
+
+    public void RemoveRating(int oldReviewRating)
+    {
+        if(ReviewCount <= 1)
         {
             Rating = 0;
+            ReviewCount = 0;
             return;
         }
 
-        var avg = Reviews.Average(r => r.Rating);
+        var currentTotalScore = Rating * ReviewCount;
+        var newRating = (currentTotalScore - oldReviewRating) / (ReviewCount - 1);
 
-        Rating = Math.Clamp(avg, 0, 10);
+        Rating = Math.Clamp(newRating, 0, 5);
+        ReviewCount--;
+    }
+
+    public void UpdateRating(int oldReviewRating, int newReviewRating)
+    {
+        if(ReviewCount == 0)
+            return;
+
+        if(oldReviewRating == newReviewRating)
+            return;
+
+        var currentTotalScore = Rating * ReviewCount;
+        var newRating = (currentTotalScore - oldReviewRating + newReviewRating) / ReviewCount;
+
+        Rating = Math.Clamp(newRating, 0, 5);
     }
 }

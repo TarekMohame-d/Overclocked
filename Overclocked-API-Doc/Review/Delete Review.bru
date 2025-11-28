@@ -1,0 +1,21 @@
+meta {
+  name: Delete Review
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{host}}/products/:productId/reviews/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  productId: 019ab5a8-962d-70bf-bfa8-5b4d82968b10
+  id: 019ab99b-a9d9-71a6-83d7-ec43a16f3f42
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

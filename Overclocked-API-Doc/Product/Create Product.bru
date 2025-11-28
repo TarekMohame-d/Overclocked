@@ -1,0 +1,73 @@
+meta {
+  name: Create Product
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{host}}/products
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "BrandId": "019ab5a0-6dae-75ce-88ae-19194fbf30f1",
+    "CategoryId": "019ab5a2-eb7a-7e14-b957-66eb8220f914",
+    "Name": "Intel Core i5-14600K",
+    "Thumbnail": "https://res.cloudinary.com/over-clocked/image/upload/v1763637350/images/products/rb9koftrtbytvlbpyxjm.jpg",
+    "Description": "Core i5 14th Gen 14-Core (6P+8E) LGA 1700 125W Intel UHD Graphics 770 Processor - Boxed - BX8071514600K",
+    "Price": 12500,
+    "Stock": 45,
+    "Discount": 0.0,
+    "Tags": [
+      "019ab5a4-27aa-7e77-95e6-faa34fcbda4a",
+      "019ab5a4-4710-77ec-a363-7ac752d61fde",
+      "019ab5a4-7199-73e5-b09d-231675702130"
+    ],
+    "Images": null,
+    "Specification": [
+      {
+        "Name": "CPU Socket Type",
+        "Value": "LGA 1700"
+      },
+      {
+        "Name": "Core Name",
+        "Value": "Raptor Lake"
+      },
+      {
+        "Name": "# of Efficient-cores",
+        "Value": "8"
+      },
+      {
+        "Name": "# of Performance-cores",
+        "Value": "6"
+      },
+      {
+        "Name": "Performance-core Base Frequency",
+        "Value": "3.5 GHz"
+      },
+      {
+        "Name": "Max Turbo Frequency",
+        "Value": "5.3 GHz"
+      },
+      {
+        "Name": "L2 Cache",
+        "Value": "20MB"
+      },
+      {
+        "Name": "L3 Cache",
+        "Value": "24MB"
+      },
+      {
+        "Name": "Memory Types",
+        "Value": "DDR4 3200 / DDR5 5600"
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

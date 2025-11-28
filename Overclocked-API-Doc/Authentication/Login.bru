@@ -1,0 +1,36 @@
+meta {
+  name: Login
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{host}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "tarekmohamed1401@gmail.com",
+    "password": "P@ssword123",
+    "deviceId": "cf:3d:35:08:e9:df"
+  }
+}
+
+script:post-response {
+  const response = res.getBody();
+  
+  // Save the secure URL to an environment variable for the next request
+  if (res.status === 200)
+  {
+    bru.setEnvVar("accessToken", response.data.accessToken);
+    bru.setEnvVar("refreshToken", response.data.refreshToken);
+    bru.setEnvVar("refreshTokenExpiration", response.data.refreshTokenExpiration);
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

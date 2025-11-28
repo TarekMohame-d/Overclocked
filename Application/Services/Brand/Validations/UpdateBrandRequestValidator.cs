@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Services.Brand.Validations;
 
-public class UpdateBrandRequestValidator : AbstractValidator<UpdateBrandRequest>
+public class UpdateBrandRequestValidator : AbstractValidator<UpdateBrandRequestBody>
 {
     public UpdateBrandRequestValidator()
     {

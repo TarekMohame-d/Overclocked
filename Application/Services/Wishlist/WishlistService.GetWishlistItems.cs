@@ -22,6 +22,7 @@ public sealed partial class WishlistService
             .Where(wi => wi.WishlistId == wishlist.Id)
             .Select(wi => new WishlistItemResponse
             {
+                Id = wi.Id,
                 ProductId = wi.ProductId,
                 ProductName = wi.Product!.Name,
                 ProductDescription = wi.Product.Description,

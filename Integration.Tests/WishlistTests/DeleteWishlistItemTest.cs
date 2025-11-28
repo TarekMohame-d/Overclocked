@@ -35,7 +35,7 @@ public class DeleteWishlistItemTest(CustomWebApplicationFactory factory) : IAsyn
 
         // Act
         HttpResponseMessage response = await _client
-            .DeleteAsync(WishlistRoutes.DeleteWishlistItem.Replace("{id:guid}", product.Id.ToString()));
+            .DeleteAsync(WishlistRoutes.DeleteWishlistItem.Replace("{id:guid}", wishlist.WishlistItems.First().Id.ToString()));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);

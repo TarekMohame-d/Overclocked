@@ -22,6 +22,7 @@ public sealed partial class CartService
             .Where(ci => ci.CartId == cart.Id)
             .Select(ci => new CartItemResponse.CartItem
             {
+                CartItemId = ci.Id,
                 ProductId = ci.ProductId,
                 ProductName = ci.Product!.Name,
                 ProductDescription = ci.Product.Description,
@@ -36,7 +37,7 @@ public sealed partial class CartService
         var response = new CartItemResponse
         {
             CartItems = cartItems,
-            Total = cartItems.Sum(ci => ci.LineTotal),
+            Total = Math.Round(cartItems.Sum(ci => ci.LineTotal), 2),
         };
 
         return Result<CartItemResponse>.Success(response);

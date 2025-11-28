@@ -8,8 +8,8 @@ public interface ICartService
 {
     Task<Result> CreateCartAsync(Guid userId, CancellationToken cancellationToken);
     Task<Result<CartItemResponse>> GetCartItemsAsync(Guid userId, CancellationToken cancellationToken);
-    Task<Result> AddCartItemAsync(Guid userId, AddCartItemRequest request, CancellationToken cancellationToken);
-    Task<Result> UpdateCartItemAsync(Guid userId, UpdateCartItemRequest request, CancellationToken cancellationToken);
-    Task<Result> DeleteCartItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken);
+    Task<Result> AddCartItemAsync(AddCartItemRequest request, CancellationToken cancellationToken);
+    Task<Result> UpdateCartItemAsync(UpdateCartItemRequest request, CancellationToken cancellationToken);
+    Task<Result> DeleteCartItemAsync(DeleteCartItemRequest request, CancellationToken cancellationToken);
     Task<Result> ClearCartAsync(Guid userId, CancellationToken cancellationToken);
 }

@@ -9,6 +9,8 @@ public record ProductListResponse
     public required string Thumbnail { get; init; }
     public required decimal Price { get; init; }
     public required decimal Discount { get; init; }
+    public required decimal FinalPrice { get; init; }
     public required double Rating { get; init; }
+    public required int ReviewCount { get; init; }
     public required BrandResponse Brand { get; init; }
 }

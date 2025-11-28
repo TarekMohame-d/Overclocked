@@ -108,6 +108,15 @@ public class ProductRepository(ApplicationDbContext dbContext)
         };
     }
 
+    public async Task<int?> GetProductStockQuantityAsync(Guid productId, CancellationToken cancellationToken = default)
+    {
+        var product = await Query()
+                        .Select(p => new { p.Id, p.StockQuantity })
+                        .SingleOrDefaultAsync(p => p.Id == productId, cancellationToken: cancellationToken);
+
+        return product?.StockQuantity;
+    }
+
     private static string EscapeLikePattern(string input) =>
         input.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace("[", "\\[");
 }

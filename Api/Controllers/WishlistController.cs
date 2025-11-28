@@ -1,4 +1,3 @@
-using Api.ActionFilters;
 using Api.Extensions;
 using Api.Routing;
 using Application.Abstraction.DomainServices;
@@ -32,10 +31,9 @@ public class WishlistController(IWishlistService wishlistService) : ControllerBa
 
     [Authorize(Roles = nameof(RoleType.Customer))]
     [HttpPost]
-    [ServiceFilter(typeof(ValidationActionAttribute<AddWishlistItemRequest>))]
     [Route(WishlistRoutes.AddWishlistItem)]
     public async Task<IActionResult> AddWishlistItem(
-        [FromBody] AddWishlistItemRequest request,
+        [FromBody] AddWishlistItemRequestBody requestBody,
         CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
@@ -43,7 +41,14 @@ public class WishlistController(IWishlistService wishlistService) : ControllerBa
         {
             return Unauthorized();
         }
-        Result response = await wishlistService.AddWishlistItemAsync((Guid)userId, request, cancellationToken);
+
+        var request = new AddWishlistItemRequest
+        {
+            ProductId = requestBody.ProductId,
+            UserId = (Guid)userId
+        };
+
+        Result response = await wishlistService.AddWishlistItemAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -58,7 +63,14 @@ public class WishlistController(IWishlistService wishlistService) : ControllerBa
         {
             return Unauthorized();
         }
-        Result response = await wishlistService.DeleteWishlistItemAsync((Guid)userId, id, cancellationToken);
+
+        var request = new DeleteWishlistItemRequest
+        {
+            WishlistItemId = id,
+            UserId = (Guid)userId
+        };
+
+        Result response = await wishlistService.DeleteWishlistItemAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }

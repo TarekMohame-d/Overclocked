@@ -32,10 +32,10 @@ public class CartController(ICartService cartService) : ControllerBase
 
     [Authorize(Roles = nameof(RoleType.Customer))]
     [HttpPost]
-    [ServiceFilter(typeof(ValidationActionAttribute<AddCartItemRequest>))]
+    [ServiceFilter(typeof(ValidationActionAttribute<AddCartItemRequestBody>))]
     [Route(CartRoutes.AddCartItem)]
     public async Task<IActionResult> AddCartItem(
-        [FromBody] AddCartItemRequest request,
+        [FromBody] AddCartItemRequestBody requestBody,
         CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
@@ -43,17 +43,26 @@ public class CartController(ICartService cartService) : ControllerBase
         {
             return Unauthorized();
         }
-        Result response = await cartService.AddCartItemAsync((Guid)userId, request, cancellationToken);
+
+        var request = new AddCartItemRequest
+        {
+            ProductId = requestBody.ProductId,
+            Quantity = requestBody.Quantity,
+            UserId = (Guid)userId
+        };
+
+        Result response = await cartService.AddCartItemAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
 
     [Authorize(Roles = nameof(RoleType.Customer))]
     [HttpPut]
-    [ServiceFilter(typeof(ValidationActionAttribute<UpdateCartItemRequest>))]
+    [ServiceFilter(typeof(ValidationActionAttribute<UpdateCartItemRequestBody>))]
     [Route(CartRoutes.UpdateCartItem)]
     public async Task<IActionResult> UpdateCartItem(
-        [FromBody] UpdateCartItemRequest request,
+        [FromRoute] Guid id,
+        [FromBody] UpdateCartItemRequestBody requestBody,
         CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
@@ -61,7 +70,15 @@ public class CartController(ICartService cartService) : ControllerBase
         {
             return Unauthorized();
         }
-        Result response = await cartService.UpdateCartItemAsync((Guid)userId, request, cancellationToken);
+
+        var request = new UpdateCartItemRequest
+        {
+            Quantity = requestBody.Quantity,
+            CartItemId = id,
+            UserId = (Guid)userId
+        };
+
+        Result response = await cartService.UpdateCartItemAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }
@@ -76,7 +93,13 @@ public class CartController(ICartService cartService) : ControllerBase
         {
             return Unauthorized();
         }
-        Result response = await cartService.DeleteCartItemAsync((Guid)userId, id, cancellationToken);
+        var request = new DeleteCartItemRequest
+        {
+            CartItemId = id,
+            UserId = (Guid)userId
+        };
+
+        Result response = await cartService.DeleteCartItemAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }

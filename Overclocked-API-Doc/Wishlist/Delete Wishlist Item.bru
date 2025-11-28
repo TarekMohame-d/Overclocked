@@ -1,0 +1,20 @@
+meta {
+  name: Delete Wishlist Item
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{host}}/wishlist/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 019ab5a8-962d-70bf-bfa8-5b4d82968b10
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

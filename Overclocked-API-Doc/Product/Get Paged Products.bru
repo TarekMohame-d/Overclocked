@@ -1,0 +1,27 @@
+meta {
+  name: Get Paged Products
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/products?page=1&pageSize=5&sortBy=id&direction=asc&search&category&brand&tagId
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  pageSize: 5
+  sortBy: id
+  direction: asc
+  search: 
+  category: 
+  brand: 
+  tagId: 
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -40,7 +40,12 @@ public class AddWishlistItemAsyncTest
         // Arrange
         var userId = Guid.NewGuid();
         var productId = Guid.NewGuid();
-        var addWishlistItemRequest = new AddWishlistItemRequest { ProductId = productId };
+
+        var request = new AddWishlistItemRequest
+        {
+            UserId = userId,
+            ProductId = productId
+        };
 
         _wishlistRepositoryMock.SingleOrDefaultAsync(
                 Arg.Any<Expression<Func<Wishlist, bool>>>(),
@@ -50,7 +55,7 @@ public class AddWishlistItemAsyncTest
 
         // Act
         Exception exception = await Should.ThrowAsync<Exception>(async () =>
-            await _wishlistService.AddWishlistItemAsync(userId, addWishlistItemRequest, CancellationToken.None));
+            await _wishlistService.AddWishlistItemAsync(request, CancellationToken.None));
 
         // Assert
         exception.ShouldBeOfType<WishlistNotFoundException>();
@@ -68,7 +73,12 @@ public class AddWishlistItemAsyncTest
         // Arrange
         var userId = Guid.NewGuid();
         var productId = Guid.NewGuid();
-        var addWishlistItemRequest = new AddWishlistItemRequest { ProductId = productId };
+
+        var request = new AddWishlistItemRequest
+        {
+            UserId = userId,
+            ProductId = productId
+        };
 
         var wishlist = new Wishlist { UserId = userId };
 
@@ -85,7 +95,7 @@ public class AddWishlistItemAsyncTest
 
         // Act
         Result result = await _wishlistService
-            .AddWishlistItemAsync(userId, addWishlistItemRequest, CancellationToken.None);
+            .AddWishlistItemAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -109,7 +119,12 @@ public class AddWishlistItemAsyncTest
         // Arrange
         var userId = Guid.NewGuid();
         var productId = Guid.NewGuid();
-        var addWishlistItemRequest = new AddWishlistItemRequest { ProductId = productId };
+
+        var request = new AddWishlistItemRequest
+        {
+            UserId = userId,
+            ProductId = productId
+        };
 
         var wishlist = new Wishlist { UserId = userId };
 
@@ -136,7 +151,7 @@ public class AddWishlistItemAsyncTest
 
         // Act
         Result result = await _wishlistService
-            .AddWishlistItemAsync(userId, addWishlistItemRequest, CancellationToken.None);
+            .AddWishlistItemAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -163,7 +178,12 @@ public class AddWishlistItemAsyncTest
         // Arrange
         var userId = Guid.NewGuid();
         var productId = Guid.NewGuid();
-        var addWishlistItemRequest = new AddWishlistItemRequest { ProductId = productId };
+
+        var request = new AddWishlistItemRequest
+        {
+            UserId = userId,
+            ProductId = productId
+        };
 
         var wishlist = new Wishlist { UserId = userId };
 
@@ -187,7 +207,7 @@ public class AddWishlistItemAsyncTest
 
         // Act
         Result result = await _wishlistService
-            .AddWishlistItemAsync(userId, addWishlistItemRequest, CancellationToken.None);
+            .AddWishlistItemAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

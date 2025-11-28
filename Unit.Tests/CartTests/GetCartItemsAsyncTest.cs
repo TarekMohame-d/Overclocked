@@ -7,7 +7,6 @@ using ArchitectureTests.FakeData;
 using Domain.Entities;
 using Domain.Exceptions;
 using MockQueryable;
-using MockQueryable.NSubstitute;
 using NSubstitute;
 using Shouldly;
 

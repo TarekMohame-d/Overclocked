@@ -7,6 +7,7 @@ using Application.Common.Results;
 using Application.Services.Brand.DTOs.Response;
 using Application.Services.Category.DTOs.Response;
 using Application.Services.Product.DTOs.Response;
+using Application.Services.Review.DTOs.Response;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -232,8 +233,28 @@ public class GetProductByIdTest(CustomWebApplicationFactory factory) : IAsyncLif
             Tags = [],
             Discount = entity.Discount,
             Price = entity.Price,
+            FinalPrice = entity.Price * (1 - entity.Discount),
             Rating = entity.Rating,
-            Specifications = [],
+            ReviewCount = entity.ReviewCount,
+            Reviews = entity.Reviews.Select(r => new ReviewResponse
+            {
+                Id = r.Id,
+                UserId = r.UserId,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.UpdatedAt,
+                UserName = $"{r.User!.FirstName} {r.User!.LastName}",
+                UserEmail = r.User!.Email,
+                Reply = r.ReviewReply != null
+                        ? new ReviewReplyResponse
+                        {
+                            Id = r.ReviewReply.Id,
+                            Reply = r.ReviewReply.Reply ?? "",
+                            CreatedAt = r.ReviewReply.UpdatedAt
+                        }
+                        : null
+            }),
+            Specifications = []
         };
     }
 }

@@ -17,4 +17,8 @@ public interface IProductRepository : IGenericRepository<Product>
         string? brand = null,
         Guid? tagId = null
     );
+
+    Task<int?> GetProductStockQuantityAsync(
+        Guid productId,
+        CancellationToken cancellationToken = default);
 }

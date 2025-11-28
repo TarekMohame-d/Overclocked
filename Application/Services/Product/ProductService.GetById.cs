@@ -5,6 +5,7 @@ using Application.Services.Brand.DTOs.Response;
 using Application.Services.Category.DTOs.Response;
 using Application.Services.Product.DTOs.Request;
 using Application.Services.Product.DTOs.Response;
+using Application.Services.Review.DTOs.Response;
 using Application.Services.Tag.DTOs.Response;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,8 +27,10 @@ public sealed partial class ProductService
                 Thumbnail = p.Thumbnail,
                 Description = p.Description,
                 Price = p.Price,
+                FinalPrice = Math.Round(p.Price * (1 - p.Discount), 2),
                 Discount = p.Discount,
                 Rating = p.Rating,
+                ReviewCount = p.ReviewCount,
                 Category = new CategoryResponse
                 {
                     Id = p.Category!.Id,
@@ -52,8 +55,38 @@ public sealed partial class ProductService
                     Value = s.Value,
                 }),
                 Images = p.ProductImages.Select(i => i.Image),
+                Reviews = p.Reviews
+                .OrderByDescending(r => r.UpdatedAt)
+                .Take(10)
+                .Select(r => new ReviewResponse
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    CreatedAt = r.UpdatedAt,
+                    UserName = $"{r.User!.FirstName} {r.User!.LastName}",
+                    UserEmail = r.User!.Email,
+                    Reply = r.ReviewReply != null
+                            ? new ReviewReplyResponse
+                            {
+                                Id = r.ReviewReply.Id,
+                                Reply = r.ReviewReply.Reply ?? "",
+                                CreatedAt = r.ReviewReply.UpdatedAt
+                            }
+                            : null
+                })
             })
             .SingleOrDefaultAsync(cancellationToken);
+
+        if(productResponse is not null)
+        {
+            Result<RatingBreakdownResponse>? ratingBreakdown = await reviewService
+                .GetReviewRatingBreakdownAsync(productResponse.Id, cancellationToken);
+
+            if(ratingBreakdown.IsSuccess)
+                productResponse.RatingBreakdownResponse = ratingBreakdown.Data!;
+        }
 
         return productResponse is null
             ? Result<ProductResponse>.Failure(Errors.ProductNotFound, HttpStatusCode.NotFound)

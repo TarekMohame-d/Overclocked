@@ -1,0 +1,35 @@
+meta {
+  name: Upload Image
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://api.cloudinary.com/v1_1/{{cloudName}}/image/upload
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(/home/tarek/temp/OC_data/products/intel_i5_14400f.jpg) @contentType(file)
+  api_key: {{apiKey}} @contentType(string)
+  timestamp: {{timestamp}} @contentType(string)
+  signature: {{signature}} @contentType(string)
+  folder: {{folder}} @contentType(string)
+  transformation: {{transformation}} @contentType(string)
+}
+
+script:post-response {
+  const response = res.getBody();
+  
+  // Save the secure URL to an environment variable for the next request
+  if (res.status === 200)
+  {
+    bru.setEnvVar("imageUrl", response.secure_url);
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

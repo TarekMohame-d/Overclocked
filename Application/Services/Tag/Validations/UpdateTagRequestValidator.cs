@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Services.Tag.Validations;
 
-public class UpdateTagRequestValidator : AbstractValidator<UpdateTagRequest>
+public class UpdateTagRequestValidator : AbstractValidator<UpdateTagRequestBody>
 {
     public UpdateTagRequestValidator()
     {

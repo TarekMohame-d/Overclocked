@@ -48,21 +48,21 @@ public class BrandController(IBrandService brandServices) : ControllerBase
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPut]
-    [ServiceFilter(typeof(ValidationActionAttribute<UpdateBrandRequest>))]
+    [ServiceFilter(typeof(ValidationActionAttribute<UpdateBrandRequestBody>))]
     [Route(BrandRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromBody] UpdateBrandRequestBody request,
+        [FromBody] UpdateBrandRequestBody requestBody,
         CancellationToken cancellationToken)
     {
-        UpdateBrandRequest updateBrandRequest = new()
+        UpdateBrandRequest request = new()
         {
             Id = id,
-            Name = request.Name,
-            ImageUrl = request.ImageUrl,
+            Name = requestBody.Name,
+            ImageUrl = requestBody.ImageUrl,
         };
 
-        Result response = await brandServices.UpdateBrandAsync(updateBrandRequest, cancellationToken);
+        Result response = await brandServices.UpdateBrandAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }

@@ -107,8 +107,9 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
 
                 if(missingTags.Count != 0)
                 {
-                    context.AddFailure("Tags",
-                    $"The following tags do not exist: [\n{string.Join(",\n", missingTags)}");
+                    context.AddFailure(
+                        "Tags",
+                        $"The following tags do not exist: [\n{string.Join(",\n", missingTags)}\n]");
                 }
             });
     }

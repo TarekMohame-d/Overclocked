@@ -11,26 +11,43 @@ public class Cart
     public User? User { get; set; }
     public ICollection<CartItem> CartItems { get; set; } = [];
 
-    public void AddOrUpdateItem(Guid productId, int quantity, int stockQuantity)
+    public void AddCartItem(Guid productId, int quantity, int stockQuantity)
     {
-        CartItem? existingItem = CartItems.SingleOrDefault(ci => ci.ProductId == productId);
-
-        if(quantity > stockQuantity)
-            throw new InvalidCartItemQuantityException(productId, quantity, stockQuantity);
+        CartItem? existingItem = CartItems.FirstOrDefault(x => x.ProductId == productId);
 
         if(existingItem is not null)
         {
-            existingItem.Quantity = quantity;
+            // Update existing
+            var newQuantity = existingItem.Quantity + quantity;
+            if(newQuantity > stockQuantity)
+                throw new InvalidCartItemQuantityException(productId, newQuantity, stockQuantity);
+
+            existingItem.Quantity = newQuantity;
+            existingItem.UpdatedAt = DateTime.UtcNow;
         }
         else
         {
-            CartItems.Add(
-                new CartItem
-                {
-                    CartId = Id,
-                    ProductId = productId,
-                    Quantity = quantity,
-                });
+            // Add new
+            if(quantity > stockQuantity)
+                throw new InvalidCartItemQuantityException(productId, quantity, stockQuantity);
+
+            CartItems.Add(new CartItem
+            {
+                CartId = Id,
+                ProductId = productId,
+                Quantity = quantity,
+            });
         }
+    }
+
+    public void UpdateItem(Guid itemId, int quantity, int stockQuantity)
+    {
+        CartItem existingItem = CartItems.Single(ci => ci.Id == itemId);
+
+        if(quantity > stockQuantity)
+            throw new InvalidCartItemQuantityException(existingItem.ProductId, quantity, stockQuantity);
+
+        existingItem.Quantity = quantity;
+        existingItem.UpdatedAt = DateTime.UtcNow;
     }
 }

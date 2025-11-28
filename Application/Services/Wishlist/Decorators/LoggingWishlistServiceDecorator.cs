@@ -20,16 +20,13 @@ public class LoggingWishlistServiceDecorator(
         CancellationToken cancellationToken) =>
             ExecuteWithLoggingAsync("GetWishlistItems", () => inner.GetWishlistItemsAsync(userId, cancellationToken));
 
-    public Task<Result> AddWishlistItemAsync(
-        Guid userId,
-        AddWishlistItemRequest request,
-        CancellationToken cancellationToken) =>
-            ExecuteWithLoggingAsync(request, () =>
-                inner.AddWishlistItemAsync(userId, request, cancellationToken));
+    public Task<Result> AddWishlistItemAsync(AddWishlistItemRequest request, CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(request, () => inner.AddWishlistItemAsync(request, cancellationToken));
 
-    public Task<Result> DeleteWishlistItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken) =>
-        ExecuteWithLoggingAsync("DeleteWishlistItem", () =>
-            inner.DeleteWishlistItemAsync(userId, productId, cancellationToken));
+    public Task<Result> DeleteWishlistItemAsync(
+        DeleteWishlistItemRequest request,
+        CancellationToken cancellationToken) =>
+        ExecuteWithLoggingAsync(request, () => inner.DeleteWishlistItemAsync(request, cancellationToken));
 
     public Task<Result> ClearWishlistAsync(Guid userId, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync("ClearWishlist", () => inner.ClearWishlistAsync(userId, cancellationToken));

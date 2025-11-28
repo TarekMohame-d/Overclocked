@@ -3,6 +3,7 @@ using System.Net;
 using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Services.Cart;
+using Application.Services.Cart.DTOs.Request;
 using Domain.Entities;
 using Domain.Exceptions;
 using NSubstitute;
@@ -37,7 +38,13 @@ public class DeleteCartItemAsyncTest
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var productId = Guid.NewGuid();
+        var cartItemId = Guid.NewGuid();
+
+        var request = new DeleteCartItemRequest
+        {
+            CartItemId = cartItemId,
+            UserId = userId
+        };
 
         _cartRepositoryMock.SingleOrDefaultAsync(
                 Arg.Any<Expression<Func<Cart, bool>>>(),
@@ -47,7 +54,7 @@ public class DeleteCartItemAsyncTest
 
         // Act
         Exception exception = await Should.ThrowAsync<Exception>(async () =>
-            await _cartService.DeleteCartItemAsync(userId, productId, CancellationToken.None));
+            await _cartService.DeleteCartItemAsync(request, CancellationToken.None));
 
         // Assert
         exception.ShouldBeOfType<CartNotFoundException>();
@@ -64,7 +71,13 @@ public class DeleteCartItemAsyncTest
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var productId = Guid.NewGuid();
+        var cartItemId = Guid.NewGuid();
+
+        var request = new DeleteCartItemRequest
+        {
+            CartItemId = cartItemId,
+            UserId = userId
+        };
 
         var cart = new Cart { UserId = userId };
 
@@ -80,7 +93,7 @@ public class DeleteCartItemAsyncTest
             .Returns(1);
 
         // Act
-        Result result = await _cartService.DeleteCartItemAsync(userId, productId, CancellationToken.None);
+        Result result = await _cartService.DeleteCartItemAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

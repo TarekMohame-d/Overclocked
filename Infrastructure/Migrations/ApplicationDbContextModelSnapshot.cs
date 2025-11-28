@@ -696,8 +696,13 @@ namespace Infrastructure.Migrations
 
                     b.Property<double>("Rating")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("double precision")
+                        .HasColumnType("decimal(2,1)")
                         .HasDefaultValue(0.0);
+
+                    b.Property<int>("ReviewCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<int>("StockQuantity")
                         .HasColumnType("integer");
@@ -717,8 +722,6 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("Discount");
-
                     b.HasIndex("Name")
                         .IsUnique();
 
@@ -728,8 +731,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Price");
 
                     b.HasIndex("Rating");
-
-                    b.HasIndex("StockQuantity");
 
                     b.ToTable("Products");
                 });
@@ -966,6 +967,9 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Rating");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "ProductId")
+                        .IsUnique();
 
                     b.ToTable("Reviews");
                 });

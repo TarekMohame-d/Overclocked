@@ -1,0 +1,23 @@
+meta {
+  name: Get Paged Tags
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/tags?page=1&pageSize=10&sortBy=id&direction=asc
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  pageSize: 10
+  sortBy: id
+  direction: asc
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

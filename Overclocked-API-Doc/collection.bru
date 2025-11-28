@@ -1,0 +1,14 @@
+auth {
+  mode: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+vars:pre-request {
+  host: http://localhost:8080/api/v1
+  accessToken: 
+  refreshToken: 
+  refreshTokenExpiration: 
+}

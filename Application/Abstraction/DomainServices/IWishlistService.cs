@@ -10,7 +10,7 @@ public interface IWishlistService
     Task<Result<IEnumerable<WishlistItemResponse>>> GetWishlistItemsAsync(
         Guid userId,
         CancellationToken cancellationToken);
-    Task<Result> AddWishlistItemAsync(Guid userId, AddWishlistItemRequest request, CancellationToken cancellationToken);
-    Task<Result> DeleteWishlistItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken);
+    Task<Result> AddWishlistItemAsync(AddWishlistItemRequest request, CancellationToken cancellationToken);
+    Task<Result> DeleteWishlistItemAsync(DeleteWishlistItemRequest request, CancellationToken cancellationToken);
     Task<Result> ClearWishlistAsync(Guid userId, CancellationToken cancellationToken);
 }
