@@ -1,21 +1,21 @@
 ﻿using Application.Common.Results;
-using Domain.Entities;
+using Application.Services.Cart.DTOs.Request;
 using Domain.Exceptions;
 
 namespace Application.Services.Cart;
 
 public sealed partial class CartService
 {
-    public async Task<Result> DeleteCartItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken)
+    public async Task<Result> DeleteCartItemAsync(DeleteCartItemRequest request, CancellationToken cancellationToken)
     {
         Domain.Entities.Cart cart =
             await cartRepository.SingleOrDefaultAsync(
-                x => x.UserId == userId,
+                x => x.UserId == request.UserId,
                 cancellationToken: cancellationToken)
-            ?? throw new CartNotFoundException(userId);
+            ?? throw new CartNotFoundException(request.UserId);
 
         await cartItemRepository.DeleteWhereAsync(
-            x => x.ProductId == productId && x.CartId == cart.Id,
+            x => x.Id == request.CartItemId && x.CartId == cart.Id,
             cancellationToken);
 
         return Result.Success();

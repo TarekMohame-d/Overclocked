@@ -48,7 +48,7 @@ public class TagController(ITagService tagService) : ControllerBase
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPut]
-    [ServiceFilter(typeof(ValidationActionAttribute<UpdateTagRequest>))]
+    [ServiceFilter(typeof(ValidationActionAttribute<UpdateTagRequestBody>))]
     [Route(TagRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,

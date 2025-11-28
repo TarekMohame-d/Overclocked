@@ -201,7 +201,9 @@ public class GetPagedProductsTest(CustomWebApplicationFactory factory) : IAsyncL
             Thumbnail = entity.Thumbnail,
             Discount = entity.Discount,
             Price = entity.Price,
+            FinalPrice = Math.Round(entity.Price * (1 - entity.Discount), 2),
             Rating = entity.Rating,
+            ReviewCount = entity.ReviewCount,
             Brand = new BrandResponse
             {
                 Id = brand.Id,

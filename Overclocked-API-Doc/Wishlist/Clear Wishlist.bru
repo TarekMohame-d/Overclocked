@@ -1,0 +1,15 @@
+meta {
+  name: Clear Wishlist
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{host}}/wishlist/clear
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,36 @@
+meta {
+  name: Generate Signature
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host}}/cloudinary/upload-signature?category=products
+  body: none
+  auth: none
+}
+
+params:query {
+  category: products
+}
+
+script:post-response {
+  // Parse JSON response
+  const data = res.getBody();
+  
+  // Save variables to the environment
+  if (res.status === 200)
+  {
+    bru.setEnvVar("apiKey", data.apiKey);
+    bru.setEnvVar("timestamp", data.timestamp);
+    bru.setEnvVar("signature", data.signature);
+    bru.setEnvVar("cloudName", data.cloudName);
+    bru.setEnvVar("folder", data.folder);
+    bru.setEnvVar("transformation", data.transformation);
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

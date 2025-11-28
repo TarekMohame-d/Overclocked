@@ -18,15 +18,14 @@ public class UpdateCategoryRequestValidatorTest
         // Arrange
         var validator = new UpdateCategoryRequestValidator();
 
-        var request = new UpdateCategoryRequest
+        var request = new UpdateCategoryRequestBody
         {
-            Id = Guid.CreateVersion7(),
             Name = name!,
             ImageUrl = "https://res.cloudinary.com/over-clocked/image.png",
         };
 
         // Act
-        TestValidationResult<UpdateCategoryRequest> result = validator.TestValidate(request);
+        TestValidationResult<UpdateCategoryRequestBody> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();
@@ -44,15 +43,14 @@ public class UpdateCategoryRequestValidatorTest
         // Arrange
         var validator = new UpdateCategoryRequestValidator();
 
-        var request = new UpdateCategoryRequest
+        var request = new UpdateCategoryRequestBody
         {
-            Id = Guid.CreateVersion7(),
             Name = "Category Name",
             ImageUrl = imageUrl!,
         };
 
         // Act
-        TestValidationResult<UpdateCategoryRequest> result = validator.TestValidate(request);
+        TestValidationResult<UpdateCategoryRequestBody> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();

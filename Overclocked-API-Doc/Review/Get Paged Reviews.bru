@@ -1,0 +1,27 @@
+meta {
+  name: Get Paged Reviews
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host}}/products/:productId/reviews?page=1&pageSize=10&sortBy=createdAt&direction=desc
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  pageSize: 10
+  sortBy: createdAt
+  direction: desc
+}
+
+params:path {
+  productId: 019ab5a8-962d-70bf-bfa8-5b4d82968b10
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -39,6 +39,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
 
     private DbConnection _dbConnection = null!;
     private Respawner _respawner = null!;
+    private IConnectionMultiplexer _redisConnection = null!;
     public HttpClient HttpClient { get; private set; } = null!;
     public IFileStorageService FileStorageServiceMock { get; } = Substitute.For<IFileStorageService>();
     public IBackgroundJobClient BackgroundJobClientMock { get; } = Substitute.For<IBackgroundJobClient>();
@@ -50,14 +51,18 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
 
         _dbConnection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await _dbConnection.OpenAsync();
-        await ApplyMigrationsAsync();
+
+        _redisConnection = await ConnectionMultiplexer.ConnectAsync(_redisContainer.GetConnectionString());
+
         HttpClient = CreateClient();
+        await ApplyMigrationsAsync();
         await InitializeRespawnerAsync();
     }
 
     public new async Task DisposeAsync()
     {
         await _dbConnection.DisposeAsync();
+        _redisConnection.Dispose();
         await _dbContainer.DisposeAsync();
         await _redisContainer.DisposeAsync();
     }
@@ -103,7 +108,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
         await _respawner.ResetAsync(_dbConnection);
 
         ConnectionMultiplexer redis = await ConnectionMultiplexer.ConnectAsync(_redisContainer.GetConnectionString());
-        IDatabase db = redis.GetDatabase();
+        IDatabase db = _redisConnection.GetDatabase();
         await db.ExecuteAsync("FLUSHDB");
     }
 
@@ -131,13 +136,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<IApiMarker>, IA
         string userId = "test-user-id",
         string role = "Customer",
         string deviceId = "test-device-id",
-        IList<string>? permissions = null
-    )
+        string email = "test@temp.com",
+        IList<string>? permissions = null)
     {
         var claims = new List<Claim>
         {
             new(ClaimsConstants.NameIdentifier, userId),
-            new(ClaimsConstants.Email, "test-user-email"),
+            new(ClaimsConstants.Email, email),
             new(ClaimsConstants.DeviceId, deviceId),
             new(ClaimsConstants.Role, role),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

@@ -7,6 +7,7 @@ public record CartItemResponse
 
     public record CartItem
     {
+        public required Guid CartItemId { get; init; }
         public required Guid ProductId { get; init; }
         public required string ProductName { get; init; }
         public required string ProductDescription { get; init; }

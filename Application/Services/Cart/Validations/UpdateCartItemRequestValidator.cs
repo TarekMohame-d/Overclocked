@@ -3,15 +3,10 @@ using FluentValidation;
 
 namespace Application.Services.Cart.Validations;
 
-public class UpdateCartItemRequestValidator : AbstractValidator<UpdateCartItemRequest>
+public class UpdateCartItemRequestValidator : AbstractValidator<UpdateCartItemRequestBody>
 {
     public UpdateCartItemRequestValidator()
     {
-        RuleFor(x => x.ProductId)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("{PropertyName} is required.");
-
         RuleFor(x => x.Quantity)
             .NotEmpty()
             .WithMessage("{PropertyName} is required.")

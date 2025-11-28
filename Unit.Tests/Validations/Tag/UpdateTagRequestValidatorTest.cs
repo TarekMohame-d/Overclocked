@@ -16,12 +16,12 @@ public class UpdateTagRequestValidatorTest
     public void UpdateTagRequestValidator_Should_ReturnError_When_NameValidationFails(string? name)
     {
         // Arrange
-        var request = new UpdateTagRequest { Id = Guid.CreateVersion7(), Name = name! };
+        var request = new UpdateTagRequestBody { Name = name! };
 
         var validator = new UpdateTagRequestValidator();
 
         // Act
-        TestValidationResult<UpdateTagRequest> result = validator.TestValidate(request);
+        TestValidationResult<UpdateTagRequestBody> result = validator.TestValidate(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();

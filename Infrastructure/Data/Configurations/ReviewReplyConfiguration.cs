@@ -46,6 +46,7 @@ public class ReviewReplyConfiguration : IEntityTypeConfiguration<ReviewReply>
         // Indexes
         builder.HasIndex(r => r.EmployeeId);
 
-        builder.HasIndex(r => r.ReviewId);
+        builder.HasIndex(r => r.ReviewId)
+            .IsUnique();
     }
 }

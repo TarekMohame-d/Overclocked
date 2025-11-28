@@ -72,7 +72,7 @@ public class UpdateProductValidationTestCases
         // Empty or invalid
         yield return
         [
-            new List<UpdateProductRequest.Specs>
+            new List<UpdateProductRequestBody.Specs>
             {
                 new() { Name = null!, Value = null! },
             },
@@ -81,7 +81,7 @@ public class UpdateProductValidationTestCases
         // Too long name and value
         yield return
         [
-            new List<UpdateProductRequest.Specs>
+            new List<UpdateProductRequestBody.Specs>
             {
                 new() { Name = new string('N', 55), Value = new string('V', 350) },
             },
@@ -98,6 +98,6 @@ public class UpdateProductValidationTestCases
         ];
 
         // Empty list
-        yield return [new List<UpdateProductRequest.Specs>()];
+        yield return [new List<UpdateProductRequestBody.Specs>()];
     }
 }

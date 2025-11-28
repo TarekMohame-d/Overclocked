@@ -8,7 +8,6 @@ using NSubstitute;
 using Unit.Tests.Validations.Product.TestCases;
 using BrandEntity = Domain.Entities.Brand;
 using CategoryEntity = Domain.Entities.Category;
-using ProductEntity = Domain.Entities.Product;
 using TagEntity = Domain.Entities.Tag;
 
 namespace Unit.Tests.Validations.Product;
@@ -38,11 +37,11 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id));
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags.Select(x => x.Id));
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns((BrandEntity)null!);
 
@@ -53,7 +52,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.BrandId).Only();
@@ -64,11 +63,11 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id));
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags.Select(x => x.Id));
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -79,7 +78,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.CategoryId).Only();
@@ -94,11 +93,11 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id), name: name!);
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags.Select(x => x.Id), name: name!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -109,7 +108,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Name).Only();
@@ -124,11 +123,11 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id), thumbnail: thumbnail!);
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags.Select(x => x.Id), thumbnail: thumbnail!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -139,7 +138,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Thumbnail).Only();
@@ -154,11 +153,14 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id), description: description!);
+        UpdateProductRequestBody request = UpdateProductRequest(
+            specs,
+            tags.Select(x => x.Id),
+            description: description!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -169,7 +171,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Description).Only();
@@ -184,11 +186,11 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id), price: (decimal)price!);
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags.Select(x => x.Id), price: (decimal)price!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -199,7 +201,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Price).Only();
@@ -214,11 +216,11 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id), stock: (int)stock!);
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags.Select(x => x.Id), stock: (int)stock!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -229,7 +231,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Stock).Only();
@@ -244,15 +246,14 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(
+        UpdateProductRequestBody request = UpdateProductRequest(
             specs,
             tags.Select(x => x.Id),
-            discount: (decimal)discount!
-        );
+            discount: (decimal)discount!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -263,7 +264,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Discount).Only();
@@ -278,11 +279,11 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id), images: images);
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags.Select(x => x.Id), images: images);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -293,7 +294,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Images).Only();
@@ -308,11 +309,11 @@ public class UpdateProductRequestValidatorTest
     {
         // Arrange
         List<TagEntity> tagEntities = new TagFaker().Generate(3);
-        IEnumerable<UpdateProductRequest.Specs> specs =
+        IEnumerable<UpdateProductRequestBody.Specs> specs =
         [
-            new UpdateProductRequest.Specs { Name = "Name", Value = "Value" },
+            new UpdateProductRequestBody.Specs { Name = "Name", Value = "Value" },
         ];
-        UpdateProductRequest request = UpdateProductRequest(specs, tags);
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -323,7 +324,7 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tagEntities));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Tags).Only();
@@ -335,12 +336,11 @@ public class UpdateProductRequestValidatorTest
         MemberType = typeof(UpdateProductValidationTestCases)
     )]
     public async Task UpdateProductRequestValidator_Should_HaveError_When_Specifications_Is_Invalid(
-        IEnumerable<UpdateProductRequest.Specs> specs
-    )
+        IEnumerable<UpdateProductRequestBody.Specs> specs)
     {
         // Arrange
         List<TagEntity> tags = new TagFaker().Generate(3);
-        UpdateProductRequest request = UpdateProductRequest(specs, tags.Select(x => x.Id));
+        UpdateProductRequestBody request = UpdateProductRequest(specs, tags.Select(x => x.Id));
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<object[]>()).Returns(Substitute.For<BrandEntity>());
 
@@ -351,14 +351,14 @@ public class UpdateProductRequestValidatorTest
             .Returns(Task.FromResult<IEnumerable<TagEntity>>(tags));
 
         // Act
-        TestValidationResult<UpdateProductRequest> result = await _validator.TestValidateAsync(request);
+        TestValidationResult<UpdateProductRequestBody> result = await _validator.TestValidateAsync(request);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Specification).Only();
     }
 
     private UpdateProductRequest UpdateProductRequest(
-        IEnumerable<UpdateProductRequest.Specs> specs,
+        IEnumerable<UpdateProductRequestBody.Specs> specs,
         IEnumerable<Guid> tags,
         IEnumerable<string>? images = null,
         Guid? id = null,

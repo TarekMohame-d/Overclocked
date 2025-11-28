@@ -10,27 +10,25 @@ namespace Application.Services.Cart;
 public sealed partial class CartService
 {
     public async Task<Result> AddCartItemAsync(
-        Guid userId,
         AddCartItemRequest request,
         CancellationToken cancellationToken)
     {
         Domain.Entities.Cart cart =
             await cartRepository.SingleOrDefaultAsync(
-                x => x.UserId == userId,
+                x => x.UserId == request.UserId,
                 include: q => q.Include(c => c.CartItems),
                 asNoTracking: false,
                 cancellationToken)
-            ?? throw new CartNotFoundException(userId);
+            ?? throw new CartNotFoundException(request.UserId);
 
-        Domain.Entities.Product? product = await productRepository
-            .SingleOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken: cancellationToken);
+        var stockQuantity = await productRepository.GetProductStockQuantityAsync(request.ProductId, cancellationToken);
 
-        if(product is null)
+        if(stockQuantity is null)
             return Result.Failure(Errors.ProductNotFound, HttpStatusCode.NotFound);
 
         try
         {
-            cart.AddOrUpdateItem(request.ProductId, request.Quantity, product.StockQuantity);
+            cart.AddCartItem(request.ProductId, request.Quantity, (int)stockQuantity);
         }
         catch(InvalidCartItemQuantityException)
         {

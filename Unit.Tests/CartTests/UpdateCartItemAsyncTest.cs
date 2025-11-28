@@ -4,9 +4,9 @@ using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Services.Cart;
 using Application.Services.Cart.DTOs.Request;
-using ArchitectureTests.FakeData;
 using Domain.Entities;
 using Domain.Exceptions;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using Shouldly;
 
@@ -40,7 +40,12 @@ public class UpdateCartItemAsyncTest
         // Arrange
         var userId = Guid.NewGuid();
 
-        var updateCartRequest = new UpdateCartItemRequest { ProductId = Guid.NewGuid(), Quantity = 1 };
+        var request = new UpdateCartItemRequest
+        {
+            UserId = userId,
+            CartItemId = Guid.NewGuid(),
+            Quantity = 1
+        };
 
         _cartRepositoryMock.SingleOrDefaultAsync(
                 Arg.Any<Expression<Func<Cart, bool>>>(),
@@ -51,7 +56,7 @@ public class UpdateCartItemAsyncTest
 
         // Act
         Exception exception = await Should.ThrowAsync<Exception>(async () =>
-            await _cartService.UpdateCartItemAsync(userId, updateCartRequest, CancellationToken.None));
+            await _cartService.UpdateCartItemAsync(request, CancellationToken.None));
 
         // Assert
         exception.ShouldBeOfType<CartNotFoundException>();
@@ -69,10 +74,26 @@ public class UpdateCartItemAsyncTest
     {
         // Arrange
         var userId = Guid.NewGuid();
-
-        var updateCartRequest = new UpdateCartItemRequest { ProductId = Guid.NewGuid(), Quantity = 1 };
+        var productId = Guid.NewGuid();
 
         var cart = new Cart { UserId = userId };
+
+        var cartItem = new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = productId,
+            Quantity = 1
+        };
+
+        var request = new UpdateCartItemRequest
+        {
+            UserId = userId,
+            CartItemId = cartItem.Id,
+            Quantity = 1
+        };
+
+
+        cart.CartItems.Add(cartItem);
 
         _cartRepositoryMock.SingleOrDefaultAsync(
                 Arg.Any<Expression<Func<Cart, bool>>>(),
@@ -81,13 +102,11 @@ public class UpdateCartItemAsyncTest
                 Arg.Any<CancellationToken>())
             .Returns(cart);
 
-        _productRepositoryMock.SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<Product, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns((Product)null!);
+        _productRepositoryMock.GetProductStockQuantityAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<int?>(null));
 
         // Act
-        Result result = await _cartService.UpdateCartItemAsync(userId, updateCartRequest, CancellationToken.None);
+        Result result = await _cartService.UpdateCartItemAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -101,9 +120,7 @@ public class UpdateCartItemAsyncTest
                 Arg.Any<CancellationToken>());
 
         await _productRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<Product, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+            .GetProductStockQuantityAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -111,12 +128,25 @@ public class UpdateCartItemAsyncTest
     {
         // Arrange
         var userId = Guid.NewGuid();
-
-        var updateCartRequest = new UpdateCartItemRequest { ProductId = Guid.NewGuid(), Quantity = 1 };
+        var productId = Guid.NewGuid();
 
         var cart = new Cart { UserId = userId };
 
-        Product product = new ProductFaker().Generate();
+        var cartItem = new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = productId,
+            Quantity = 1
+        };
+
+        var request = new UpdateCartItemRequest
+        {
+            UserId = userId,
+            CartItemId = cartItem.Id,
+            Quantity = 1
+        };
+
+        cart.CartItems.Add(cartItem);
 
         _cartRepositoryMock.SingleOrDefaultAsync(
                 Arg.Any<Expression<Func<Cart, bool>>>(),
@@ -125,16 +155,14 @@ public class UpdateCartItemAsyncTest
                 Arg.Any<CancellationToken>())
             .Returns(cart);
 
-        _productRepositoryMock.SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<Product, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(product);
+        _productRepositoryMock.GetProductStockQuantityAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(50);
 
         _unitOfWorkMock.CompleteAsync(cancellationToken: Arg.Any<CancellationToken>())
             .Returns(1);
 
         // Act
-        Result result = await _cartService.UpdateCartItemAsync(userId, updateCartRequest, CancellationToken.None);
+        Result result = await _cartService.UpdateCartItemAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -148,9 +176,7 @@ public class UpdateCartItemAsyncTest
                 Arg.Any<CancellationToken>());
 
         await _productRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<Product, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+            .GetProductStockQuantityAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)
             .CompleteAsync(Arg.Any<CancellationToken>());
@@ -162,11 +188,24 @@ public class UpdateCartItemAsyncTest
         // Arrange
         var userId = Guid.NewGuid();
         var productId = Guid.NewGuid();
-        var updateCartRequest = new UpdateCartItemRequest { ProductId = productId, Quantity = 200 };
 
         var cart = new Cart { UserId = userId };
 
-        Product product = new ProductFaker().Generate();
+        var cartItem = new CartItem
+        {
+            CartId = cart.Id,
+            ProductId = productId,
+            Quantity = 1
+        };
+
+        var request = new UpdateCartItemRequest
+        {
+            UserId = userId,
+            CartItemId = cartItem.Id,
+            Quantity = 200
+        };
+
+        cart.CartItems.Add(cartItem);
 
         _cartRepositoryMock.SingleOrDefaultAsync(
                 Arg.Any<Expression<Func<Cart, bool>>>(),
@@ -175,13 +214,11 @@ public class UpdateCartItemAsyncTest
                 Arg.Any<CancellationToken>())
             .Returns(cart);
 
-        _productRepositoryMock.SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<Product, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(product);
+        _productRepositoryMock.GetProductStockQuantityAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(50);
 
         // Act
-        Result result = await _cartService.UpdateCartItemAsync(userId, updateCartRequest, CancellationToken.None);
+        Result result = await _cartService.UpdateCartItemAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -195,9 +232,7 @@ public class UpdateCartItemAsyncTest
                 Arg.Any<CancellationToken>());
 
         await _productRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
-                Arg.Any<Expression<Func<Product, bool>>>(),
-                cancellationToken: Arg.Any<CancellationToken>());
+            .GetProductStockQuantityAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.DidNotReceive()
             .CompleteAsync(Arg.Any<CancellationToken>());

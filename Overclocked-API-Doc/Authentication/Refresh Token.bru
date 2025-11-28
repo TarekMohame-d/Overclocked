@@ -1,0 +1,35 @@
+meta {
+  name: Refresh Token
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{host}}/auth/refresh-token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "accessToken": "{{accessToken}}",
+    "refreshToken": "{{refreshToken}}"
+  }
+}
+
+script:post-response {
+  const response = res.getBody();
+  
+  // Save the secure URL to an environment variable for the next request
+  if (res.status === 200)
+  {
+    bru.setEnvVar("accessToken", response.data.accessToken);
+    bru.setEnvVar("refreshToken", response.data.refreshToken);
+    bru.setEnvVar("refreshTokenExpiration", response.data.refreshTokenExpiration);
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Resend EmailConfirmationCode
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{host}}/auth/resend-confirmation-code
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "Email": "tarekmohamed1401@gmail.com"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

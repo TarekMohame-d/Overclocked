@@ -100,8 +100,10 @@ public static class ProductMapping
             Thumbnail = x.Thumbnail,
             Price = x.Price,
             Discount = x.Discount,
+            FinalPrice = Math.Round(x.Price * (1 - x.Discount), 2),
             Rating = x.Rating,
-            Brand = x.Brand!.ToDto(),
+            ReviewCount = x.ReviewCount,
+            Brand = x.Brand!.ToDto()
         });
     }
 }

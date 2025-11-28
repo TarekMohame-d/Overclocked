@@ -18,21 +18,17 @@ public class LoggingCartServiceDecorator(ICartService inner, ILogger<LoggingCart
             ExecuteWithLoggingAsync("GetCartItemsRequest", () => inner.GetCartItemsAsync(userId, cancellationToken));
 
     public Task<Result> AddCartItemAsync(
-        Guid userId,
         AddCartItemRequest request,
         CancellationToken cancellationToken) =>
-            ExecuteWithLoggingAsync(request, () => inner.AddCartItemAsync(userId, request, cancellationToken));
+            ExecuteWithLoggingAsync(request, () => inner.AddCartItemAsync(request, cancellationToken));
 
     public Task<Result> UpdateCartItemAsync(
-        Guid userId,
         UpdateCartItemRequest request,
         CancellationToken cancellationToken) =>
-            ExecuteWithLoggingAsync(request, () => inner.UpdateCartItemAsync(userId, request, cancellationToken));
+            ExecuteWithLoggingAsync(request, () => inner.UpdateCartItemAsync(request, cancellationToken));
 
-    public Task<Result> DeleteCartItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken) =>
-        ExecuteWithLoggingAsync(
-            "DeleteCartItemRequest",
-            () => inner.DeleteCartItemAsync(userId, productId, cancellationToken));
+    public Task<Result> DeleteCartItemAsync(DeleteCartItemRequest request, CancellationToken cancellationToken) =>
+        ExecuteWithLoggingAsync(request, () => inner.DeleteCartItemAsync(request, cancellationToken));
 
     public Task<Result> ClearCartAsync(Guid userId, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync("ClearCartRequest", () => inner.ClearCartAsync(userId, cancellationToken));

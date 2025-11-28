@@ -13,7 +13,8 @@ public sealed class ProductFaker : Faker<Product>
         RuleFor(p => p.Description, f => f.Commerce.ProductDescription());
         RuleFor(p => p.Price, f => Math.Round(f.Random.Decimal(10m, 10_000m), 2));
         RuleFor(p => p.Discount, f => Math.Round(f.Random.Decimal(0m, 0.99m), 2));
-        RuleFor(p => p.Rating, f => Math.Round(f.Random.Double(0, 5), 1));
+        RuleFor(p => p.Rating, f => 0);
+        RuleFor(p => p.ReviewCount, f => 0);
         RuleFor(p => p.StockQuantity, f => f.Random.Int(10, 100));
     }
 }

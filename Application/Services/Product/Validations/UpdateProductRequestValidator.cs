@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Application.Services.Product.Validations;
 
-public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequest>
+public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequestBody>
 {
     private readonly IBrandRepository _brandRepository;
     private readonly ICategoryRepository _categoryRepository;

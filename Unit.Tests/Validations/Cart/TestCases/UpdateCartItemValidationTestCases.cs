@@ -2,11 +2,6 @@
 
 public static class UpdateCartItemValidationTestCases
 {
-    public static IEnumerable<object[]> InvalidProductIdCases()
-    {
-        yield return [Guid.Empty];
-    }
-
     public static IEnumerable<object[]> InvalidQuantityCases()
     {
         yield return [0];

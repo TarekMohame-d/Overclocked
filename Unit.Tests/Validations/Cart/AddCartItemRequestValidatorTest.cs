@@ -9,38 +9,19 @@ namespace Unit.Tests.Validations.Cart;
 public class AddCartItemRequestValidatorTest
 {
     [Theory]
-    [MemberData(
-        nameof(AddCartItemValidationTestCases.InvalidProductIdCases),
-        MemberType = typeof(AddCartItemValidationTestCases)
-    )]
-    public async Task AddCartItemRequestValidator_Should_ReturnError_When_ProductIdIsInvalid(Guid? productId)
-    {
-        // Arrange
-        var validator = new AddCartItemRequestValidator();
-        var request = new AddCartItemRequest { ProductId = (Guid)productId!, Quantity = 1 };
-
-        // Act
-        TestValidationResult<AddCartItemRequest> result = await validator.TestValidateAsync(request);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldNotBeEmpty();
-        result.ShouldHaveValidationErrorFor(x => x.ProductId).Only();
-    }
-
-    [Theory]
-    [MemberData(
-        nameof(AddCartItemValidationTestCases.InvalidQuantityCases),
-        MemberType = typeof(AddCartItemValidationTestCases)
-    )]
+    [MemberData(nameof(AddCartItemValidationTestCases.InvalidQuantityCases), MemberType = typeof(AddCartItemValidationTestCases))]
     public async Task AddCartItemRequestValidator_Should_ReturnError_When_QuantityIsInvalid(int? quantity)
     {
         // Arrange
         var validator = new AddCartItemRequestValidator();
-        var request = new AddCartItemRequest { ProductId = Guid.NewGuid(), Quantity = (int)quantity! };
+        var request = new AddCartItemRequestBody
+        {
+            ProductId = Guid.NewGuid(),
+            Quantity = (int)quantity!
+        };
 
         // Act
-        TestValidationResult<AddCartItemRequest> result = await validator.TestValidateAsync(request);
+        TestValidationResult<AddCartItemRequestBody> result = await validator.TestValidateAsync(request);
 
         // Assert
         result.IsValid.ShouldBeFalse();

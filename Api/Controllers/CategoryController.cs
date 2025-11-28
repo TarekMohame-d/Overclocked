@@ -50,21 +50,21 @@ public class CategoryController(ICategoryService categoryServices) : ControllerB
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPut]
-    [ServiceFilter(typeof(ValidationActionAttribute<UpdateCategoryRequest>))]
+    [ServiceFilter(typeof(ValidationActionAttribute<UpdateCategoryRequestBody>))]
     [Route(CategoryRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,
-        [FromBody] UpdateCategoryRequestBody request,
+        [FromBody] UpdateCategoryRequestBody requestBody,
         CancellationToken cancellationToken)
     {
-        UpdateCategoryRequest updateCategoryRequest = new()
+        UpdateCategoryRequest request = new()
         {
             Id = id,
-            Name = request.Name,
-            ImageUrl = request.ImageUrl,
+            Name = requestBody.Name,
+            ImageUrl = requestBody.ImageUrl,
         };
 
-        Result response = await categoryServices.UpdateCategoryAsync(updateCategoryRequest, cancellationToken);
+        Result response = await categoryServices.UpdateCategoryAsync(request, cancellationToken);
 
         return response.ToActionResult();
     }

@@ -1,6 +1,6 @@
 namespace Unit.Tests.Validations.Tag.TestCases;
 
-public class CreateTagValidationTestCases
+public static class CreateTagValidationTestCases
 {
     public static IEnumerable<object[]> InvalidNameCases()
     {

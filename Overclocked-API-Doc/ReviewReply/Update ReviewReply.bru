@@ -1,0 +1,28 @@
+meta {
+  name: Update ReviewReply
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{host}}/products/:productId/reviews/:reviewId/replies/:replyId
+  body: json
+  auth: inherit
+}
+
+params:path {
+  replyId: 019abadb-cf6a-7015-a2f7-c7c0622d2ec7
+  productId: 019ab5a8-962d-70bf-bfa8-5b4d82968b10
+  reviewId: 019aba53-6796-7f71-8100-1e168f4b5f90
+}
+
+body:json {
+  {
+    "Reply": "Thank you ❤️❤️"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -55,7 +55,7 @@ public class ProductController(IProductService productService) : ControllerBase
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPut]
-    [ServiceFilter(typeof(ValidationActionAttribute<UpdateProductRequest>))]
+    [ServiceFilter(typeof(ValidationActionAttribute<UpdateProductRequestBody>))]
     [Route(ProductRoutes.Update)]
     public async Task<IActionResult> Put(
         [FromRoute] Guid id,

@@ -1,0 +1,16 @@
+meta {
+  name: Get All Categories
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/categories
+  body: none
+  auth: none
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -9,16 +9,15 @@ namespace Application.Services.Wishlist;
 public sealed partial class WishlistService
 {
     public async Task<Result> AddWishlistItemAsync(
-        Guid userId,
         AddWishlistItemRequest request,
         CancellationToken cancellationToken)
     {
         Domain.Entities.Wishlist wishlist =
             await wishlistRepository.SingleOrDefaultAsync(
-                x => x.UserId == userId,
+                x => x.UserId == request.UserId,
                 asNoTracking: false,
                 cancellationToken)
-            ?? throw new WishlistNotFoundException(userId);
+            ?? throw new WishlistNotFoundException(request.UserId);
 
         var productExists = await productRepository
             .AnyAsync(p => p.Id == request.ProductId, cancellationToken: cancellationToken);

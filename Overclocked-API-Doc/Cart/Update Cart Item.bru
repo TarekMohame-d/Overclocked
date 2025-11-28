@@ -1,0 +1,26 @@
+meta {
+  name: Update Cart Item
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{host}}/cart/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 019ab5a8-962d-70bf-bfa8-5b4d82968b10
+}
+
+body:json {
+  {
+    "quantity": 2
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

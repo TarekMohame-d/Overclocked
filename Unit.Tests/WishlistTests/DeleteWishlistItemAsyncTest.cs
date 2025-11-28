@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Services.Wishlist;
+using Application.Services.Wishlist.DTOs.Request;
 using Domain.Entities;
 using Domain.Exceptions;
 using NSubstitute;
@@ -36,7 +37,13 @@ public class DeleteWishlistItemAsyncTest
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var productId = Guid.NewGuid();
+        var wishlistItemId = Guid.NewGuid();
+
+        var request = new DeleteWishlistItemRequest
+        {
+            WishlistItemId = wishlistItemId,
+            UserId = userId
+        };
 
         _wishlistRepositoryMock.SingleOrDefaultAsync(
                 Arg.Any<Expression<Func<Wishlist, bool>>>(),
@@ -45,7 +52,7 @@ public class DeleteWishlistItemAsyncTest
 
         // Act
         Exception exception = await Should.ThrowAsync<Exception>(async () =>
-            await _wishlistService.DeleteWishlistItemAsync(userId, productId, CancellationToken.None));
+            await _wishlistService.DeleteWishlistItemAsync(request, CancellationToken.None));
 
         // Assert
         exception.ShouldNotBeNull();
@@ -58,7 +65,14 @@ public class DeleteWishlistItemAsyncTest
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var productId = Guid.NewGuid();
+        var wishlistItemId = Guid.NewGuid();
+
+        var request = new DeleteWishlistItemRequest
+        {
+            WishlistItemId = wishlistItemId,
+            UserId = userId
+        };
+
         var wishlist = new Wishlist { UserId = userId };
 
         _wishlistRepositoryMock
@@ -73,7 +87,7 @@ public class DeleteWishlistItemAsyncTest
             .Returns(1);
 
         // Act
-        Result result = await _wishlistService.DeleteWishlistItemAsync(userId, productId, CancellationToken.None);
+        Result result = await _wishlistService.DeleteWishlistItemAsync(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

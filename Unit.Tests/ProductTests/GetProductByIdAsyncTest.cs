@@ -1,10 +1,12 @@
 using System.Net;
+using Application.Abstraction.DomainServices;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
 using Application.Common.Results;
 using Application.Services.Product;
 using Application.Services.Product.DTOs.Request;
 using Application.Services.Product.DTOs.Response;
+using Application.Services.Review.DTOs.Response;
 using ArchitectureTests.FakeData;
 using Domain.Entities;
 using MockQueryable;
@@ -15,16 +17,24 @@ namespace Unit.Tests.ProductTests;
 
 public class GetProductByIdAsyncTest
 {
+    private readonly IEventDispatcher _eventDispatcherMock;
     private readonly IProductRepository _productRepositoryMock;
+    private readonly IReviewService _reviewServiceMock;
     private readonly ProductService _productService;
+    private readonly IUnitOfWork _unitOfWorkMock;
 
     public GetProductByIdAsyncTest()
     {
         _productRepositoryMock = Substitute.For<IProductRepository>();
+        _reviewServiceMock = Substitute.For<IReviewService>();
+        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+        _eventDispatcherMock = Substitute.For<IEventDispatcher>();
+
         _productService = new ProductService(
             _productRepositoryMock,
-            Substitute.For<IUnitOfWork>(),
-            Substitute.For<IEventDispatcher>());
+            _reviewServiceMock,
+            _unitOfWorkMock,
+            _eventDispatcherMock);
     }
 
     [Fact]
@@ -55,6 +65,9 @@ public class GetProductByIdAsyncTest
         _productRepositoryMock.Query()
             .Returns(mockQueryable);
 
+        _reviewServiceMock.GetReviewRatingBreakdownAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(Substitute.For<Result<RatingBreakdownResponse>>());
+
         var request = new GetProductByIdRequest { Id = products[0].Id };
 
         // Act
@@ -66,6 +79,9 @@ public class GetProductByIdAsyncTest
 
         _productRepositoryMock.Received(1)
             .Query();
+
+        await _reviewServiceMock.Received(1)
+            .GetReviewRatingBreakdownAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

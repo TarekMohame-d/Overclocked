@@ -6,6 +6,7 @@ using Application.Services.Brand.Decorators;
 using Application.Services.Cart.Decorators;
 using Application.Services.Category.Decorators;
 using Application.Services.Product.Decorators;
+using Application.Services.Review.Decorators;
 using Application.Services.Tag.Decorators;
 using Application.Services.Wishlist.Decorators;
 using FluentValidation;
@@ -70,6 +71,7 @@ public static class DependencyInjection
         services.Decorate<IAuthenticationService, LoggingAuthenticationServiceDecorator>();
         services.Decorate<ICartService, LoggingCartServiceDecorator>();
         services.Decorate<IWishlistService, LoggingWishlistServiceDecorator>();
+        services.Decorate<IReviewService, LoggingReviewServiceDecorator>();
 
         return services;
     }

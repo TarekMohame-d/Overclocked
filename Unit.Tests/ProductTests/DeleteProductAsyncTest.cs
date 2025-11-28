@@ -1,4 +1,5 @@
 using System.Net;
+using Application.Abstraction.DomainServices;
 using Application.Abstraction.Messaging;
 using Application.Abstraction.Repositories;
 using Application.Common.Results;
@@ -16,16 +17,22 @@ public class DeleteProductAsyncTest
 {
     private readonly IEventDispatcher _eventDispatcherMock;
     private readonly IProductRepository _productRepositoryMock;
+    private readonly IReviewService _reviewServiceMock;
     private readonly ProductService _productService;
     private readonly IUnitOfWork _unitOfWorkMock;
 
     public DeleteProductAsyncTest()
     {
         _productRepositoryMock = Substitute.For<IProductRepository>();
+        _reviewServiceMock = Substitute.For<IReviewService>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _eventDispatcherMock = Substitute.For<IEventDispatcher>();
 
-        _productService = new ProductService(_productRepositoryMock, _unitOfWorkMock, _eventDispatcherMock);
+        _productService = new ProductService(
+            _productRepositoryMock,
+            _reviewServiceMock,
+            _unitOfWorkMock,
+            _eventDispatcherMock);
     }
 
     [Fact]

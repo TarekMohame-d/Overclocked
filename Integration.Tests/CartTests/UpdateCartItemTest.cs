@@ -37,7 +37,9 @@ public class UpdateCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
         StringContent form = CreateJsonContent(product.Id, 4);
 
         // Act
-        HttpResponseMessage response = await _client.PutAsync(CartRoutes.UpdateCartItem, form);
+        HttpResponseMessage response = await _client.PutAsync(CartRoutes.UpdateCartItem.Replace(
+            "{id:guid}",
+            cart.CartItems.First().Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -48,8 +50,7 @@ public class UpdateCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         CartItem? cartItem = await dbContext.CartItems.SingleOrDefaultAsync(x =>
-            x.CartId == cart.Id && x.ProductId == product.Id
-        );
+            x.CartId == cart.Id && x.ProductId == product.Id);
 
         cartItem.ShouldNotBeNull();
         cartItem.Quantity.ShouldBe(4);
@@ -73,7 +74,9 @@ public class UpdateCartItemTest(CustomWebApplicationFactory factory) : IAsyncLif
         StringContent form = CreateJsonContent(product.Id, 20);
 
         // Act
-        HttpResponseMessage response = await _client.PutAsync(CartRoutes.UpdateCartItem, form);
+        HttpResponseMessage response = await _client.PutAsync(CartRoutes.UpdateCartItem.Replace(
+            "{id:guid}",
+            cart.CartItems.First().Id.ToString()), form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
