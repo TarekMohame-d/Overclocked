@@ -121,3 +121,4 @@ configs.json
 *.env
 .env*
 .devcontainer/logs/*.txt
+GEMINI.md

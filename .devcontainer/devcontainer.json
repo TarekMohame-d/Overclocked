@@ -36,7 +36,10 @@
                 "ryanluker.vscode-coverage-gutters",
                 "sidp.strict-whitespace",
                 "jongrant.csharpsortusings",
-                "pflannery.vscode-versionlens"
+                "pflannery.vscode-versionlens",
+                "jesschadwick.nuget-reverse-package-search",
+                "redhat.vscode-xml",
+                "yzhang.markdown-all-in-one"
             ]
         }
     }
