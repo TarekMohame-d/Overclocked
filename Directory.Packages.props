@@ -5,7 +5,8 @@
     <!--.NET 9 packages. Most of them will work on .NET 8. If you need to, make the updates here individually.-->
     <ItemGroup>
         <!-- Static code analysis -->
-        <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.12.0.118525" />
+        <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.12.0.118525" />
+        <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
         <!-- Application -->
         <PackageVersion Include="Scrutor" Version="6.1.0" />
         <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
@@ -13,8 +14,6 @@
         <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
         <PackageVersion Include="Serilog" Version="4.3.0" />
         <PackageVersion Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
-        <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.21" />
-        <PackageVersion Include="Hangfire.PostgreSql" Version="1.20.12" />
         <!-- Infrastructure -->
         <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9" />
         <PackageVersion Include="CloudinaryDotNet" Version="1.27.7" />
@@ -23,6 +22,8 @@
         <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
         <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.9" />
         <PackageVersion Include="MailKit" Version="4.14.1" />
+        <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.21" />
+        <PackageVersion Include="Hangfire.PostgreSql" Version="1.20.12" />
         <!-- Web.Api -->
         <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
         <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9" />
