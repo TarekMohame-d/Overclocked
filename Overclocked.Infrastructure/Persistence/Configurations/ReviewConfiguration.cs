@@ -1,0 +1,108 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Overclocked.Domain.ProductsAggregate;
+using Overclocked.Domain.ProductsAggregate.ValueObjects;
+using Overclocked.Domain.ReviewAggregate;
+using Overclocked.Domain.ReviewAggregate.Entities;
+using Overclocked.Domain.ReviewAggregate.ValueObjects;
+using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.UserAggregate.ValueObjects;
+
+namespace Overclocked.Infrastructure.Persistence.Configurations;
+
+public class ReviewConfiguration : IEntityTypeConfiguration<Review>
+{
+    public void Configure(EntityTypeBuilder<Review> builder)
+    {
+        builder.ToTable("Reviews");
+
+        builder.HasKey(r => r.Id);
+        builder.Property(r => r.Id)
+            .ValueGeneratedNever()
+            .HasConversion(
+                id => id.Value,
+                value => ReviewId.Create(value))
+            .IsRequired();
+
+        builder.Property(r => r.UserId)
+            .HasConversion(
+                id => id.Value,
+                value => UserId.Create(value))
+            .IsRequired();
+
+        builder.Property(r => r.ProductId)
+            .HasConversion(
+                id => id.Value,
+                value => ProductId.Create(value))
+            .IsRequired();
+
+        builder.Property(r => r.Comment)
+            .HasMaxLength(500)
+            .IsRequired();
+
+        builder.Property(r => r.Rating)
+            .IsRequired();
+
+        builder.Property(r => r.CreatedAt)
+            .HasColumnType("timestamptz")
+            .IsRequired();
+
+        builder.Property(r => r.UpdatedAt)
+            .HasColumnType("timestamptz")
+            .IsRequired();
+
+        // Relationships
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne<Product>()
+            .WithMany()
+            .HasForeignKey(r => r.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.OwnsOne(r => r.ReviewReply, reviewReplyBuilder =>
+        {
+            reviewReplyBuilder.ToTable("ReviewReplies");
+
+            reviewReplyBuilder.WithOwner().HasForeignKey("ReviewId"); // shadow property
+
+            reviewReplyBuilder.HasKey(rr => rr.Id);
+            reviewReplyBuilder.Property(rr => rr.Id)
+                .ValueGeneratedNever()
+                .HasConversion(
+                    id => id.Value,
+                    value => ReviewReplyId.Create(value))
+                .IsRequired();
+
+            reviewReplyBuilder.Property(rr => rr.EmployeeId)
+                .HasConversion(
+                    id => id.Value,
+                    value => UserId.Create(value))
+                .IsRequired();
+
+            reviewReplyBuilder.Property(rr => rr.Reply)
+                .HasMaxLength(500)
+                .IsRequired();
+
+            reviewReplyBuilder.Property(rr => rr.CreatedAt)
+                .HasColumnType("timestamptz")
+                .IsRequired();
+
+            reviewReplyBuilder.Property(rr => rr.UpdatedAt)
+                .HasColumnType("timestamptz")
+                .IsRequired();
+
+            reviewReplyBuilder.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(rr => rr.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Indexes
+        builder.HasIndex(r => r.UserId);
+        builder.HasIndex(r => r.ProductId);
+        builder.HasIndex(r => r.Rating);
+    }
+}
