@@ -53,7 +53,10 @@ public class ResendConfirmationCodeCommandHandlerTest
     public async Task ResendConfirmationCodeCommandHandler_Should_ReturnSuccess_When_EmailNotExist()
     {
         // Arrange
-        var command = new ResendEmailConfirmationCodeCommand("email@gmail.com");
+        var command = new ResendEmailConfirmationCodeCommand
+        {
+            Email = "email@gmail.com"
+        };
 
         _userRepositoryMock.GetByEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((User)null!);
@@ -74,7 +77,10 @@ public class ResendConfirmationCodeCommandHandlerTest
     public async Task ResendConfirmationCodeCommandHandler_Should_ReturnFailure_When_EmailAlreadyConfirmed()
     {
         // Arrange
-        var command = new ResendEmailConfirmationCodeCommand("email@gmail.com");
+        var command = new ResendEmailConfirmationCodeCommand
+        {
+            Email = "email@gmail.com"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
         user.ConfirmEmail();
@@ -100,7 +106,10 @@ public class ResendConfirmationCodeCommandHandlerTest
     public async Task ResendConfirmationCodeCommandHandler_Should_CreateAndReturnSuccess_When_AllIsValid()
     {
         // Arrange
-        var command = new ResendEmailConfirmationCodeCommand("email@gmail.com");
+        var command = new ResendEmailConfirmationCodeCommand
+        {
+            Email = "email@gmail.com"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 

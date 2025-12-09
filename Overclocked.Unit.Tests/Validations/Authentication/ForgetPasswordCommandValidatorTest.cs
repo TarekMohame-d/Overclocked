@@ -15,7 +15,10 @@ public class ForgetPasswordCommandValidatorTest
     {
         // Arrange
         var validator = new ForgetPasswordCommandValidator();
-        var request = new ForgetPasswordCommand(email!);
+        var request = new ForgetPasswordCommand
+        {
+            Email = email!
+        };
 
         // Act
         TestValidationResult<ForgetPasswordCommand> result = validator.TestValidate(request);

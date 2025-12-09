@@ -60,7 +60,12 @@ public sealed partial class AuthenticationCommands
 
         DateTime expiredAt = user.CreateRefreshToken(claims.Value.deviceId, refreshTokenHash);
 
-        var authResponse = new AuthResponse(accessToken, refreshToken, expiredAt);
+        var authResponse = new AuthResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            ExpiredAt = expiredAt
+        };
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -21,12 +21,14 @@ public class AuthController(IAuthenticationCommands authenticationCommands) : Co
     [Route(AuthRoutes.Register)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        var command = new RegisterCommand(
-            request.Email,
-            request.Password,
-            request.FirstName,
-            request.LastName,
-            request.PhoneNumber);
+        var command = new RegisterCommand
+        {
+            Email = request.Email,
+            Password = request.Password,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            PhoneNumber = request.PhoneNumber
+        };
 
         Result response = await authenticationCommands.RegisterCommandHandler(command, cancellationToken);
 
@@ -39,7 +41,11 @@ public class AuthController(IAuthenticationCommands authenticationCommands) : Co
         [FromBody] ConfirmEmailRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new ConfirmEmailCommand(request.Email, request.Code);
+        var command = new ConfirmEmailCommand
+        {
+            Email = request.Email,
+            Code = request.Code
+        };
 
         Result response = await authenticationCommands.ConfirmEmailCommandHandler(command, cancellationToken);
 
@@ -50,7 +56,12 @@ public class AuthController(IAuthenticationCommands authenticationCommands) : Co
     [Route(AuthRoutes.Login)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        var command = new LoginCommand(request.Email, request.Password, request.DeviceId);
+        var command = new LoginCommand
+        {
+            Email = request.Email,
+            Password = request.Password,
+            DeviceId = request.DeviceId
+        };
 
         Result<AuthResponse> response = await authenticationCommands.LoginCommandHandler(command, cancellationToken);
 
@@ -63,7 +74,10 @@ public class AuthController(IAuthenticationCommands authenticationCommands) : Co
         [FromBody] ResendEmailConfirmationCodeRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new ResendEmailConfirmationCodeCommand(request.Email);
+        var command = new ResendEmailConfirmationCodeCommand
+        {
+            Email = request.Email
+        };
 
         Result response = await authenticationCommands.ResendConfirmationCodeCommandHandler(command, cancellationToken);
 
@@ -76,7 +90,10 @@ public class AuthController(IAuthenticationCommands authenticationCommands) : Co
         [FromBody] ForgetPasswordRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new ForgetPasswordCommand(request.Email);
+        var command = new ForgetPasswordCommand
+        {
+            Email = request.Email
+        };
 
         Result response = await authenticationCommands.ForgetPasswordCommandHandler(command, cancellationToken);
 
@@ -89,7 +106,12 @@ public class AuthController(IAuthenticationCommands authenticationCommands) : Co
         [FromBody] ResetPasswordRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new ResetPasswordCommand(request.Email, request.Password, request.Code);
+        var command = new ResetPasswordCommand
+        {
+            Email = request.Email,
+            Password = request.Password,
+            Code = request.Code
+        };
 
         Result response = await authenticationCommands.ResetPasswordCommandHandler(command, cancellationToken);
 
@@ -102,7 +124,11 @@ public class AuthController(IAuthenticationCommands authenticationCommands) : Co
         [FromBody] RefreshTokenRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new RefreshTokenCommand(request.AccessToken, request.RefreshToken);
+        var command = new RefreshTokenCommand
+        {
+            AccessToken = request.AccessToken,
+            RefreshToken = request.RefreshToken
+        };
 
         Result<AuthResponse> response = await authenticationCommands
             .RefreshTokenCommandHandler(command, cancellationToken);

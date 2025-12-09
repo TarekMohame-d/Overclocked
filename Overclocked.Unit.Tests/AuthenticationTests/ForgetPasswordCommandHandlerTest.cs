@@ -52,7 +52,10 @@ public class ForgetPasswordCommandHandlerTest
     public async Task ForgetPasswordCommandHandler_Should_ReturnSuccess_When_UserNotExist()
     {
         // Arrange
-        var command = new ForgetPasswordCommand("email@gmail.com");
+        var command = new ForgetPasswordCommand
+        {
+            Email = "email@gmail.com"
+        };
 
         _userRepositoryMock.GetByEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((User)null!);
@@ -73,7 +76,10 @@ public class ForgetPasswordCommandHandlerTest
     public async Task ForgetPasswordCommandHandler_Should_ReturnSuccess_When_AllDataValid()
     {
         // Arrange
-        var command = new ForgetPasswordCommand("email@gmail.com");
+        var command = new ForgetPasswordCommand
+        {
+            Email = "email@gmail.com"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 

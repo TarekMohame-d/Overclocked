@@ -53,7 +53,12 @@ public class ResetPasswordCommandHandlerTest
     public async Task ResetPasswordCommandHandler_Should_ReturnFailure_When_EmailNotExist()
     {
         // Arrange
-        var command = new ResetPasswordCommand("email@gmail.com", "password", "code");
+        var command = new ResetPasswordCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            Code = "VF25G4"
+        };
 
         _userRepositoryMock.GetByEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((User)null!);
@@ -75,7 +80,12 @@ public class ResetPasswordCommandHandlerTest
     public async Task ResetPasswordCommandHandler_Should_ReturnFailure_When_EmailConfirmationCodeExpiredOrUsed()
     {
         // Arrange
-        var command = new ResetPasswordCommand("email@gmail.com", "password", "code");
+        var command = new ResetPasswordCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            Code = "VF25G4"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
         user.ConfirmEmail();
@@ -100,7 +110,12 @@ public class ResetPasswordCommandHandlerTest
     public async Task ResetPasswordCommandHandler_Should_ReturnFailure_When_CodeIsInvalid()
     {
         // Arrange
-        var command = new ResetPasswordCommand("email@gmail.com", "password", "code");
+        var command = new ResetPasswordCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            Code = "VF25G4"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 
@@ -131,7 +146,12 @@ public class ResetPasswordCommandHandlerTest
     public async Task ResetPasswordCommandHandler_Should_ResetPasswordAndReturnSuccess_When_AllIsValid()
     {
         // Arrange
-        var command = new ResetPasswordCommand("email@gmail.com", "password", "code");
+        var command = new ResetPasswordCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            Code = "VF25G4"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 

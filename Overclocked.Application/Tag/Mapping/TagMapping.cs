@@ -7,11 +7,19 @@ public static class TagMapping
 {
     public static TagResponse ToDto(this TagEntity entity)
     {
-        return new(entity.Id, entity.Name);
+        return new()
+        {
+            Id = entity.Id,
+            Name = entity.Name
+        };
     }
 
     public static IEnumerable<TagListResponse> ToDto(this IEnumerable<TagEntity> entities)
     {
-        return entities.Select(x => new TagListResponse(x.Id, x.Name));
+        return entities.Select(x => new TagListResponse
+        {
+            Id = x.Id,
+            Name = x.Name
+        });
     }
 }

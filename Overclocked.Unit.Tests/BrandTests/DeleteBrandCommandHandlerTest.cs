@@ -32,7 +32,10 @@ public class DeleteBrandCommandHandlerTest
     {
         // Arrange
         var brandId = Guid.CreateVersion7();
-        var command = new DeleteBrandCommand(BrandId.Create(brandId));
+        var command = new DeleteBrandCommand
+        {
+            Id = brandId
+        };
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>())
             .Returns((Brand)null!);
@@ -55,7 +58,10 @@ public class DeleteBrandCommandHandlerTest
     {
         // Arrange
         var brandId = Guid.CreateVersion7();
-        var command = new DeleteBrandCommand(BrandId.Create(brandId));
+        var command = new DeleteBrandCommand
+        {
+            Id = brandId
+        };
 
         Brand brand = new BrandFaker().Generate();
 

@@ -1,19 +1,16 @@
-using static Overclocked.Contracts.Product.CreateProductRequest;
-
 namespace Overclocked.Contracts.Product;
 
-public record CreateProductRequest(
-    Guid BrandId,
-    Guid CategoryId,
-    string Name,
-    string Thumbnail,
-    string Description,
-    decimal Price,
-    int StockQuantity,
-    decimal? Discount,
-    IEnumerable<Guid> Tags,
-    IEnumerable<string>? Images,
-    IEnumerable<Specs> Specification)
+public record CreateProductRequest
 {
-    public record Specs(string Name, string Value);
+    public required Guid BrandId { get; init; }
+    public required Guid CategoryId { get; init; }
+    public required string Name { get; init; }
+    public required string Thumbnail { get; init; }
+    public required string Description { get; init; }
+    public required decimal Price { get; init; }
+    public required int StockQuantity { get; init; }
+    public decimal? Discount { get; init; }
+    public required IEnumerable<Guid> Tags { get; init; }
+    public required IEnumerable<ProductSpecificationDto> Specifications { get; init; }
+    public IEnumerable<string>? Images { get; init; }
 }

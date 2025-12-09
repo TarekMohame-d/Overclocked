@@ -31,18 +31,20 @@ public class CreateProductAsyncTest
     public async Task CreateProductCommandHandler_Should_ReturnSuccess_When_ThereIsNoError()
     {
         // Arrange
-        var command = new CreateProductCommand(
-            BrandId: Guid.NewGuid(),
-            CategoryId: Guid.NewGuid(),
-            Name: "Product Name",
-            Thumbnail: "Thumbnail",
-            Description: "Description",
-            Price: 7200,
-            StockQuantity: 45,
-            Discount: 0.0m,
-            Tags: [Guid.NewGuid()],
-            Images: null,
-            Specification: [new CreateProductCommand.Specs("Name", "Value")]);
+        var command = new CreateProductCommand
+        {
+            BrandId = Guid.NewGuid(),
+            CategoryId = Guid.NewGuid(),
+            Name = "Product Name",
+            Thumbnail = "Thumbnail",
+            Description = "Description",
+            Price = 7200,
+            StockQuantity = 45,
+            Discount = 0.0m,
+            Tags = [Guid.NewGuid()],
+            Images = null,
+            Specifications = [("Name", "Value")]
+        };
 
         Product product = new ProductFaker(Guid.NewGuid(), Guid.NewGuid()).Generate();
 

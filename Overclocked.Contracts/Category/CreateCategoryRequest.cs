@@ -1,3 +1,7 @@
 namespace Overclocked.Contracts.Category;
 
-public record CreateCategoryRequest(string Name, string ImageUrl);
+public record CreateCategoryRequest
+{
+    public required string Name { get; init; }
+    public required string ImageUrl { get; init; }
+}

@@ -21,7 +21,11 @@ public class CreateBrandCommandValidatorTest
     {
         // Arrange
         var validator = new CreateBrandCommandValidator(_brandRepositoryMock);
-        var command = new CreateBrandCommand(name!, "https://res.cloudinary.com/over-clocked/image.png");
+        var command = new CreateBrandCommand
+        {
+            Name = name!,
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _brandRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -45,7 +49,11 @@ public class CreateBrandCommandValidatorTest
     {
         // Arrange
         var validator = new CreateBrandCommandValidator(_brandRepositoryMock);
-        var command = new CreateBrandCommand("Brand Name", imageUrl!);
+        var command = new CreateBrandCommand
+        {
+            Name = "Brand Name",
+            ImageUrl = imageUrl!
+        };
 
         _brandRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -66,7 +74,11 @@ public class CreateBrandCommandValidatorTest
     {
         // Arrange
         var validator = new CreateBrandCommandValidator(_brandRepositoryMock);
-        var command = new CreateBrandCommand("Brand Name", "https://res.cloudinary.com/over-clocked/image.png");
+        var command = new CreateBrandCommand
+        {
+            Name = "Brand Name",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _brandRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -87,7 +99,11 @@ public class CreateBrandCommandValidatorTest
     {
         // Arrange
         var validator = new CreateBrandCommandValidator(_brandRepositoryMock);
-        var command = new CreateBrandCommand(string.Empty, "imageUrl");
+        var command = new CreateBrandCommand
+        {
+            Name = string.Empty,
+            ImageUrl = "imageUrl"
+        };
 
         _brandRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -107,7 +123,11 @@ public class CreateBrandCommandValidatorTest
     {
         // Arrange
         var validator = new CreateBrandCommandValidator(_brandRepositoryMock);
-        var command = new CreateBrandCommand("Brand Name", "https://res.cloudinary.com/over-clocked/image.png");
+        var command = new CreateBrandCommand
+        {
+            Name = "Brand Name",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _brandRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<BrandEntity, bool>>>(), Arg.Any<CancellationToken>())

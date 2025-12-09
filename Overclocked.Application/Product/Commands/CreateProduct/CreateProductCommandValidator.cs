@@ -153,7 +153,7 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
 
     private void ValidateSpecification()
     {
-        RuleFor(x => x.Specification)
+        RuleFor(x => x.Specifications)
             .Custom(
                 (specs, context) =>
                 {

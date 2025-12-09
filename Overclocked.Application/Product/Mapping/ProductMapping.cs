@@ -1,5 +1,4 @@
 using Overclocked.Application.Product.Commands.CreateProduct;
-using Overclocked.Contracts.Product;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.ProductAggregate.Entities;
@@ -24,12 +23,12 @@ public static class ProductMapping
             discount: command.Discount is null ? Money.Zero : Money.Create((decimal)command.Discount),
             stock: command.StockQuantity,
             images: CreateProductImages(command.Images),
-            specifications: CreateSpecifications(command.Specification),
+            specifications: CreateSpecifications(command.Specifications),
             tags: CreateProductTags(command.Tags)
         );
     }
 
-    private static IEnumerable<Specification> CreateSpecifications(IEnumerable<CreateProductCommand.Specs> specs)
+    private static IEnumerable<Specification> CreateSpecifications(IEnumerable<(string Name, string Value)> specs)
     {
         return specs.Select(x => Specification.Create(SpecificationId.Create(), x.Name, x.Value));
     }

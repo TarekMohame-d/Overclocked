@@ -22,7 +22,10 @@ public class CreateTagCommandValidatorTest
         // Arrange
         var validator = new CreateTagCommandValidator(_tagRepositoryMock);
 
-        var command = new CreateTagCommand(name!);
+        var command = new CreateTagCommand
+        {
+            Name = name!
+        };
 
         _tagRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -43,7 +46,10 @@ public class CreateTagCommandValidatorTest
         // Arrange
         var validator = new CreateTagCommandValidator(_tagRepositoryMock);
 
-        var command = new CreateTagCommand("Tag Name");
+        var command = new CreateTagCommand
+        {
+            Name = "Tag Name"
+        };
 
         _tagRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), Arg.Any<CancellationToken>())

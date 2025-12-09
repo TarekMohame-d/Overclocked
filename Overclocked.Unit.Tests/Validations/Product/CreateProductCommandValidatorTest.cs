@@ -43,7 +43,7 @@ public class CreateProductCommandValidatorTest
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -72,7 +72,7 @@ public class CreateProductCommandValidatorTest
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -105,7 +105,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value], name: name!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -135,7 +135,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -168,7 +168,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
@@ -204,7 +204,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
@@ -240,7 +240,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
@@ -276,7 +276,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
@@ -312,7 +312,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
@@ -348,7 +348,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
@@ -384,7 +384,7 @@ public class CreateProductCommandValidatorTest
         IEnumerable<TagEntity> tagEntities = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<CreateProductCommand.Specs> specs = [new("Name", "Value")];
+        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
             tags: tags);
@@ -414,7 +414,7 @@ public class CreateProductCommandValidatorTest
         nameof(CreateProductValidationTestCases.InvalidSpecificationsCases),
         MemberType = typeof(CreateProductValidationTestCases))]
     public async Task CreateProductCommandValidator_Should_HaveError_When_Specifications_Is_Invalid(
-        IEnumerable<CreateProductCommand.Specs> specs)
+        IEnumerable<(string Name, string Value)> specs)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
@@ -445,7 +445,7 @@ public class CreateProductCommandValidatorTest
     }
 
     private static CreateProductCommand CreateProductCommand(
-        IEnumerable<CreateProductCommand.Specs>? specs = null,
+        IEnumerable<(string Name, string Value)>? specs = null,
         IEnumerable<Guid>? tags = null,
         IEnumerable<string>? images = null,
         Guid? brandId = null,
@@ -457,17 +457,19 @@ public class CreateProductCommandValidatorTest
         decimal discount = 0m,
         int stock = 10)
     {
-        return new CreateProductCommand(
-            brandId ?? Guid.NewGuid(),
-            categoryId ?? Guid.NewGuid(),
-            name,
-            thumbnail,
-            description,
-            price,
-            stock,
-            discount,
-            tags ?? [],
-            images ?? [],
-            specs ?? []);
+        return new CreateProductCommand
+        {
+            BrandId = brandId ?? Guid.NewGuid(),
+            CategoryId = categoryId ?? Guid.NewGuid(),
+            Name = name,
+            Thumbnail = thumbnail,
+            Description = description,
+            Price = price,
+            StockQuantity = stock,
+            Discount = discount,
+            Tags = tags ?? [],
+            Images = images ?? [],
+            Specifications = specs ?? []
+        };
     }
 }

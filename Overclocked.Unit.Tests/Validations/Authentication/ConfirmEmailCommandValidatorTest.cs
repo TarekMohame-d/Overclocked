@@ -15,7 +15,11 @@ public class ConfirmEmailCommandValidatorTest
     {
         // Arrange
         var validator = new ConfirmEmailCommandValidator();
-        var request = new ConfirmEmailCommand(email!, "VC74A1");
+        var request = new ConfirmEmailCommand
+        {
+            Email = email!,
+            Code = "VC74A1"
+        };
 
         // Act
         TestValidationResult<ConfirmEmailCommand> result = validator.TestValidate(request);
@@ -34,7 +38,11 @@ public class ConfirmEmailCommandValidatorTest
     {
         // Arrange
         var validator = new ConfirmEmailCommandValidator();
-        var request = new ConfirmEmailCommand("email@gmail.com", code!);
+        var request = new ConfirmEmailCommand
+        {
+            Email = "email@gmail.com",
+            Code = code!
+        };
 
         // Act
         TestValidationResult<ConfirmEmailCommand> result = validator.TestValidate(request);

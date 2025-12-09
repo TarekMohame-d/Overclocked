@@ -16,7 +16,11 @@ public class UpdateTagCommandValidatorTest
     {
         // Arrange
         var tagId = TagId.Create();
-        var request = new UpdateTagCommand(tagId, name!);
+        var request = new UpdateTagCommand
+        {
+            Id = tagId,
+            Name = name!
+        };
 
         var validator = new UpdateTagCommandValidator();
 

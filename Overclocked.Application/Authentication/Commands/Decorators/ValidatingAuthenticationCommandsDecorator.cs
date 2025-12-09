@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.Extensions.DependencyInjection;
 using Overclocked.Application.Authentication.Commands.ConfirmEmail;
 using Overclocked.Application.Authentication.Commands.ForgetPassword;
 using Overclocked.Application.Authentication.Commands.Login;
@@ -12,33 +13,25 @@ using Overclocked.Domain.Common.Results;
 
 namespace Overclocked.Application.Authentication.Commands.Decorators;
 
-public class ValidatingAuthenticationCommandsDecorator(IAuthenticationCommands inner,
-        IValidator<RegisterCommand> createValidator,
-        IValidator<ConfirmEmailCommand> confirmEmailValidator,
-        IValidator<LoginCommand> loginValidator,
-        IValidator<ResendEmailConfirmationCodeCommand> resendEmailConfirmationCodeValidator,
-        IValidator<ForgetPasswordCommand> forgetPasswordValidator,
-        IValidator<ResetPasswordCommand> resetPasswordValidator,
-        IValidator<RefreshTokenCommand> refreshTokenValidator) : IAuthenticationCommands
+public class ValidatingAuthenticationCommandsDecorator(
+    IAuthenticationCommands inner,
+    IServiceProvider serviceProvider) : IAuthenticationCommands
 {
     public Task<Result> RegisterCommandHandler(RegisterCommand command, CancellationToken cancellationToken) =>
         ValidateAndExecute(
             command,
-            createValidator,
             () => inner.RegisterCommandHandler(command, cancellationToken),
             cancellationToken);
 
     public Task<Result> ConfirmEmailCommandHandler(ConfirmEmailCommand command, CancellationToken cancellationToken) =>
         ValidateAndExecute(
                 command,
-                confirmEmailValidator,
                 () => inner.ConfirmEmailCommandHandler(command, cancellationToken),
                 cancellationToken);
 
     public Task<Result<AuthResponse>> LoginCommandHandler(LoginCommand command, CancellationToken cancellationToken) =>
         ValidateAndExecute(
             command,
-            loginValidator,
             () => inner.LoginCommandHandler(command, cancellationToken),
             cancellationToken);
 
@@ -47,7 +40,6 @@ public class ValidatingAuthenticationCommandsDecorator(IAuthenticationCommands i
         CancellationToken cancellationToken) =>
             ValidateAndExecute(
                 command,
-                resendEmailConfirmationCodeValidator,
                 () => inner.ResendConfirmationCodeCommandHandler(command, cancellationToken),
                 cancellationToken);
 
@@ -56,7 +48,6 @@ public class ValidatingAuthenticationCommandsDecorator(IAuthenticationCommands i
         CancellationToken cancellationToken) =>
             ValidateAndExecute(
                 command,
-                forgetPasswordValidator,
                 () => inner.ForgetPasswordCommandHandler(command, cancellationToken),
                 cancellationToken);
 
@@ -65,7 +56,6 @@ public class ValidatingAuthenticationCommandsDecorator(IAuthenticationCommands i
         CancellationToken cancellationToken) =>
             ValidateAndExecute(
                 command,
-                resetPasswordValidator,
                 () => inner.ResetPasswordCommandHandler(command, cancellationToken),
                 cancellationToken);
 
@@ -74,16 +64,16 @@ public class ValidatingAuthenticationCommandsDecorator(IAuthenticationCommands i
         CancellationToken cancellationToken) =>
             ValidateAndExecute(
                 command,
-                refreshTokenValidator,
                 () => inner.RefreshTokenCommandHandler(command, cancellationToken),
                 cancellationToken);
 
-    private static async Task<Result> ValidateAndExecute<TCommand>(
+    private async Task<Result> ValidateAndExecute<TCommand>(
         TCommand command,
-        IValidator<TCommand> validator,
         Func<Task<Result>> execute,
         CancellationToken cancellationToken)
     {
+        IValidator<TCommand> validator = serviceProvider.GetService<IValidator<TCommand>>()!;
+
         ValidationResult validationResult = await validator.ValidateAsync(command, cancellationToken);
 
         if(!validationResult.IsValid)
@@ -98,12 +88,13 @@ public class ValidatingAuthenticationCommandsDecorator(IAuthenticationCommands i
         return await execute();
     }
 
-    private static async Task<Result<TValue>> ValidateAndExecute<TCommand, TValue>(
+    private async Task<Result<TValue>> ValidateAndExecute<TCommand, TValue>(
         TCommand command,
-        IValidator<TCommand> validator,
         Func<Task<Result<TValue>>> execute,
         CancellationToken cancellationToken)
     {
+        IValidator<TCommand> validator = serviceProvider.GetService<IValidator<TCommand>>()!;
+
         ValidationResult validationResult = await validator.ValidateAsync(command, cancellationToken);
 
         if(!validationResult.IsValid)

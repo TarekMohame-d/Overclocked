@@ -1,3 +1,7 @@
 namespace Overclocked.Contracts.Authentication;
 
-public record RefreshTokenRequest(string AccessToken, string RefreshToken);
+public record RefreshTokenRequest
+{
+    public required string AccessToken { get; init; }
+    public required string RefreshToken { get; init; }
+}

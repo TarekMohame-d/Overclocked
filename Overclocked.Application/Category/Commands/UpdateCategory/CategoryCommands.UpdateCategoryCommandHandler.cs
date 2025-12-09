@@ -1,5 +1,6 @@
 using System.Net;
 using Overclocked.Application.Category.Commands.UpdateCategory;
+using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Errors;
 using Overclocked.Domain.Common.Results;
 
@@ -12,7 +13,7 @@ public sealed partial class CategoryCommands
         CancellationToken cancellationToken)
     {
         Domain.CategoryAggregate.Category? category = await categoryRepository
-            .SingleOrDefaultAsync(x => x.Id == command.Id, asNoTracking: false, cancellationToken);
+            .SingleOrDefaultAsync(x => x.Id == CategoryId.Create(command.Id), asNoTracking: false, cancellationToken);
 
         if(category is null)
         {

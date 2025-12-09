@@ -79,7 +79,7 @@ public static class CreateProductValidationTestCases
         // Empty or invalid
         yield return
         [
-            new List<CreateProductCommand.Specs>
+            new List<(string Name, string Value)>
             {
                 new(null!, null!),
                 new(string.Empty, string.Empty),
@@ -89,7 +89,7 @@ public static class CreateProductValidationTestCases
         // Too long name and value
         yield return
         [
-            new List<CreateProductCommand.Specs>
+            new List<(string Name, string Value)>
             {
                 new(new string('N', 55), new string('V', 350)),
             },
@@ -98,7 +98,7 @@ public static class CreateProductValidationTestCases
         // Duplicate names
         yield return
         [
-            new List<CreateProductCommand.Specs>
+            new List<(string Name, string Value)>
             {
                 new("Name", "Value"),
                 new("Name", "Another Value"),
@@ -106,6 +106,6 @@ public static class CreateProductValidationTestCases
         ];
 
         // Empty list
-        yield return [new List<CreateProductCommand.Specs>()];
+        yield return [new List<(string Name, string Value)>()];
     }
 }

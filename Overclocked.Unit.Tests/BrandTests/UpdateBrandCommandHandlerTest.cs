@@ -33,7 +33,12 @@ public class UpdateBrandCommandHandlerTest
     {
         // Arrange
         var brandId = Guid.NewGuid();
-        var command = new UpdateBrandCommand(BrandId.Create(brandId), "Brand Name", "image.png");
+        var command = new UpdateBrandCommand
+        {
+            Id = brandId,
+            Name = "Brand Name",
+            ImageUrl = "image.png"
+        };
 
         _brandRepositoryMock.SingleOrDefaultAsync(
             Arg.Any<Expression<Func<Brand, bool>>>(),
@@ -62,7 +67,12 @@ public class UpdateBrandCommandHandlerTest
     {
         // Arrange
         var brandId = Guid.NewGuid();
-        var command = new UpdateBrandCommand(BrandId.Create(brandId), "Brand Name", "image.png");
+        var command = new UpdateBrandCommand
+        {
+            Id = brandId,
+            Name = "Brand Name",
+            ImageUrl = "image.png"
+        };
 
         Brand brand = new BrandFaker().Generate();
 
@@ -104,7 +114,12 @@ public class UpdateBrandCommandHandlerTest
     {
         // Arrange
         var brandId = Guid.NewGuid();
-        var command = new UpdateBrandCommand(BrandId.Create(brandId), "Brand Name", "image.png");
+        var command = new UpdateBrandCommand
+        {
+            Id = brandId,
+            Name = "Brand Name",
+            ImageUrl = "image.png"
+        };
 
         Brand brand = new BrandFaker().Generate();
 
@@ -140,7 +155,12 @@ public class UpdateBrandCommandHandlerTest
     {
         // Arrange
         var brandId = Guid.NewGuid();
-        var command = new UpdateBrandCommand(BrandId.Create(brandId), "Brand Name", "image.png");
+        var command = new UpdateBrandCommand
+        {
+            Id = brandId,
+            Name = "Brand Name",
+            ImageUrl = "image.png"
+        };
 
         Brand brand = new BrandFaker().Generate();
 

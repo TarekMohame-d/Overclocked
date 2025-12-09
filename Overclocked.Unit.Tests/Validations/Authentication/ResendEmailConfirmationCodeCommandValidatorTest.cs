@@ -15,7 +15,10 @@ public class ResendEmailConfirmationCodeCommandValidatorTest
     {
         // Arrange
         var validator = new ResendEmailConfirmationCodeCommandValidator();
-        var request = new ResendEmailConfirmationCodeCommand(email!);
+        var request = new ResendEmailConfirmationCodeCommand
+        {
+            Email = email!
+        };
 
         // Act
         TestValidationResult<ResendEmailConfirmationCodeCommand> result = validator.TestValidate(request);

@@ -1,5 +1,6 @@
 using System.Net;
 using Overclocked.Application.Brand.Commands.UpdateBrand;
+using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.Common.Errors;
 using Overclocked.Domain.Common.Results;
 
@@ -10,7 +11,7 @@ public sealed partial class BrandCommands
     public async Task<Result> UpdateBrandCommandHandler(UpdateBrandCommand command, CancellationToken cancellationToken)
     {
         Domain.BrandAggregate.Brand? brand = await brandRepository
-            .SingleOrDefaultAsync(x => x.Id == command.Id, asNoTracking: false, cancellationToken);
+            .SingleOrDefaultAsync(x => x.Id == BrandId.Create(command.Id), asNoTracking: false, cancellationToken);
 
         if(brand is null)
         {

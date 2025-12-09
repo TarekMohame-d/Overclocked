@@ -1,5 +1,8 @@
-using Overclocked.Domain.CategoryAggregate.ValueObjects;
-
 namespace Overclocked.Application.Category.Commands.UpdateCategory;
 
-public record UpdateCategoryCommand(CategoryId Id, string Name, string ImageUrl);
+public record UpdateCategoryCommand
+{
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
+    public required string ImageUrl { get; init; }
+}

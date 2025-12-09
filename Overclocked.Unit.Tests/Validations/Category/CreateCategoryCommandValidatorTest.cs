@@ -21,7 +21,11 @@ public class CreateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new CreateCategoryCommandValidator(_categoryRepositoryMock);
-        var command = new CreateCategoryCommand(name!, "https://res.cloudinary.com/over-clocked/image.png");
+        var command = new CreateCategoryCommand
+        {
+            Name = name!,
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _categoryRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -45,7 +49,11 @@ public class CreateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new CreateCategoryCommandValidator(_categoryRepositoryMock);
-        var command = new CreateCategoryCommand("Category Name", imageUrl!);
+        var command = new CreateCategoryCommand
+        {
+            Name = "Category Name",
+            ImageUrl = imageUrl!
+        };
 
         _categoryRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -66,7 +74,11 @@ public class CreateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new CreateCategoryCommandValidator(_categoryRepositoryMock);
-        var command = new CreateCategoryCommand("Category Name", "https://res.cloudinary.com/over-clocked/image.png");
+        var command = new CreateCategoryCommand
+        {
+            Name = "Category Name",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _categoryRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -87,7 +99,11 @@ public class CreateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new CreateCategoryCommandValidator(_categoryRepositoryMock);
-        var command = new CreateCategoryCommand(string.Empty, "imageUrl");
+        var command = new CreateCategoryCommand
+        {
+            Name = string.Empty,
+            ImageUrl = "imageUrl"
+        };
 
         _categoryRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -107,7 +123,11 @@ public class CreateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new CreateCategoryCommandValidator(_categoryRepositoryMock);
-        var command = new CreateCategoryCommand("Category Name", "https://res.cloudinary.com/over-clocked/image.png");
+        var command = new CreateCategoryCommand
+        {
+            Name = "Category Name",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         _categoryRepositoryMock
             .AnyAsync(Arg.Any<Expression<Func<CategoryEntity, bool>>>(), Arg.Any<CancellationToken>())

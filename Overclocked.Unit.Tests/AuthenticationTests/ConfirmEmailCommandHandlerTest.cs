@@ -53,7 +53,11 @@ public class ConfirmEmailCommandHandlerTest
     public async Task ConfirmEmailCommandHandler_Should_ReturnFailure_When_EmailNotExist()
     {
         // Arrange
-        var command = new ConfirmEmailCommand("email@gmail.com", "VF25G4");
+        var command = new ConfirmEmailCommand
+        {
+            Email = "email@gmail.com",
+            Code = "VF25G4"
+        };
 
         _userRepositoryMock.GetByEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((User)null!);
@@ -75,7 +79,11 @@ public class ConfirmEmailCommandHandlerTest
     public async Task ConfirmEmailCommandHandler_Should_ReturnFailure_When_EmailIsAlreadyConfirmed()
     {
         // Arrange
-        var command = new ConfirmEmailCommand("email@gmail.com", "VF25G4");
+        var command = new ConfirmEmailCommand
+        {
+            Email = "email@gmail.com",
+            Code = "VF25G4"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 
@@ -101,7 +109,11 @@ public class ConfirmEmailCommandHandlerTest
     public async Task ConfirmEmailCommandHandler_Should_ReturnFailure_When_ConfirmationCodeIsInvalid()
     {
         // Arrange
-        var command = new ConfirmEmailCommand("email@gmail.com", "VF25G4");
+        var command = new ConfirmEmailCommand
+        {
+            Email = "email@gmail.com",
+            Code = "VF25G4"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 
@@ -128,7 +140,11 @@ public class ConfirmEmailCommandHandlerTest
     public async Task ConfirmEmailCommandHandler_Should_ReturnSuccess_When_AllIsGood()
     {
         // Arrange
-        var command = new ConfirmEmailCommand("email@gmail.com", "VF25G4");
+        var command = new ConfirmEmailCommand
+        {
+            Email = "email@gmail.com",
+            Code = "VF25G4"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 

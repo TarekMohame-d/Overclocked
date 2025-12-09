@@ -132,16 +132,20 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
             Name = name,
             Thumbnail = "https://res.cloudinary.com/over-clocked/image.png",
             Description = "Product Description",
-            Price = 100,
-            Stock = 10,
-            Discount = 0,
+            Price = 100.0m,
+            StockQuantity = 10,
+            Discount = 0.0m,
             Tags = tags,
             Images = new List<string>
             {
                 "https://res.cloudinary.com/over-clocked/image1.png",
                 "https://res.cloudinary.com/over-clocked/image2.png",
             },
-            Specification = new[] { new { Name = "Name", Value = "Value" } },
+            Specifications = new[]
+            {
+                new { Name = "Name", Value = "Value" },
+                new { Name = "Name 2", Value = "Value 2" }
+            },
         };
 
         var json = JsonSerializer.Serialize(payload);

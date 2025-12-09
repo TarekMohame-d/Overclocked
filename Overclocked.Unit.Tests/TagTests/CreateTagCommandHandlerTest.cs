@@ -29,7 +29,10 @@ public class CreateTagCommandHandlerTest
     public async Task CreateTagCommandHandler_Should_ReturnSuccess_When_ThereIsNoError()
     {
         // Arrange
-        var command = new CreateTagCommand("Tag Name");
+        var command = new CreateTagCommand
+        {
+            Name = "Tag Name"
+        };
 
         Tag tag = new TagFaker().Generate();
 

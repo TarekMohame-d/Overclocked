@@ -15,7 +15,11 @@ public class RefreshTokenCommandValidatorTest
     {
         // Arrange
         var validator = new RefreshTokenCommandValidator();
-        var request = new RefreshTokenCommand(accessToken!, "refresh-token");
+        var request = new RefreshTokenCommand
+        {
+            AccessToken = accessToken!,
+            RefreshToken = "refresh-token"
+        };
 
         // Act
         TestValidationResult<RefreshTokenCommand> result = validator.TestValidate(request);
@@ -39,7 +43,11 @@ public class RefreshTokenCommandValidatorTest
                 + ".eyJuYW1laWQibG9ja2VkQVBJIiwiYXVkIjoiT3ZlcmNsb2NrZWRVc2VycyJ9"
                 + ".xsCFZ9E1iYatCccyPl-uBZa0qV3IjADKZ06FGNAeiU8";
 
-        var request = new RefreshTokenCommand(accessToken, refreshToken!);
+        var request = new RefreshTokenCommand
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken!
+        };
 
         // Act
         TestValidationResult<RefreshTokenCommand> result = validator.TestValidate(request);
