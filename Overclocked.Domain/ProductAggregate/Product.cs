@@ -1,10 +1,10 @@
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Primitives;
-using Overclocked.Domain.ProductsAggregate.Entities;
-using Overclocked.Domain.ProductsAggregate.ValueObjects;
+using Overclocked.Domain.ProductAggregate.Entities;
+using Overclocked.Domain.ProductAggregate.ValueObjects;
 
-namespace Overclocked.Domain.ProductsAggregate;
+namespace Overclocked.Domain.ProductAggregate;
 
 public sealed class Product : AggregateRoot<ProductId>
 {
@@ -46,8 +46,10 @@ public sealed class Product : AggregateRoot<ProductId>
         string thumbnail,
         int stock,
         Money price,
-        ProductRating? productRating = null,
-        Money? discount = null,
+        Money discount,
+        IEnumerable<ProductImage> images,
+        IEnumerable<Specification> specifications,
+        IEnumerable<ProductTag> tags,
         bool isDeleted = false) : base(id)
     {
         BrandId = brandId;
@@ -56,12 +58,14 @@ public sealed class Product : AggregateRoot<ProductId>
         NormalizedName = name.ToUpper();
         Description = description;
         Thumbnail = thumbnail;
-        Price = price;
         StockQuantity = stock;
+        Price = price;
+        Discount = discount;
+        _images.AddRange(images);
+        _specifications.AddRange(specifications);
+        _tags.AddRange(tags);
 
-        ProductRating = productRating ?? ProductRating.Zero;
-        Discount = discount ?? Money.Zero;
-
+        ProductRating = ProductRating.Zero;
         IsDeleted = isDeleted;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
@@ -76,8 +80,10 @@ public sealed class Product : AggregateRoot<ProductId>
         string thumbnail,
         int stock,
         Money price,
-        ProductRating? productRating = null,
-        Money? discount = null,
+        Money discount,
+        IEnumerable<ProductImage> images,
+        IEnumerable<Specification> specifications,
+        IEnumerable<ProductTag> tags,
         bool isDeleted = false) =>
         new(
             id: id,
@@ -88,8 +94,10 @@ public sealed class Product : AggregateRoot<ProductId>
             thumbnail: thumbnail,
             stock: stock,
             price: price,
-            productRating: productRating,
             discount: discount,
+            images: images,
+            specifications: specifications,
+            tags: tags,
             isDeleted: isDeleted);
 
     // --- Domain Behaviors ---

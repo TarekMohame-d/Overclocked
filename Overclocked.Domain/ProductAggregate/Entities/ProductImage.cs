@@ -1,7 +1,7 @@
 using Overclocked.Domain.Common.Primitives;
-using Overclocked.Domain.ProductsAggregate.ValueObjects;
+using Overclocked.Domain.ProductAggregate.ValueObjects;
 
-namespace Overclocked.Domain.ProductsAggregate.Entities;
+namespace Overclocked.Domain.ProductAggregate.Entities;
 
 public sealed class ProductImage : Entity<ProductImageId>
 {
@@ -18,6 +18,6 @@ public sealed class ProductImage : Entity<ProductImageId>
     public string ImageUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    internal static ProductImage Create(ProductImageId id, string imageUrl) =>
+    public static ProductImage Create(ProductImageId id, string imageUrl) =>
         new(id: id, imageUrl: imageUrl);
 }

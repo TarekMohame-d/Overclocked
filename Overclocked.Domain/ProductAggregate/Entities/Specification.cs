@@ -1,7 +1,7 @@
 using Overclocked.Domain.Common.Primitives;
-using Overclocked.Domain.ProductsAggregate.ValueObjects;
+using Overclocked.Domain.ProductAggregate.ValueObjects;
 
-namespace Overclocked.Domain.ProductsAggregate.Entities;
+namespace Overclocked.Domain.ProductAggregate.Entities;
 
 public sealed class Specification : Entity<SpecificationId>
 {
@@ -25,6 +25,6 @@ public sealed class Specification : Entity<SpecificationId>
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    internal static Specification Create(SpecificationId id, string name, string value) =>
+    public static Specification Create(SpecificationId id, string name, string value) =>
         new(id: id, name: name, value: value);
 }

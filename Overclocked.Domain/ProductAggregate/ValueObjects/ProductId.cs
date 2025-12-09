@@ -1,6 +1,6 @@
 using Overclocked.Domain.Common.Primitives;
 
-namespace Overclocked.Domain.ProductsAggregate.ValueObjects;
+namespace Overclocked.Domain.ProductAggregate.ValueObjects;
 
 public record ProductId(Guid Value) : IEntityKey
 {
