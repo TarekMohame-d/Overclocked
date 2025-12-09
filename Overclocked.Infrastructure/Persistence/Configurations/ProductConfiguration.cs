@@ -4,8 +4,8 @@ using Overclocked.Domain.BrandAggregate;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
-using Overclocked.Domain.ProductsAggregate;
-using Overclocked.Domain.ProductsAggregate.ValueObjects;
+using Overclocked.Domain.ProductAggregate;
+using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Overclocked.Domain.TagAggregate;
 using Overclocked.Domain.TagAggregate.ValueObjects;
 

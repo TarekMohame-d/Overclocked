@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Overclocked.Domain.ProductsAggregate;
-using Overclocked.Domain.ProductsAggregate.ValueObjects;
+using Overclocked.Domain.ProductAggregate;
+using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Overclocked.Domain.ReviewAggregate;
 using Overclocked.Domain.ReviewAggregate.Entities;
 using Overclocked.Domain.ReviewAggregate.ValueObjects;

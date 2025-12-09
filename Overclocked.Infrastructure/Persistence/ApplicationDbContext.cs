@@ -4,7 +4,7 @@ using Overclocked.Domain.CartAggregate;
 using Overclocked.Domain.CategoryAggregate;
 using Overclocked.Domain.EmployeeActivityLogAggregate;
 using Overclocked.Domain.PermissionAggregate;
-using Overclocked.Domain.ProductsAggregate;
+using Overclocked.Domain.ProductAggregate;
 using Overclocked.Domain.ReviewAggregate;
 using Overclocked.Domain.RoleAggregate;
 using Overclocked.Domain.TagAggregate;
