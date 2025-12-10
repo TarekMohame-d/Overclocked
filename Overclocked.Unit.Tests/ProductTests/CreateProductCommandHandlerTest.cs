@@ -11,13 +11,13 @@ using Shouldly;
 
 namespace Overclocked.Unit.Tests.ProductTests;
 
-public class CreateProductAsyncTest
+public class CreateProductCommandHandlerTest
 {
     private readonly IProductRepository _productRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IProductCommands _productCommands;
 
-    public CreateProductAsyncTest()
+    public CreateProductCommandHandlerTest()
     {
         _productRepositoryMock = Substitute.For<IProductRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();

@@ -2,48 +2,44 @@ using System.Linq.Expressions;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Product.Commands.CreateProduct;
+using Overclocked.Application.Product.Commands.UpdateProduct;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Unit.Tests.Validations.Product.TestCases;
 using BrandEntity = Overclocked.Domain.BrandAggregate.Brand;
 using CategoryEntity = Overclocked.Domain.CategoryAggregate.Category;
-using ProductEntity = Overclocked.Domain.ProductAggregate.Product;
 using TagEntity = Overclocked.Domain.TagAggregate.Tag;
 
 namespace Overclocked.Unit.Tests.Validations.Product;
 
-public class CreateProductCommandValidatorTest
+public class UpdateProductCommandValidatorTest
 {
     private readonly IBrandRepository _brandRepositoryMock;
     private readonly ICategoryRepository _categoryRepositoryMock;
-    private readonly IProductRepository _productRepositoryMock;
     private readonly ITagRepository _tagRepositoryMock;
-    private readonly CreateProductCommandValidator _validator;
+    private readonly UpdateProductCommandValidator _validator;
 
-    public CreateProductCommandValidatorTest()
+    public UpdateProductCommandValidatorTest()
     {
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
         _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
-        _productRepositoryMock = Substitute.For<IProductRepository>();
         _tagRepositoryMock = Substitute.For<ITagRepository>();
 
-        _validator = new CreateProductCommandValidator(
+        _validator = new UpdateProductCommandValidator(
             _brandRepositoryMock,
             _categoryRepositoryMock,
-            _productRepositoryMock,
             _tagRepositoryMock);
     }
 
     [Fact]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_BrandId_DoesNotExist()
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_BrandId_DoesNotExist()
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
+        UpdateProductCommand command = UpdateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
             .Returns((BrandEntity)null!);
@@ -51,28 +47,25 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand> result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand> result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.BrandId).Only();
     }
 
     [Fact]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_CategoryId_DoesNotExist()
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_CategoryId_DoesNotExist()
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
+        UpdateProductCommand command = UpdateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
             .Returns(brand);
@@ -80,15 +73,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns((CategoryEntity)null!);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand> result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand> result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.CategoryId).Only();
@@ -96,16 +86,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidNameCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Name_Is_Invalid(string? name)
+        nameof(UpdateProductValidationTestCases.InvalidNameCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Name_Is_Invalid(string? name)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value], name: name!);
+        UpdateProductCommand command = UpdateProductCommand(specs: specs, tags: [tags.First().Id.Value], name: name!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
             .Returns(brand);
@@ -113,45 +103,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Name).Only();
-    }
-
-    [Fact]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Name_Is_Already_Exists()
-    {
-        // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
-        BrandEntity brand = new BrandFaker().Generate();
-        CategoryEntity category = new CategoryFaker().Generate();
-        IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
-
-        _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
-            .Returns(brand);
-
-        _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
-            .Returns(category);
-
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(true);
-
-        _tagRepositoryMock
-            .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
-            .Returns(tags);
-
-        // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Name).Only();
@@ -159,16 +116,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidThumbnailCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Thumbnail_Is_Invalid(string? thumbnail)
+        nameof(UpdateProductValidationTestCases.InvalidThumbnailCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Thumbnail_Is_Invalid(string? thumbnail)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(
+        UpdateProductCommand command = UpdateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
             thumbnail: thumbnail!);
@@ -179,15 +136,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Thumbnail).Only();
@@ -195,16 +149,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidDescriptionCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Description_Is_Invalid(string? description)
+        nameof(UpdateProductValidationTestCases.InvalidDescriptionCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Description_Is_Invalid(string? description)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(
+        UpdateProductCommand command = UpdateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
             description: description!);
@@ -215,15 +169,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Description).Only();
@@ -231,16 +182,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidPriceCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Price_Is_Invalid(decimal? price)
+        nameof(UpdateProductValidationTestCases.InvalidPriceCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Price_Is_Invalid(decimal? price)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(
+        UpdateProductCommand command = UpdateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
             price: (decimal)price!);
@@ -251,15 +202,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Price).Only();
@@ -267,16 +215,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidStockCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Stock_Is_Invalid(int? stock)
+        nameof(UpdateProductValidationTestCases.InvalidStockCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Stock_Is_Invalid(int? stock)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(
+        UpdateProductCommand command = UpdateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
             stock: (int)stock!);
@@ -287,15 +235,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.StockQuantity).Only();
@@ -303,16 +248,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidDiscountCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Discount_Is_Invalid(decimal? discount)
+        nameof(UpdateProductValidationTestCases.InvalidDiscountCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Discount_Is_Invalid(decimal? discount)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(
+        UpdateProductCommand command = UpdateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
             discount: (decimal)discount!);
@@ -323,15 +268,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Discount).Only();
@@ -339,16 +281,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidImagesCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Images_Is_Invalid(string[] images)
+        nameof(UpdateProductValidationTestCases.InvalidImagesCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Images_Is_Invalid(string[] images)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(
+        UpdateProductCommand command = UpdateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value],
             images: images);
@@ -359,15 +301,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor("Images").Only();
@@ -375,16 +314,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidTagsCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Tags_Is_Invalid(List<Guid> tags)
+        nameof(UpdateProductValidationTestCases.InvalidTagsCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Tags_Is_Invalid(List<Guid> tags)
     {
         // Arrange
         IEnumerable<TagEntity> tagEntities = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(
+        UpdateProductCommand command = UpdateProductCommand(
             specs: specs,
             tags: tags);
 
@@ -394,15 +333,12 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tagEntities);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor("Tags").Only();
@@ -410,16 +346,16 @@ public class CreateProductCommandValidatorTest
 
     [Theory]
     [MemberData(
-        nameof(CreateProductValidationTestCases.InvalidSpecificationsCases),
-        MemberType = typeof(CreateProductValidationTestCases))]
-    public async Task CreateProductCommandValidator_Should_HaveError_When_Specifications_Is_Invalid(
+        nameof(UpdateProductValidationTestCases.InvalidSpecificationsCases),
+        MemberType = typeof(UpdateProductValidationTestCases))]
+    public async Task UpdateProductCommandValidator_Should_HaveError_When_Specifications_Is_Invalid(
         IEnumerable<(string Name, string Value)> specs)
     {
         // Arrange
         IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
-        CreateProductCommand command = CreateProductCommand(
+        UpdateProductCommand command = UpdateProductCommand(
             specs: specs,
             tags: [tags.First().Id.Value]);
 
@@ -429,21 +365,18 @@ public class CreateProductCommandValidatorTest
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>())
             .Returns(category);
 
-        _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<ProductEntity, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
         _tagRepositoryMock
             .WhereAsync(Arg.Any<Expression<Func<TagEntity, bool>>>(), cancellationToken: Arg.Any<CancellationToken>())
             .Returns(tags);
 
         // Act
-        TestValidationResult<CreateProductCommand>? result = await _validator.TestValidateAsync(command);
+        TestValidationResult<UpdateProductCommand>? result = await _validator.TestValidateAsync(command);
 
         // Assert
         result.ShouldHaveValidationErrorFor("Specification").Only();
     }
 
-    private static CreateProductCommand CreateProductCommand(
+    private static UpdateProductCommand UpdateProductCommand(
         IEnumerable<(string Name, string Value)>? specs = null,
         IEnumerable<Guid>? tags = null,
         IEnumerable<string>? images = null,
@@ -456,8 +389,9 @@ public class CreateProductCommandValidatorTest
         decimal discount = 0m,
         int stock = 10)
     {
-        return new CreateProductCommand
+        return new UpdateProductCommand
         {
+            Id = Guid.NewGuid(),
             BrandId = brandId ?? Guid.NewGuid(),
             CategoryId = categoryId ?? Guid.NewGuid(),
             Name = name,
