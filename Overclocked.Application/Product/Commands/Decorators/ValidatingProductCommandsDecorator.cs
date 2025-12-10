@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using Overclocked.Application.Product.Commands.CreateProduct;
+using Overclocked.Application.Product.Commands.DeleteProduct;
 using Overclocked.Application.Product.Commands.UpdateProduct;
 using Overclocked.Domain.Common.Results;
 
@@ -49,6 +50,15 @@ public class ValidatingProductCommandsDecorator(
         }
 
         Result result = await inner.UpdateProductCommandHandler(command, cancellationToken);
+
+        return result;
+    }
+
+    public async Task<Result> DeleteProductCommandHandler(
+        DeleteProductCommand command,
+        CancellationToken cancellationToken)
+    {
+        Result result = await inner.DeleteProductCommandHandler(command, cancellationToken);
 
         return result;
     }

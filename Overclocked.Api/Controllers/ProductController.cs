@@ -4,6 +4,7 @@ using Overclocked.Api.Extensions;
 using Overclocked.Api.Routing;
 using Overclocked.Application.Product.Commands;
 using Overclocked.Application.Product.Commands.CreateProduct;
+using Overclocked.Application.Product.Commands.DeleteProduct;
 using Overclocked.Application.Product.Commands.UpdateProduct;
 using Overclocked.Contracts.Product;
 using Overclocked.Domain.Common.Results;
@@ -39,6 +40,23 @@ public class ProductController(IProductCommands productCommands) : ControllerBas
         var command = UpdateProductCommand.Create(request, id);
 
         Result response = await productCommands.UpdateProductCommandHandler(command, cancellationToken);
+
+        return response.ToActionResult(this);
+    }
+
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [HttpDelete]
+    [Route(ProductRoutes.Delete)]
+    public async Task<IActionResult> Delete(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeleteProductCommand
+        {
+            Id = id
+        };
+
+        Result response = await productCommands.DeleteProductCommandHandler(command, cancellationToken);
 
         return response.ToActionResult(this);
     }

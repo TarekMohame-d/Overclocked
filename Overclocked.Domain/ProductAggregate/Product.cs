@@ -215,6 +215,13 @@ public sealed class Product : AggregateRoot<ProductId>
             }
         }
     }
+
+    public void DeleteProduct()
+    {
+        var images = _images.Select(x => x.ImageUrl).ToList();
+        images.Add(Thumbnail);
+        RaiseDomainEvent(new ProductDeletedEvent(Id.Value, images));
+    }
     // --- Domain Behaviors ---
 
     // public void CalculateRating(int newReviewRating)
