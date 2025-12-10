@@ -163,7 +163,7 @@ public class UpdateProductCommandHandlerTest
         // Assert
         result.IsSuccess.ShouldBeFalse();
         result.StatusCode.ShouldBe(HttpStatusCode.Conflict);
-        result.Error.ShouldNotBeNull();
+        result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.Conflict);
 
         await _productRepositoryMock.Received(1)
