@@ -23,15 +23,22 @@ public class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCo
                 Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult)
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
             .WithMessage("{PropertyName} must be a valid URL.")
-            .Must(url => url.StartsWith("https://res.cloudinary.com/over-clocked/", StringComparison.OrdinalIgnoreCase))
+            .Must(url => url.Contains("://res.cloudinary.com/over-clocked/"))
             .WithMessage("{PropertyName} must be hosted on res.cloudinary.com/over-clocked.");
     }
 
     private static bool ValidateImageExtension(string imageUrl)
     {
-        string[] validExtensions = [".jpg", ".jpeg", ".png"];
-        var extension = Path.GetExtension(imageUrl) ?? null;
+        if(!Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri? uri))
+        {
+            return false;
+        }
 
-        return extension is not null && validExtensions.Contains(extension);
+        var path = uri.LocalPath;
+        var extension = Path.GetExtension(path);
+
+        string[] validExtensions = [".jpg", ".jpeg", ".png"];
+
+        return !string.IsNullOrEmpty(extension) && validExtensions.Contains(extension.ToLowerInvariant());
     }
 }

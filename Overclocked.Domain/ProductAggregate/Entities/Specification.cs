@@ -27,4 +27,9 @@ public sealed class Specification : Entity<SpecificationId>
 
     public static Specification Create(SpecificationId id, string name, string value) =>
         new(id: id, name: name, value: value);
+
+    public void UpdateValue(string value)
+    {
+        Value = value;
+    }
 }

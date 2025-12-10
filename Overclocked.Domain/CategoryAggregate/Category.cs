@@ -38,7 +38,7 @@ public sealed class Category : AggregateRoot<CategoryId>
     {
         if(ImageUrl != imageUrl)
         {
-            RaiseDomainEvent(new CategoryUpdatedEvent(ImageUrl));
+            RaiseDomainEvent(new CategoryUpdatedEvent(Id, ImageUrl));
         }
 
         Name = name;
@@ -49,6 +49,6 @@ public sealed class Category : AggregateRoot<CategoryId>
 
     public void Delete()
     {
-        RaiseDomainEvent(new CategoryDeletedEvent(ImageUrl));
+        RaiseDomainEvent(new CategoryDeletedEvent(Id, ImageUrl));
     }
 }

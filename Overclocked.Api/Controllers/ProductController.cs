@@ -4,6 +4,7 @@ using Overclocked.Api.Extensions;
 using Overclocked.Api.Routing;
 using Overclocked.Application.Product.Commands;
 using Overclocked.Application.Product.Commands.CreateProduct;
+using Overclocked.Application.Product.Commands.UpdateProduct;
 using Overclocked.Contracts.Product;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.Common.StaticData;
@@ -23,6 +24,21 @@ public class ProductController(IProductCommands productCommands) : ControllerBas
         var command = CreateProductCommand.Create(request);
 
         Result response = await productCommands.CreateProductCommandHandler(command, cancellationToken);
+
+        return response.ToActionResult(this);
+    }
+
+    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [HttpPut]
+    [Route(ProductRoutes.Update)]
+    public async Task<IActionResult> Update(
+        [FromRoute] Guid id,
+        [FromBody] UpdateProductRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = UpdateProductCommand.Create(request, id);
+
+        Result response = await productCommands.UpdateProductCommandHandler(command, cancellationToken);
 
         return response.ToActionResult(this);
     }

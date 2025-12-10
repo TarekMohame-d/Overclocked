@@ -3,53 +3,49 @@ using Overclocked.Application.Abstraction.Persistence;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 
-namespace Overclocked.Application.Product.Commands.CreateProduct;
+namespace Overclocked.Application.Product.Commands.UpdateProduct;
 
-public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+public class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
 {
     private readonly IBrandRepository _brandRepository;
     private readonly ICategoryRepository _categoryRepository;
-    private readonly IProductRepository _productRepository;
     private readonly ITagRepository _tagRepository;
 
-    public CreateProductCommandValidator(
+    public UpdateProductCommandValidator(
         IBrandRepository brandRepository,
         ICategoryRepository categoryRepository,
-        IProductRepository productRepository,
         ITagRepository tagRepository)
     {
         _brandRepository = brandRepository;
         _categoryRepository = categoryRepository;
-        _productRepository = productRepository;
         _tagRepository = tagRepository;
-
-        RuleFor(x => x.BrandId)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("{PropertyName} is required.")
-            .MustAsync(async (id, cancellation) => await _brandRepository
-                .GetByIdAsync(BrandId.Create(id), cancellation) is not null)
-            .WithMessage("{PropertyName}: does not exist.");
-
-        RuleFor(x => x.CategoryId)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("{PropertyName} is required.")
-            .MustAsync(async (id, cancellation) => await _categoryRepository
-                .GetByIdAsync(CategoryId.Create(id), cancellation) is not null)
-            .WithMessage("{PropertyName}: does not exist.");
 
         RuleFor(x => x.Name)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("{PropertyName} is required.")
             .MaximumLength(50)
-            .WithMessage("{PropertyName} must not exceed 50 characters.")
-            .MustAsync(async (name, cancellation) =>
-                {
-                    return !await _productRepository.AnyAsync(p => p.NormalizedName == name.ToUpper(), cancellation);
-                })
-            .WithMessage("{PropertyName} already exists.");
+            .WithMessage("{PropertyName} must not exceed 50 characters.");
+
+        RuleFor(x => x.BrandId)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .WithMessage("{PropertyName} is required.")
+            .MustAsync(async (id, cancellation) =>
+            {
+                return await _brandRepository.GetByIdAsync(BrandId.Create(id), cancellation) is not null;
+            })
+            .WithMessage("{PropertyName}: {PropertyValue} does not exist.");
+
+        RuleFor(x => x.CategoryId)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .WithMessage("{PropertyName} is required.")
+            .MustAsync(async (id, cancellation) =>
+            {
+                return await _categoryRepository.GetByIdAsync(CategoryId.Create(id), cancellation) is not null;
+            })
+            .WithMessage("{PropertyName}: {PropertyValue} does not exist.");
 
         RuleFor(x => x.Thumbnail)
             .Cascade(CascadeMode.Stop)
@@ -106,13 +102,12 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
                     tags.Contains(t.Id), cancellationToken: cancellation))
                     .Select(t => t.Id.Value);
 
-                var missingTags = tags.Select(t => t).Except(existingIds).ToList();
+                var missingTags = tags.Except(existingIds).ToList();
 
                 if(missingTags.Count != 0)
                 {
-                    context.AddFailure(
-                        "Tags",
-                        $"The following tags do not exist: [\n{string.Join(",\n", missingTags)}\n]");
+                    context.AddFailure("Tags",
+                    $"The following tags do not exist: [\n{string.Join(",\n", missingTags)}");
                 }
             });
     }

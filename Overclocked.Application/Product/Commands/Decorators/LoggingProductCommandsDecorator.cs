@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Overclocked.Application.Product.Commands.CreateProduct;
+using Overclocked.Application.Product.Commands.UpdateProduct;
 using Overclocked.Domain.Common.Results;
 using Serilog.Context;
 
@@ -13,6 +14,11 @@ public class LoggingProductCommandsDecorator(
         CreateProductCommand command,
         CancellationToken cancellationToken) =>
             ExecuteWithLoggingAsync(command, () => inner.CreateProductCommandHandler(command, cancellationToken));
+
+    public Task<Result> UpdateProductCommandHandler(
+        UpdateProductCommand command,
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(command, () => inner.UpdateProductCommandHandler(command, cancellationToken));
 
     private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object command, Func<Task<TResult>> action)
         where TResult : Result

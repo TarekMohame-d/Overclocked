@@ -2,7 +2,9 @@ using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Primitives;
 using Overclocked.Domain.ProductAggregate.Entities;
+using Overclocked.Domain.ProductAggregate.Events;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
+using Overclocked.Domain.TagAggregate.ValueObjects;
 
 namespace Overclocked.Domain.ProductAggregate;
 
@@ -83,8 +85,7 @@ public sealed class Product : AggregateRoot<ProductId>
         Money discount,
         IEnumerable<ProductImage> images,
         IEnumerable<Specification> specifications,
-        IEnumerable<ProductTag> tags,
-        bool isDeleted = false) =>
+        IEnumerable<ProductTag> tags) =>
         new(
             id: id,
             brandId: brandId,
@@ -97,9 +98,123 @@ public sealed class Product : AggregateRoot<ProductId>
             discount: discount,
             images: images,
             specifications: specifications,
-            tags: tags,
-            isDeleted: isDeleted);
+            tags: tags);
 
+    public void Update(
+        BrandId brandId,
+        CategoryId categoryId,
+        string name,
+        string description,
+        string thumbnail,
+        int stock,
+        Money price,
+        Money discount,
+        IEnumerable<string>? images,
+        IEnumerable<(string Name, string Value)> specifications,
+        IEnumerable<Guid> tags,
+        bool isDeleted = false)
+    {
+        BrandId = brandId;
+        CategoryId = categoryId;
+        Name = name;
+        NormalizedName = name.ToUpper();
+        Description = description;
+        Thumbnail = thumbnail;
+        StockQuantity = stock;
+        Price = price;
+        Discount = discount;
+
+        UpdateProductImages(images);
+        UpdateProductTags(tags);
+        UpdateProductSpecifications(specifications);
+
+        IsDeleted = isDeleted;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    private void UpdateProductImages(IEnumerable<string>? images)
+    {
+        var inputImagesSet = new HashSet<string>(images ?? []);
+
+        var imagesToRemove = _images
+            .Where(x => !inputImagesSet.Contains(x.ImageUrl))
+            .ToList();
+
+        if(imagesToRemove.Count != 0)
+        {
+            foreach(ProductImage image in imagesToRemove)
+            {
+                _images.Remove(image);
+            }
+
+            var urlsToDelete = imagesToRemove.Select(x => x.ImageUrl).ToList();
+
+            RaiseDomainEvent(new ProductImagesRemovedEvent(Id, urlsToDelete));
+        }
+
+        var existingImageUrls = new HashSet<string>(_images.Select(x => x.ImageUrl));
+
+        foreach(var imageUrl in inputImagesSet)
+        {
+            if(!existingImageUrls.Contains(imageUrl))
+            {
+                _images.Add(ProductImage.Create(ProductImageId.Create(), imageUrl));
+            }
+        }
+    }
+
+    private void UpdateProductTags(IEnumerable<Guid> tags)
+    {
+        var inputTagsSet = new HashSet<Guid>(tags);
+
+        _tags.RemoveAll(x => !inputTagsSet.Contains(x.TagId.Value));
+
+        var existingTagIds = new HashSet<Guid>(_tags.Select(x => x.TagId.Value));
+
+        foreach(Guid tagId in inputTagsSet)
+        {
+            if(!existingTagIds.Contains(tagId))
+            {
+                _tags.Add(ProductTag.Create(TagId.Create(tagId)));
+            }
+        }
+    }
+
+    private void UpdateProductSpecifications(IEnumerable<(string Name, string Value)> specifications)
+    {
+        var newSpecsDict = specifications
+            .DistinctBy(x => x.Name)
+            .ToDictionary(x => x.Name, x => x.Value);
+
+        var specsToRemove = _specifications
+            .Where(existing => !newSpecsDict.ContainsKey(existing.Name))
+            .ToList();
+
+        foreach(Specification spec in specsToRemove)
+        {
+            _specifications.Remove(spec);
+        }
+
+        var currentSpecsDict = _specifications.ToDictionary(x => x.Name);
+
+        foreach((var name, var value) in newSpecsDict)
+        {
+            if(currentSpecsDict.TryGetValue(name, out Specification? existingSpec))
+            {
+                if(existingSpec.Value != value)
+                {
+                    existingSpec.UpdateValue(value);
+                }
+            }
+            else
+            {
+                _specifications.Add(Specification.Create(
+                    SpecificationId.Create(),
+                    name,
+                    value));
+            }
+        }
+    }
     // --- Domain Behaviors ---
 
     // public void CalculateRating(int newReviewRating)
