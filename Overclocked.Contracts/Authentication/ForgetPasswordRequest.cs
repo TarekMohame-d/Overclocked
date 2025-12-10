@@ -1,3 +1,6 @@
 namespace Overclocked.Contracts.Authentication;
 
-public record ForgetPasswordRequest(string Email);
+public record ForgetPasswordRequest
+{
+    public required string Email { get; init; }
+}

@@ -28,7 +28,14 @@ public class GetPagedTagsQueryHandlerTest
     public async Task GetPagedTagsQueryHandler_Should_ReturnEmptyList_When_NoTagsFoundBySearchTerm()
     {
         // Arrange
-        var query = new GetPagedTagsQuery(1, 10, "search term", "id", "asc");
+        var query = new GetPagedTagsQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            SearchTerm = "search term",
+            SortBy = "id",
+            Direction = "asc"
+        };
 
         _tagRepositoryMock.CountAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(0);
@@ -54,7 +61,14 @@ public class GetPagedTagsQueryHandlerTest
     {
         // Arrange
         List<Tag> tags = new TagFaker().Generate(3);
-        var query = new GetPagedTagsQuery(1, 10, tags[0].Name, "id", "asc");
+        var query = new GetPagedTagsQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            SearchTerm = tags[0].Name,
+            SortBy = "id",
+            Direction = "asc"
+        };
 
         _tagRepositoryMock.CountAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(10);

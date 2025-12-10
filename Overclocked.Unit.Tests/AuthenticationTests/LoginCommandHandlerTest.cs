@@ -53,7 +53,12 @@ public class LoginCommandHandlerTest
     public async Task LoginCommandHandler_Should_ReturnFailure_When_UserWithEmailNotExist()
     {
         // Arrange
-        var command = new LoginCommand("email@gmail.com", "password", "device-id");
+        var command = new LoginCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            DeviceId = "device-id"
+        };
 
         _userRepositoryMock.GetByEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns((User)null!);
@@ -81,7 +86,12 @@ public class LoginCommandHandlerTest
     public async Task LoginCommandHandler_Should_ReturnFailure_When_PasswordIsInvalid()
     {
         // Arrange
-        var command = new LoginCommand("email@gmail.com", "password", "device-id");
+        var command = new LoginCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            DeviceId = "device-id"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 
@@ -111,7 +121,12 @@ public class LoginCommandHandlerTest
     public async Task LoginCommandHandler_Should_ReturnFailure_When_EmailIsNotConfirmed()
     {
         // Arrange
-        var command = new LoginCommand("email@gmail.com", "password", "device-id");
+        var command = new LoginCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            DeviceId = "device-id"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 
@@ -142,7 +157,12 @@ public class LoginCommandHandlerTest
     public async Task LoginCommandHandler_Should_ReturnAuthResponse_When_AllDataValid()
     {
         // Arrange
-        var command = new LoginCommand("email@gmail.com", "password", "device-id");
+        var command = new LoginCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            DeviceId = "device-id"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 

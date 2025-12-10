@@ -1,3 +1,7 @@
 namespace Overclocked.Contracts.Tag;
 
-public record TagResponse(Guid Id, string Name);
+public record TagResponse
+{
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
+}

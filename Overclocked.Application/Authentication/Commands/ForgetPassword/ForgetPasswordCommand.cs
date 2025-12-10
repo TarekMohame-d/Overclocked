@@ -1,3 +1,6 @@
 namespace Overclocked.Application.Authentication.Commands.ForgetPassword;
 
-public record ForgetPasswordCommand(string Email);
+public record ForgetPasswordCommand
+{
+    public required string Email { get; init; }
+}

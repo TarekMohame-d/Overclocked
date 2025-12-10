@@ -13,7 +13,12 @@ public class LoginCommandValidatorTest
     {
         // Arrange
         var validator = new LoginCommandValidator();
-        var request = new LoginCommand(email!, "P@ssword1", "device-id");
+        var request = new LoginCommand
+        {
+            Email = email!,
+            Password = "P@ssword1",
+            DeviceId = "device-id"
+        };
 
         // Act
         TestValidationResult<LoginCommand> result = validator.TestValidate(request);
@@ -30,7 +35,12 @@ public class LoginCommandValidatorTest
     {
         // Arrange
         var validator = new LoginCommandValidator();
-        var request = new LoginCommand("email@gmail.com", password!, "device-id");
+        var request = new LoginCommand
+        {
+            Email = "email@gmail.com",
+            Password = password!,
+            DeviceId = "device-id"
+        };
 
         // Act
         TestValidationResult<LoginCommand> result = validator.TestValidate(request);
@@ -47,7 +57,12 @@ public class LoginCommandValidatorTest
     {
         // Arrange
         var validator = new LoginCommandValidator();
-        var request = new LoginCommand("email@gmail.com", "P@ssword1", deviceId!);
+        var request = new LoginCommand
+        {
+            Email = "email@gmail.com",
+            Password = "P@ssword1",
+            DeviceId = deviceId!
+        };
 
         // Act
         TestValidationResult<LoginCommand> result = validator.TestValidate(request);

@@ -1,5 +1,7 @@
-using Overclocked.Domain.TagAggregate.ValueObjects;
-
 namespace Overclocked.Application.Tag.Commands.UpdateTag;
 
-public record UpdateTagCommand(TagId TagId, string Name);
+public record UpdateTagCommand
+{
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
+}

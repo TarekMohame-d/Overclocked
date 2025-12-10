@@ -1,3 +1,8 @@
 namespace Overclocked.Contracts.Authentication;
 
-public record ResetPasswordRequest(string Email, string Code, string Password);
+public record ResetPasswordRequest
+{
+    public required string Email { get; init; }
+    public required string Code { get; init; }
+    public required string Password { get; init; }
+}

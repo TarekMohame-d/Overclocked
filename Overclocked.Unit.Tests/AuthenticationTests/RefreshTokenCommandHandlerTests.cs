@@ -55,7 +55,11 @@ public class RefreshTokenCommandHandlerTests
     public async Task RefreshTokenCommandHandler_Should_ReturnFailure_When_AccessTokenIsInvalid()
     {
         // Arrange
-        var command = new RefreshTokenCommand("access-token", "refresh-token");
+        var command = new RefreshTokenCommand
+        {
+            AccessToken = "invalid-token",
+            RefreshToken = "refresh-token"
+        };
 
         _tokenReaderServiceMock.GetUserIdAndDeviceIdFromToken(command.AccessToken)
             .Returns(((Guid, string)?)null);
@@ -86,7 +90,11 @@ public class RefreshTokenCommandHandlerTests
         _tokenReaderServiceMock.ExtractClaimsFromToken(Arg.Any<string>())
             .Returns(claims);
 
-        var command = new RefreshTokenCommand("access-token", "refresh-token");
+        var command = new RefreshTokenCommand
+        {
+            AccessToken = "invalid-token",
+            RefreshToken = "refresh-token"
+        };
 
         _tokenReaderServiceMock.GetUserIdAndDeviceIdFromToken(Arg.Any<string>())
             .Returns(((Guid, string)?)null);
@@ -116,7 +124,11 @@ public class RefreshTokenCommandHandlerTests
         _tokenReaderServiceMock.ExtractClaimsFromToken(Arg.Any<string>())
             .Returns(claims);
 
-        var command = new RefreshTokenCommand("access-token", "refresh-token");
+        var command = new RefreshTokenCommand
+        {
+            AccessToken = "invalid-token",
+            RefreshToken = "refresh-token"
+        };
 
         _tokenReaderServiceMock.GetUserIdAndDeviceIdFromToken(Arg.Any<string>())
             .Returns(((Guid, string)?)null);
@@ -148,7 +160,11 @@ public class RefreshTokenCommandHandlerTests
         _tokenReaderServiceMock.ExtractClaimsFromToken(Arg.Any<string>())
             .Returns(claims);
 
-        var command = new RefreshTokenCommand("access-token", "refresh-token");
+        var command = new RefreshTokenCommand
+        {
+            AccessToken = "invalid-token",
+            RefreshToken = "refresh-token"
+        };
 
         _tokenReaderServiceMock.GetUserIdAndDeviceIdFromToken(Arg.Any<string>())
             .Returns((userId, "cf:3d:35:08:e9:df"));
@@ -192,7 +208,11 @@ public class RefreshTokenCommandHandlerTests
         _tokenReaderServiceMock.ExtractClaimsFromToken(Arg.Any<string>())
             .Returns(claims);
 
-        var command = new RefreshTokenCommand("access-token", "refresh-token");
+        var command = new RefreshTokenCommand
+        {
+            AccessToken = "invalid-token",
+            RefreshToken = "refresh-token"
+        };
 
         _tokenReaderServiceMock.GetUserIdAndDeviceIdFromToken(Arg.Any<string>())
             .Returns((userId, "cf:3d:35:08:e9:df"));
@@ -246,7 +266,11 @@ public class RefreshTokenCommandHandlerTests
         _tokenReaderServiceMock.ExtractClaimsFromToken(Arg.Any<string>())
             .Returns(claims);
 
-        var command = new RefreshTokenCommand("access-token", "refresh-token");
+        var command = new RefreshTokenCommand
+        {
+            AccessToken = "invalid-token",
+            RefreshToken = "refresh-token"
+        };
 
         _tokenReaderServiceMock.GetUserIdAndDeviceIdFromToken(Arg.Any<string>())
             .Returns((userId, "cf:3d:35:08:e9:df"));

@@ -23,7 +23,10 @@ public class BrandController(IBrandQueries brandQueries, IBrandCommands brandCom
     [Route(BrandRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetBrandQuery { Id = BrandId.Create(id) };
+        var query = new GetBrandQuery
+        {
+            Id = BrandId.Create(id)
+        };
 
         Result<BrandResponse> response = await brandQueries.GetBrandQueryHandler(query, cancellationToken);
 
@@ -35,6 +38,7 @@ public class BrandController(IBrandQueries brandQueries, IBrandCommands brandCom
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var query = new GetBrandListQuery();
+
         Result<IEnumerable<BrandListResponse>> response = await brandQueries
             .GetBrandListQueryHandler(query, cancellationToken);
 
@@ -46,7 +50,12 @@ public class BrandController(IBrandQueries brandQueries, IBrandCommands brandCom
     [Route(BrandRoutes.Create)]
     public async Task<IActionResult> Create([FromBody] CreateBrandRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateBrandCommand(request.Name, request.ImageUrl);
+        var command = new CreateBrandCommand
+        {
+            Name = request.Name,
+            ImageUrl = request.ImageUrl
+        };
+
         Result response = await brandCommands.CreateBrandCommandHandler(command, cancellationToken);
 
         return response.ToActionResult(this);
@@ -60,7 +69,12 @@ public class BrandController(IBrandQueries brandQueries, IBrandCommands brandCom
         [FromBody] UpdateBrandRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateBrandCommand(BrandId.Create(id), request.Name, request.ImageUrl);
+        var command = new UpdateBrandCommand
+        {
+            Id = id,
+            Name = request.Name,
+            ImageUrl = request.ImageUrl
+        };
 
         Result response = await brandCommands.UpdateBrandCommandHandler(command, cancellationToken);
 
@@ -72,7 +86,10 @@ public class BrandController(IBrandQueries brandQueries, IBrandCommands brandCom
     [Route(BrandRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var command = new DeleteBrandCommand(BrandId.Create(id));
+        var command = new DeleteBrandCommand
+        {
+            Id = id
+        };
 
         Result response = await brandCommands.DeleteBrandCommandHandler(command, cancellationToken);
 

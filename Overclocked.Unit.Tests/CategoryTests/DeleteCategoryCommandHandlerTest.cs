@@ -32,7 +32,10 @@ public class DeleteCategoryCommandHandlerTest
     {
         // Arrange
         var categoryId = Guid.CreateVersion7();
-        var command = new DeleteCategoryCommand(CategoryId.Create(categoryId));
+        var command = new DeleteCategoryCommand
+        {
+            Id = categoryId
+        };
 
         _categoryRepositoryMock.GetByIdAsync(Arg.Any<CategoryId>(), Arg.Any<CancellationToken>())
             .Returns((Category)null!);
@@ -55,7 +58,10 @@ public class DeleteCategoryCommandHandlerTest
     {
         // Arrange
         var categoryId = Guid.CreateVersion7();
-        var command = new DeleteCategoryCommand(CategoryId.Create(categoryId));
+        var command = new DeleteCategoryCommand
+        {
+            Id = categoryId
+        };
 
         Category category = new CategoryFaker().Generate();
 

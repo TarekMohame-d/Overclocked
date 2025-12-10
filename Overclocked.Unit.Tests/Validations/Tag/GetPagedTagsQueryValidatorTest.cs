@@ -11,7 +11,14 @@ public class GetPagedTagsQueryValidatorTest
     {
         // Arrange
         var validator = new GetPagedTagsQueryValidator();
-        var query = new GetPagedTagsQuery(1, 10, "search term", "wrong", "Asc");
+        var query = new GetPagedTagsQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            SearchTerm = "search term",
+            SortBy = "wrong",
+            Direction = "Asc",
+        };
 
         // Act
         TestValidationResult<GetPagedTagsQuery> result = validator.TestValidate(query);
@@ -28,7 +35,14 @@ public class GetPagedTagsQueryValidatorTest
     {
         // Arrange
         var validator = new GetPagedTagsQueryValidator();
-        var query = new GetPagedTagsQuery(1, 10, "search term", "id", "wrong");
+        var query = new GetPagedTagsQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            SearchTerm = "search term",
+            SortBy = "id",
+            Direction = "wrong",
+        };
 
         // Act
         TestValidationResult<GetPagedTagsQuery> result = validator.TestValidate(query);
@@ -45,7 +59,14 @@ public class GetPagedTagsQueryValidatorTest
     {
         // Arrange
         var validator = new GetPagedTagsQueryValidator();
-        var query = new GetPagedTagsQuery(1, 0, "search term", "id", "asc");
+        var query = new GetPagedTagsQuery
+        {
+            Page = 1,
+            PageSize = 0,
+            SearchTerm = "search term",
+            SortBy = "id",
+            Direction = "Asc",
+        };
 
         // Act
         TestValidationResult<GetPagedTagsQuery> result = validator.TestValidate(query);
@@ -62,7 +83,14 @@ public class GetPagedTagsQueryValidatorTest
     {
         // Arrange
         var validator = new GetPagedTagsQueryValidator();
-        var query = new GetPagedTagsQuery(0, 10, "search term", "id", "asc");
+        var query = new GetPagedTagsQuery
+        {
+            Page = 0,
+            PageSize = 10,
+            SearchTerm = "search term",
+            SortBy = "id",
+            Direction = "Asc",
+        };
 
         // Act
         TestValidationResult<GetPagedTagsQuery> result = validator.TestValidate(query);
@@ -79,7 +107,14 @@ public class GetPagedTagsQueryValidatorTest
     {
         // Arrange
         var validator = new GetPagedTagsQueryValidator();
-        var query = new GetPagedTagsQuery(1, 10, "search term", "id", "asc");
+        var query = new GetPagedTagsQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            SearchTerm = "search term",
+            SortBy = "id",
+            Direction = "asc",
+        };
 
         // Act
         TestValidationResult<GetPagedTagsQuery> result = validator.TestValidate(query);
@@ -95,7 +130,14 @@ public class GetPagedTagsQueryValidatorTest
     {
         // Arrange
         var validator = new GetPagedTagsQueryValidator();
-        var query = new GetPagedTagsQuery(0, 0, string.Empty, "wrong", "wrong");
+        var query = new GetPagedTagsQuery
+        {
+            Page = 0,
+            PageSize = 0,
+            SearchTerm = string.Empty,
+            SortBy = "wrong",
+            Direction = "wrong",
+        };
 
         // Act
         TestValidationResult<GetPagedTagsQuery> result = validator.TestValidate(query);

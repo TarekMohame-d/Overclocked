@@ -29,7 +29,11 @@ public class CreateBrandCommandHandlerTest
     public async Task CreateBrandCommandHandler_Should_ReturnSuccess_When_ThereIsNoError()
     {
         // Arrange
-        var command = new CreateBrandCommand("Brand Name", "image.png");
+        var command = new CreateBrandCommand
+        {
+            Name = "Brand Name",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         Brand brand = new BrandFaker().Generate();
 

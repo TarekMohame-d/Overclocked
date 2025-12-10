@@ -4,13 +4,13 @@ using Overclocked.Application.Common.Enums;
 
 namespace Overclocked.Application.Tag.Queries.GetTags;
 
-public record GetPagedTagsQuery(
-    int Page,
-    int PageSize,
-    string SearchTerm,
-    string SortBy,
-    string Direction) : ICachedQuery
+public record GetPagedTagsQuery : ICachedQuery
 {
+    public required int Page { get; init; }
+    public required int PageSize { get; init; }
+    public required string SearchTerm { get; init; }
+    public required string SortBy { get; init; }
+    public required string Direction { get; init; }
     public TagSortField TagSortField => Enum.TryParse(SortBy, true, out TagSortField parsedSortBy)
             ? parsedSortBy
             : TagSortField.Id;

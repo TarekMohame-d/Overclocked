@@ -17,7 +17,12 @@ public class UpdateBrandCommandValidatorTest
         // Arrange
         var validator = new UpdateBrandCommandValidator();
         var brandId = BrandId.Create(Guid.NewGuid());
-        var command = new UpdateBrandCommand(brandId, name!, "https://res.cloudinary.com/over-clocked/image.png");
+        var command = new UpdateBrandCommand
+        {
+            Id = brandId,
+            Name = name!,
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         // Act
         TestValidationResult<UpdateBrandCommand> result = validator.TestValidate(command);
@@ -37,7 +42,12 @@ public class UpdateBrandCommandValidatorTest
         // Arrange
         var validator = new UpdateBrandCommandValidator();
         var brandId = BrandId.Create(Guid.NewGuid());
-        var command = new UpdateBrandCommand(brandId, "Brand Name", imageUrl!);
+        var command = new UpdateBrandCommand
+        {
+            Id = brandId,
+            Name = "Brand Name",
+            ImageUrl = imageUrl!
+        };
 
         // Act
         TestValidationResult<UpdateBrandCommand> result = validator.TestValidate(command);
@@ -54,7 +64,12 @@ public class UpdateBrandCommandValidatorTest
         // Arrange
         var validator = new UpdateBrandCommandValidator();
         var brandId = BrandId.Create(Guid.NewGuid());
-        var command = new UpdateBrandCommand(brandId, string.Empty, "imageUrl");
+        var command = new UpdateBrandCommand
+        {
+            Id = brandId,
+            Name = string.Empty,
+            ImageUrl = "imageUrl"
+        };
 
         // Act
         TestValidationResult<UpdateBrandCommand> result = await validator.TestValidateAsync(command);
@@ -71,10 +86,12 @@ public class UpdateBrandCommandValidatorTest
         // Arrange
         var validator = new UpdateBrandCommandValidator();
         var brandId = BrandId.Create(Guid.NewGuid());
-        var command = new UpdateBrandCommand(
-            brandId,
-            "Brand Name",
-            "https://res.cloudinary.com/over-clocked/image.png");
+        var command = new UpdateBrandCommand
+        {
+            Id = brandId,
+            Name = "Brand Name",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         // Act
         TestValidationResult<UpdateBrandCommand> result = await validator.TestValidateAsync(command);

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Overclocked.Domain.CartAggregate;
 using Overclocked.Domain.CartAggregate.ValueObjects;
-using Overclocked.Domain.ProductsAggregate.ValueObjects;
+using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 

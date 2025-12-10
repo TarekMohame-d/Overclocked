@@ -32,7 +32,10 @@ public class DeleteTagCommandHandlerTest
         // Arrange
         var tagId = Guid.CreateVersion7();
 
-        var command = new DeleteTagCommand(TagId.Create(tagId));
+        var command = new DeleteTagCommand
+        {
+            Id = tagId
+        };
 
         _tagRepositoryMock.GetByIdAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>())
             .Returns((Tag)null!);
@@ -55,7 +58,10 @@ public class DeleteTagCommandHandlerTest
     {
         // Arrange
         var tagId = Guid.CreateVersion7();
-        var command = new DeleteTagCommand(TagId.Create(tagId));
+        var command = new DeleteTagCommand
+        {
+            Id = tagId
+        };
 
         Tag? tag = new TagFaker().Generate();
 

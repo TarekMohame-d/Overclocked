@@ -24,12 +24,14 @@ public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : C
         [FromQuery] GetPagedTagsRequest request,
         CancellationToken cancellationToken)
     {
-        var query = new GetPagedTagsQuery(
-            request.Page,
-            request.PageSize,
-            request.SearchTerm,
-            request.SortBy,
-            request.Direction);
+        var query = new GetPagedTagsQuery
+        {
+            Page = request.Page,
+            PageSize = request.PageSize,
+            SearchTerm = request.SearchTerm,
+            SortBy = request.SortBy,
+            Direction = request.Direction
+        };
 
         Result<PagedResult<TagListResponse>> response = await tagQueries
             .GetPagedTagsQueryHandler(query, cancellationToken);
@@ -42,7 +44,10 @@ public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : C
     [Route(TagRoutes.Create)]
     public async Task<IActionResult> Create([FromBody] CreateTagRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateTagCommand(request.Name);
+        var command = new CreateTagCommand
+        {
+            Name = request.Name,
+        };
 
         Result response = await tagCommands.CreateTagCommandHandler(command, cancellationToken);
 
@@ -57,7 +62,11 @@ public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : C
         [FromBody] UpdateTagRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateTagCommand(TagId.Create(id), request.Name);
+        var command = new UpdateTagCommand
+        {
+            Id = id,
+            Name = request.Name
+        };
 
         Result response = await tagCommands.UpdateTagCommandHandler(command, cancellationToken);
 
@@ -69,7 +78,10 @@ public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : C
     [Route(TagRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var command = new DeleteTagCommand(TagId.Create(id));
+        var command = new DeleteTagCommand
+        {
+            Id = id
+        };
 
         Result response = await tagCommands.DeleteTagCommandHandler(command, cancellationToken);
 

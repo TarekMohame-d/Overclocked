@@ -15,7 +15,12 @@ public class ResetPasswordCommandValidatorTest
     {
         // Arrange
         var validator = new ResetPasswordCommandValidator();
-        var request = new ResetPasswordCommand(email!, "P@ssword1", "VC74A1");
+        var request = new ResetPasswordCommand
+        {
+            Email = email!,
+            Password = "P@ssword1",
+            Code = "VC74A1"
+        };
 
         // Act
         TestValidationResult<ResetPasswordCommand> result = validator.TestValidate(request);
@@ -34,7 +39,12 @@ public class ResetPasswordCommandValidatorTest
     {
         // Arrange
         var validator = new ResetPasswordCommandValidator();
-        var request = new ResetPasswordCommand("email@gmail.com", password!, "VC74A1");
+        var request = new ResetPasswordCommand
+        {
+            Email = "email@gmail.com",
+            Password = password!,
+            Code = "VC74A1"
+        };
 
         // Act
         TestValidationResult<ResetPasswordCommand> result = validator.TestValidate(request);
@@ -53,7 +63,12 @@ public class ResetPasswordCommandValidatorTest
     {
         // Arrange
         var validator = new ResetPasswordCommandValidator();
-        var request = new ResetPasswordCommand("email@gmail.com", "P@ssword1", code!);
+        var request = new ResetPasswordCommand
+        {
+            Email = "email@gmail.com",
+            Password = "P@ssword1",
+            Code = code!
+        };
 
         // Act
         TestValidationResult<ResetPasswordCommand> result = validator.TestValidate(request);

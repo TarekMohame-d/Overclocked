@@ -1,0 +1,12 @@
+namespace Overclocked.Api.Routing;
+
+public abstract class ProductRoutes : BaseRoute
+{
+    private const string Prefix = $"{Base}/products";
+
+    public const string GetById = $"{Prefix}/{{id:guid}}";
+    public const string GetPaged = $"{Prefix}";
+    public const string Create = $"{Prefix}";
+    public const string Update = $"{Prefix}/{{id:guid}}";
+    public const string Delete = $"{Prefix}/{{id:guid}}";
+}

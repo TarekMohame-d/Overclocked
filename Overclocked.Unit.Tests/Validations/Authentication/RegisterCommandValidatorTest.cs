@@ -21,7 +21,14 @@ public class RegisterCommandValidatorTest
     {
         // Arrange
         var validator = new RegisterCommandValidator(_userRepository);
-        var request = new RegisterCommand("email@gmail.com", "P@ssword1", firstName!, "last name", "01234567890");
+        var request = new RegisterCommand
+        {
+            Email = "email@gmail.com",
+            Password = "P@ssword1",
+            FirstName = firstName!,
+            LastName = "last name",
+            PhoneNumber = "01234567890"
+        };
 
         _userRepository
             .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -44,7 +51,14 @@ public class RegisterCommandValidatorTest
     {
         // Arrange
         var validator = new RegisterCommandValidator(_userRepository);
-        var request = new RegisterCommand("email@gmail.com", "P@ssword1", "first name", lastName!, "01234567890");
+        var request = new RegisterCommand
+        {
+            Email = "email@gmail.com",
+            Password = "P@ssword1",
+            FirstName = "first name",
+            LastName = lastName!,
+            PhoneNumber = "01234567890"
+        };
 
         _userRepository
             .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -67,7 +81,14 @@ public class RegisterCommandValidatorTest
     {
         // Arrange
         var validator = new RegisterCommandValidator(_userRepository);
-        var request = new RegisterCommand(email!, "P@ssword1", "first name", "last name", "01234567890");
+        var request = new RegisterCommand
+        {
+            Email = email!,
+            Password = "P@ssword1",
+            FirstName = "first name",
+            LastName = "last name",
+            PhoneNumber = "01234567890"
+        };
 
         _userRepository
             .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -87,7 +108,14 @@ public class RegisterCommandValidatorTest
     {
         // Arrange
         var validator = new RegisterCommandValidator(_userRepository);
-        var request = new RegisterCommand("email@gmail.com", "P@ssword1", "first name", "last name", "01234567890");
+        var request = new RegisterCommand
+        {
+            Email = "email2@gmail.com",
+            Password = "P@ssword1",
+            FirstName = "first name",
+            LastName = "last name",
+            PhoneNumber = "01234567890"
+        };
 
         _userRepository.AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
@@ -113,7 +141,14 @@ public class RegisterCommandValidatorTest
     {
         // Arrange
         var validator = new RegisterCommandValidator(_userRepository);
-        var request = new RegisterCommand("email@gmail.com", password!, "first name", "last name", "01234567890");
+        var request = new RegisterCommand
+        {
+            Email = "email2@gmail.com",
+            Password = password!,
+            FirstName = "first name",
+            LastName = "last name",
+            PhoneNumber = "01234567890"
+        };
 
         _userRepository
             .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -136,7 +171,14 @@ public class RegisterCommandValidatorTest
     {
         // Arrange
         var validator = new RegisterCommandValidator(_userRepository);
-        var request = new RegisterCommand("email@gmail.com", "P@ssword1", "first name", "last name", phoneNumber!);
+        var request = new RegisterCommand
+        {
+            Email = "email2@gmail.com",
+            Password = "P@ssword1",
+            FirstName = "first name",
+            LastName = "last name",
+            PhoneNumber = phoneNumber!
+        };
 
         _userRepository
             .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())
@@ -156,7 +198,14 @@ public class RegisterCommandValidatorTest
     {
         // Arrange
         var validator = new RegisterCommandValidator(_userRepository);
-        var request = new RegisterCommand("email@gmail.com", "P@ssword2", "first name", "last name", "01234567890");
+        var request = new RegisterCommand
+        {
+            Email = "email2@gmail.com",
+            Password = "P@ssword1",
+            FirstName = "first name",
+            LastName = "last name",
+            PhoneNumber = "02234567890"
+        };
 
         _userRepository
             .AnyAsync(Arg.Any<Expression<Func<UserEntity, bool>>>(), Arg.Any<CancellationToken>())

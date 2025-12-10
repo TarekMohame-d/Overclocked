@@ -51,7 +51,14 @@ public class RegisterCommandHandlerTest
     public async Task RegisterCommandHandler_Should_ReturnSuccess_When_ThereIsNoError()
     {
         // Arrange
-        var request = new RegisterCommand("email@gmail.com", "password", "first name", "last name", "1234567890");
+        var request = new RegisterCommand
+        {
+            Email = "email@gmail.com",
+            Password = "password",
+            FirstName = "first name",
+            LastName = "last name",
+            PhoneNumber = "1234567890"
+        };
 
         User user = new UserFaker(new PasswordHasher()).Generate();
 

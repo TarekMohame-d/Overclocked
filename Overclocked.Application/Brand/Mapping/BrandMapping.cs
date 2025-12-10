@@ -7,11 +7,21 @@ public static class BrandMapping
 {
     public static BrandResponse ToDto(this BrandEntity entity)
     {
-        return new(entity.Id, entity.Name, entity.ImageUrl);
+        return new()
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            ImageUrl = entity.ImageUrl
+        };
     }
 
     public static IEnumerable<BrandListResponse> ToDto(this IEnumerable<BrandEntity> entities)
     {
-        return entities.Select(x => new BrandListResponse(x.Id, x.Name, x.ImageUrl));
+        return entities.Select(x => new BrandListResponse
+        {
+            Id = x.Id,
+            Name = x.Name,
+            ImageUrl = x.ImageUrl
+        });
     }
 }

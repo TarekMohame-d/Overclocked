@@ -11,6 +11,8 @@ using Overclocked.Application.Category.Commands;
 using Overclocked.Application.Category.Commands.Decorators;
 using Overclocked.Application.Category.Queries;
 using Overclocked.Application.Category.Queries.Decorators;
+using Overclocked.Application.Product.Commands;
+using Overclocked.Application.Product.Commands.Decorators;
 using Overclocked.Application.Tag.Commands;
 using Overclocked.Application.Tag.Commands.Decorators;
 using Overclocked.Application.Tag.Queries;
@@ -68,6 +70,10 @@ public static class DependencyInjection
 
         services.Decorate<IAuthenticationCommands, ValidatingAuthenticationCommandsDecorator>();
         services.Decorate<IAuthenticationCommands, LoggingAuthenticationCommandsDecorator>();
+
+        services.Decorate<IProductCommands, CachingProductCommandsDecorator>();
+        services.Decorate<IProductCommands, ValidatingProductCommandsDecorator>();
+        services.Decorate<IProductCommands, LoggingProductCommandsDecorator>();
 
         return services;
     }

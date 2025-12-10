@@ -1,5 +1,6 @@
 using System.Net;
 using Overclocked.Application.Brand.Commands.DeleteBrand;
+using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.Common.Errors;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.TagAggregate.ValueObjects;
@@ -11,7 +12,7 @@ public sealed partial class BrandCommands
     public async Task<Result> DeleteBrandCommandHandler(DeleteBrandCommand command, CancellationToken cancellationToken)
     {
         Domain.BrandAggregate.Brand? brand = await brandRepository
-            .GetByIdAsync(command.Id, cancellationToken);
+            .GetByIdAsync(BrandId.Create(command.Id), cancellationToken);
 
         if(brand is null)
         {

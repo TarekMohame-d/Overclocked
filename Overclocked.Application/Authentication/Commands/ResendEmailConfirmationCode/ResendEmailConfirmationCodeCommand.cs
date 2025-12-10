@@ -1,3 +1,6 @@
 namespace Overclocked.Application.Authentication.Commands.ResendEmailConfirmationCode;
 
-public record ResendEmailConfirmationCodeCommand(string Email);
+public record ResendEmailConfirmationCodeCommand
+{
+    public required string Email { get; init; }
+}

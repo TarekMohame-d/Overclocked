@@ -33,7 +33,12 @@ public class UpdateCategoryCommandHandlerTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var command = new UpdateCategoryCommand(CategoryId.Create(categoryId), "Category Name", "image.png");
+        var command = new UpdateCategoryCommand
+        {
+            Id = categoryId,
+            Name = "Category Name",
+            ImageUrl = "image.png"
+        };
 
         _categoryRepositoryMock.SingleOrDefaultAsync(
             Arg.Any<Expression<Func<Category, bool>>>(),
@@ -62,7 +67,12 @@ public class UpdateCategoryCommandHandlerTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var command = new UpdateCategoryCommand(CategoryId.Create(categoryId), "Category Name", "image.png");
+        var command = new UpdateCategoryCommand
+        {
+            Id = categoryId,
+            Name = "Category Name",
+            ImageUrl = "image.png"
+        };
 
         Category category = new CategoryFaker().Generate();
 
@@ -104,7 +114,12 @@ public class UpdateCategoryCommandHandlerTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var command = new UpdateCategoryCommand(CategoryId.Create(categoryId), "Category Name", "image.png");
+        var command = new UpdateCategoryCommand
+        {
+            Id = categoryId,
+            Name = "Category Name",
+            ImageUrl = "image.png"
+        };
 
         Category category = new CategoryFaker().Generate();
 
@@ -140,7 +155,12 @@ public class UpdateCategoryCommandHandlerTest
     {
         // Arrange
         var categoryId = Guid.NewGuid();
-        var command = new UpdateCategoryCommand(CategoryId.Create(categoryId), "Category Name", "image.png");
+        var command = new UpdateCategoryCommand
+        {
+            Id = categoryId,
+            Name = "Category Name",
+            ImageUrl = "image.png"
+        };
 
         Category category = new CategoryFaker().Generate();
 

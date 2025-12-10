@@ -13,8 +13,6 @@
         <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
         <PackageReference Include="MailKit" />
-        <PackageReference Include="Hangfire.AspNetCore" />
-        <PackageReference Include="Hangfire.PostgreSql" />
     </ItemGroup>
 
     <ItemGroup>

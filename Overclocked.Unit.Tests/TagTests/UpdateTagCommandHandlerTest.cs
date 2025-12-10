@@ -32,7 +32,11 @@ public class UpdateTagCommandHandlerTest
     {
         // Arrange
         var tagId = Guid.NewGuid();
-        var command = new UpdateTagCommand(TagId.Create(tagId), "Tag Name");
+        var command = new UpdateTagCommand
+        {
+            Id = tagId,
+            Name = "Tag Name"
+        };
 
         _tagRepositoryMock.SingleOrDefaultAsync(
             Arg.Any<Expression<Func<Tag, bool>>>(),
@@ -61,7 +65,11 @@ public class UpdateTagCommandHandlerTest
     {
         // Arrange
         var tagId = Guid.NewGuid();
-        var command = new UpdateTagCommand(TagId.Create(tagId), "Tag Name");
+        var command = new UpdateTagCommand
+        {
+            Id = tagId,
+            Name = "Tag Name"
+        };
 
         Tag tag = new TagFaker().Generate();
 
@@ -97,7 +105,11 @@ public class UpdateTagCommandHandlerTest
     {
         // Arrange
         var tagId = Guid.NewGuid();
-        var command = new UpdateTagCommand(TagId.Create(tagId), "Tag Name");
+        var command = new UpdateTagCommand
+        {
+            Id = tagId,
+            Name = "Tag Name"
+        };
 
         Tag tag = new TagFaker().Generate();
 
@@ -133,7 +145,11 @@ public class UpdateTagCommandHandlerTest
     {
         // Arrange
         var tagId = Guid.NewGuid();
-        var command = new UpdateTagCommand(TagId.Create(tagId), "Tag Name");
+        var command = new UpdateTagCommand
+        {
+            Id = tagId,
+            Name = "Tag Name"
+        };
 
         Tag tag = new TagFaker().Generate();
 

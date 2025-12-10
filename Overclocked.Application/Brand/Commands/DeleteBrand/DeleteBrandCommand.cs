@@ -1,5 +1,6 @@
-using Overclocked.Domain.BrandAggregate.ValueObjects;
-
 namespace Overclocked.Application.Brand.Commands.DeleteBrand;
 
-public record DeleteBrandCommand(BrandId Id);
+public record DeleteBrandCommand
+{
+    public required Guid Id { get; init; }
+}

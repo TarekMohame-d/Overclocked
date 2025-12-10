@@ -23,7 +23,10 @@ public class CategoryController(ICategoryQueries categoryQueries, ICategoryComma
     [Route(CategoryRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetCategoryQuery { Id = CategoryId.Create(id) };
+        var query = new GetCategoryQuery
+        {
+            Id = CategoryId.Create(id)
+        };
 
         Result<CategoryResponse> response = await categoryQueries.GetCategoryQueryHandler(query, cancellationToken);
 
@@ -35,6 +38,7 @@ public class CategoryController(ICategoryQueries categoryQueries, ICategoryComma
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var query = new GetCategoryListQuery();
+
         Result<IEnumerable<CategoryListResponse>> response = await categoryQueries
             .GetCategoryListQueryHandler(query, cancellationToken);
 
@@ -48,7 +52,12 @@ public class CategoryController(ICategoryQueries categoryQueries, ICategoryComma
         [FromBody] CreateCategoryRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new CreateCategoryCommand(request.Name, request.ImageUrl);
+        var command = new CreateCategoryCommand
+        {
+            Name = request.Name,
+            ImageUrl = request.ImageUrl
+        };
+
         Result response = await categoryCommands.CreateCategoryCommandHandler(command, cancellationToken);
 
         return response.ToActionResult(this);
@@ -62,7 +71,12 @@ public class CategoryController(ICategoryQueries categoryQueries, ICategoryComma
         [FromBody] UpdateCategoryRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateCategoryCommand(CategoryId.Create(id), request.Name, request.ImageUrl);
+        var command = new UpdateCategoryCommand
+        {
+            Id = id,
+            Name = request.Name,
+            ImageUrl = request.ImageUrl
+        };
 
         Result response = await categoryCommands.UpdateCategoryCommandHandler(command, cancellationToken);
 
@@ -74,7 +88,10 @@ public class CategoryController(ICategoryQueries categoryQueries, ICategoryComma
     [Route(CategoryRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var command = new DeleteCategoryCommand(CategoryId.Create(id));
+        var command = new DeleteCategoryCommand
+        {
+            Id = id
+        };
 
         Result response = await categoryCommands.DeleteCategoryCommandHandler(command, cancellationToken);
 

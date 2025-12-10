@@ -16,8 +16,13 @@ public class UpdateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new UpdateCategoryCommandValidator();
-        var categoryId = CategoryId.Create(Guid.NewGuid());
-        var command = new UpdateCategoryCommand(categoryId, name!, "https://res.cloudinary.com/over-clocked/image.png");
+        var categoryId = Guid.NewGuid();
+        var command = new UpdateCategoryCommand
+        {
+            Id = categoryId,
+            Name = name!,
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         // Act
         TestValidationResult<UpdateCategoryCommand> result = validator.TestValidate(command);
@@ -36,8 +41,13 @@ public class UpdateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new UpdateCategoryCommandValidator();
-        var categoryId = CategoryId.Create(Guid.NewGuid());
-        var command = new UpdateCategoryCommand(categoryId, "Category Name", imageUrl!);
+        var categoryId = Guid.NewGuid();
+        var command = new UpdateCategoryCommand
+        {
+            Id = categoryId,
+            Name = "Category Name",
+            ImageUrl = imageUrl!
+        };
 
         // Act
         TestValidationResult<UpdateCategoryCommand> result = validator.TestValidate(command);
@@ -53,8 +63,13 @@ public class UpdateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new UpdateCategoryCommandValidator();
-        var categoryId = CategoryId.Create(Guid.NewGuid());
-        var command = new UpdateCategoryCommand(categoryId, string.Empty, "imageUrl");
+        var categoryId = Guid.NewGuid();
+        var command = new UpdateCategoryCommand
+        {
+            Id = categoryId,
+            Name = string.Empty,
+            ImageUrl = "imageUrl"
+        };
 
         // Act
         TestValidationResult<UpdateCategoryCommand> result = await validator.TestValidateAsync(command);
@@ -70,11 +85,13 @@ public class UpdateCategoryCommandValidatorTest
     {
         // Arrange
         var validator = new UpdateCategoryCommandValidator();
-        var categoryId = CategoryId.Create(Guid.NewGuid());
-        var command = new UpdateCategoryCommand(
-            categoryId,
-            "Category Name",
-            "https://res.cloudinary.com/over-clocked/image.png");
+        var categoryId = Guid.NewGuid();
+        var command = new UpdateCategoryCommand
+        {
+            Id = categoryId,
+            Name = "Category Name",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         // Act
         TestValidationResult<UpdateCategoryCommand> result = await validator.TestValidateAsync(command);

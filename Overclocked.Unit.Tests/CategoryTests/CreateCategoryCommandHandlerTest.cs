@@ -29,7 +29,11 @@ public class CreateCategoryCommandHandlerTest
     public async Task CreateCategoryCommandHandler_Should_ReturnSuccess_When_ThereIsNoError()
     {
         // Arrange
-        var command = new CreateCategoryCommand("Category Name", "image.png");
+        var command = new CreateCategoryCommand
+        {
+            Name = "Category Name",
+            ImageUrl = "https://res.cloudinary.com/over-clocked/image.png"
+        };
 
         Category category = new CategoryFaker().Generate();
 

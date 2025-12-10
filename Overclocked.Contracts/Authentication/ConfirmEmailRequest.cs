@@ -1,3 +1,7 @@
 namespace Overclocked.Contracts.Authentication;
 
-public record ConfirmEmailRequest(string Email, string Code);
+public record ConfirmEmailRequest
+{
+    public required string Email { get; init; }
+    public required string Code { get; init; }
+}

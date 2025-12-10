@@ -1,3 +1,8 @@
 namespace Overclocked.Contracts.Authentication;
 
-public record AuthResponse(string AccessToken, string RefreshToken, DateTime RefreshTokenExpiration);
+public record AuthResponse
+{
+    public required string AccessToken { get; init; }
+    public required string RefreshToken { get; init; }
+    public required DateTime ExpiredAt { get; init; }
+}

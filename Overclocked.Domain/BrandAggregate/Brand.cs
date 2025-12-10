@@ -38,7 +38,7 @@ public sealed class Brand : AggregateRoot<BrandId>
     {
         if(ImageUrl != imageUrl)
         {
-            RaiseDomainEvent(new BrandUpdatedEvent(ImageUrl));
+            RaiseDomainEvent(new BrandUpdatedEvent(Id.Value, ImageUrl));
         }
 
         Name = name;
@@ -49,6 +49,6 @@ public sealed class Brand : AggregateRoot<BrandId>
 
     public void Delete()
     {
-        RaiseDomainEvent(new BrandDeletedEvent(ImageUrl));
+        RaiseDomainEvent(new BrandDeletedEvent(Id.Value, ImageUrl));
     }
 }

@@ -1,3 +1,6 @@
 namespace Overclocked.Contracts.Tag;
 
-public record CreateTagRequest(string Name);
+public record CreateTagRequest
+{
+    public required string Name { get; init; }
+}
