@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,9 @@ using Overclocked.Domain.BrandAggregate;
 using Overclocked.Domain.CategoryAggregate;
 using Overclocked.Domain.Common.StaticData;
 using Overclocked.Domain.ProductAggregate;
+using Overclocked.Domain.ProductAggregate.Events;
 using Overclocked.Domain.TagAggregate;
+using Overclocked.Infrastructure.Outbox;
 using Overclocked.Infrastructure.Persistence;
 using Overclocked.Integration.Tests.Shared;
 using Shouldly;
@@ -18,7 +21,7 @@ using Shouldly;
 namespace Overclocked.Integration.Tests.ProductTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLifetime
+public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
     private readonly HttpClient _client = factory.HttpClient;
 
@@ -34,59 +37,104 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task Create_Should_CreateAndReturnSuccess_When_DataIsValid()
+    public async Task Update_Should_ReturnFailure_When_ProductNotFound()
     {
         // Arrange
         const string Name = "AMD";
+        var id = Guid.NewGuid().ToString();
 
         (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
         StringContent form = CreateJsonContent(Name, brandId, categoryId, tags);
 
         // Act
-        HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
+        HttpResponseMessage response = await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", id), form);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.Created);
-
-        using IServiceScope scope = factory.Services.CreateScope();
-        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        Product? product = await dbContext.Products.SingleOrDefaultAsync(x => x.NormalizedName == Name.ToUpper());
-        product.ShouldNotBeNull();
-        product.Name.ShouldBe(Name);
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact]
-    public async Task Create_Should_ReturnBadRequest_When_NameAlreadyExists()
+    public async Task Update_Should_ReturnSuccess_When_DataIsValid()
     {
         // Arrange
         (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
 
         Product product = await SeedDatabaseAsync(brandId, categoryId);
-
-        StringContent form = CreateJsonContent(product.Name, brandId, categoryId, tags);
+        StringContent form = CreateJsonContent("New Name", brandId, categoryId, tags);
 
         // Act
-        HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
+        HttpResponseMessage response = await _client.PutAsync(
+            ProductRoutes.Update.Replace("{id:guid}", product.Id.Value.ToString()),
+            form);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        Product? updatedProduct = await dbContext.Products.FindAsync(product.Id);
+        updatedProduct.ShouldNotBeNull();
+        updatedProduct.Name.ShouldBe("New Name");
     }
 
     [Fact]
-    public async Task Create_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    public async Task Update_Should_ReturnSuccess_When_DataIsValidAndImagesRemoved()
     {
         // Arrange
-        const string Name = "AMD";
+        IEnumerable<string> newImages =
+        [
+            "https://res.cloudinary.com/over-clocked/image1.png"
+        ];
 
         (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
-        StringContent form = CreateJsonContent(Name, brandId, categoryId, tags);
+
+        Product product = await SeedDatabaseAsync(brandId, categoryId);
+        StringContent form = CreateJsonContent("New Name", brandId, categoryId, tags);
+        await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", product.Id.Value.ToString()), form);
+
+        StringContent form2 = CreateJsonContent("New Name", brandId, categoryId, tags, newImages);
+
+        // Act
+        HttpResponseMessage response = await _client.PutAsync(
+            ProductRoutes.Update.Replace("{id:guid}", product.Id.Value.ToString()),
+            form2);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        using IServiceScope scope = factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        Product? updatedProduct = await dbContext.Products.FindAsync(product.Id);
+        updatedProduct.ShouldNotBeNull();
+        updatedProduct.Name.ShouldBe("New Name");
+        updatedProduct.Images.Select(x => x.ImageUrl).ShouldBe(newImages);
+        updatedProduct.Images.Count.ShouldBe(1);
+
+        OutboxMessage? message = await dbContext.Set<OutboxMessage>()
+            .FirstOrDefaultAsync(x => x.Type == nameof(ProductImagesRemovedEvent));
+
+        message.ShouldNotBeNull();
+        message.ProcessedOnUtc.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Update_Should_ReturnForbidden_When_UserDoesNotHavePermission()
+    {
+        // Arrange
+        (Guid brandId, Guid categoryId, IEnumerable<Guid> tags) = await SeedDependantEntityAsync();
+
+        Product product = await SeedDatabaseAsync(brandId, categoryId);
+        StringContent form = CreateJsonContent("New Name", brandId, categoryId, tags);
 
         var token = CustomWebApplicationFactory.GenerateJwtToken();
         factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        HttpResponseMessage response = await _client.PostAsync(ProductRoutes.Create, form);
+        HttpResponseMessage response = await _client.PutAsync(
+            ProductRoutes.Update.Replace("{id:guid}", product.Id.Value.ToString()),
+            form);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -123,8 +171,18 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         return (brand.Id.Value, category.Id.Value, tags.Select(x => x.Id.Value));
     }
 
-    private static StringContent CreateJsonContent(string name, Guid brandId, Guid categoryId, IEnumerable<Guid> tags)
+    private static StringContent CreateJsonContent(
+        string name,
+        Guid brandId,
+        Guid categoryId,
+        IEnumerable<Guid> tags,
+        IEnumerable<string>? newImages = null)
     {
+        IEnumerable<string> images = newImages ??
+        [
+            "https://res.cloudinary.com/over-clocked/image1.png",
+            "https://res.cloudinary.com/over-clocked/image2.png"
+        ];
         var payload = new
         {
             BrandId = brandId,
@@ -136,11 +194,7 @@ public class CreateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
             StockQuantity = 10,
             Discount = 0.0m,
             Tags = tags,
-            Images = new List<string>
-            {
-                "https://res.cloudinary.com/over-clocked/image1.png",
-                "https://res.cloudinary.com/over-clocked/image2.png",
-            },
+            Images = images,
             Specifications = new[]
             {
                 new { Name = "Name", Value = "Value" },
