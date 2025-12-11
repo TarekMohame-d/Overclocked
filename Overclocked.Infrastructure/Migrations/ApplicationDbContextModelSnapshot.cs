@@ -148,7 +148,7 @@ namespace Overclocked.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Permissions");
+                    b.ToTable("Permissions", (string)null);
 
                     b.HasData(
                         new
@@ -346,7 +346,7 @@ namespace Overclocked.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -597,6 +597,31 @@ namespace Overclocked.Infrastructure.Migrations
                                 .HasForeignKey("ProductId");
                         });
 
+                    b.OwnsOne("Overclocked.Domain.ProductsAggregate.ValueObjects.ProductRating", "ProductRating", b1 =>
+                        {
+                            b1.Property<Guid>("ProductId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<double>("Rating")
+                                .HasColumnType("decimal(2,1)")
+                                .HasColumnName("Rating");
+
+                            b1.Property<int>("ReviewCount")
+                                .HasColumnType("integer")
+                                .HasColumnName("ReviewCount");
+
+                            b1.HasKey("ProductId");
+
+                            b1.HasIndex("Rating");
+
+                            b1.HasIndex("ReviewCount");
+
+                            b1.ToTable("Products", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId");
+                        });
+
                     b.OwnsMany("Overclocked.Domain.ProductsAggregate.Entities.Specification", "Specifications", b1 =>
                         {
                             b1.Property<Guid>("Id")
@@ -631,31 +656,6 @@ namespace Overclocked.Infrastructure.Migrations
                             b1.HasIndex("ProductId");
 
                             b1.ToTable("ProductSpecifications", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("ProductId");
-                        });
-
-                    b.OwnsOne("Overclocked.Domain.ProductsAggregate.ValueObjects.ProductRating", "ProductRating", b1 =>
-                        {
-                            b1.Property<Guid>("ProductId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<double>("Rating")
-                                .HasColumnType("decimal(2,1)")
-                                .HasColumnName("Rating");
-
-                            b1.Property<int>("ReviewCount")
-                                .HasColumnType("integer")
-                                .HasColumnName("ReviewCount");
-
-                            b1.HasKey("ProductId");
-
-                            b1.HasIndex("Rating");
-
-                            b1.HasIndex("ReviewCount");
-
-                            b1.ToTable("Products");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -905,43 +905,6 @@ namespace Overclocked.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsMany("Overclocked.Domain.UserAggregate.Entities.RefreshToken", "RefreshTokens", b1 =>
-                        {
-                            b1.Property<Guid>("Id")
-                                .HasColumnType("uuid");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("timestamptz");
-
-                            b1.Property<string>("DeviceId")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<DateTime>("ExpiredAt")
-                                .HasColumnType("timestamptz");
-
-                            b1.Property<string>("TokenHash")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("timestamptz");
-
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("DeviceId");
-
-                            b1.HasIndex("UserId");
-
-                            b1.ToTable("RefreshTokens", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
                     b.OwnsMany("Overclocked.Domain.UserAggregate.ValueObjects.Address", "Addresses", b1 =>
                         {
                             b1.Property<Guid>("Id")
@@ -1000,6 +963,43 @@ namespace Overclocked.Infrastructure.Migrations
                             b1.HasKey("UserId");
 
                             b1.ToTable("EmailConfirmationCodes", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.OwnsMany("Overclocked.Domain.UserAggregate.Entities.RefreshToken", "RefreshTokens", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .HasColumnType("timestamptz");
+
+                            b1.Property<string>("DeviceId")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<DateTime>("ExpiredAt")
+                                .HasColumnType("timestamptz");
+
+                            b1.Property<string>("TokenHash")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<DateTime>("UpdatedAt")
+                                .HasColumnType("timestamptz");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("DeviceId");
+
+                            b1.HasIndex("UserId");
+
+                            b1.ToTable("RefreshTokens", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

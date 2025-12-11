@@ -12,6 +12,6 @@ public class UserRepository(ApplicationDbContext context)
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
     {
         return _context.Users.AsTracking().AsSplitQuery()
-            .SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
     }
 }

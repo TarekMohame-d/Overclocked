@@ -13,6 +13,6 @@ public class WishlistRepository(ApplicationDbContext context)
 
     public Task<Wishlist?> GetByUserIdAsync(UserId userId, CancellationToken cancellationToken = default)
     {
-        return _context.Wishlists.AsNoTracking().SingleOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+        return _context.Wishlists.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
     }
 }

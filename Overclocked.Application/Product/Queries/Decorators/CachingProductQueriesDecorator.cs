@@ -1,27 +1,26 @@
 using Microsoft.Extensions.Logging;
 using Overclocked.Application.Abstraction.Messaging;
 using Overclocked.Application.Abstraction.Services;
-using Overclocked.Application.Brand.Queries.GetAllBrands;
-using Overclocked.Application.Brand.Queries.GetBrand;
-using Overclocked.Contracts.Brand;
+using Overclocked.Application.Product.Queries.GetProduct;
+using Overclocked.Contracts.Product;
 using Overclocked.Domain.Common.Results;
 
-namespace Overclocked.Application.Brand.Queries.Decorators;
+namespace Overclocked.Application.Product.Queries.Decorators;
 
-public class CachingBrandQueriesDecorator(
-    IBrandQueries inner,
+public class CachingProductQueriesDecorator(
+    IProductQueries inner,
     ICacheService cacheService,
-    ILogger<CachingBrandQueriesDecorator> logger) : IBrandQueries
+    ILogger<CachingProductQueriesDecorator> logger) : IProductQueries
 {
-    public Task<Result<BrandResponse>> GetBrandQueryHandler(
-        GetBrandQuery query,
+    public Task<Result<ProductResponse>> GetProductQueryHandler(
+        GetProductQuery query,
         CancellationToken cancellationToken) =>
-            ExecuteWithCacheAsync(query, inner.GetBrandQueryHandler, cancellationToken);
+            ExecuteWithCacheAsync(query, inner.GetProductQueryHandler, cancellationToken);
 
-    public Task<Result<IEnumerable<BrandListResponse>>> GetBrandListQueryHandler(
-        GetBrandListQuery query,
-        CancellationToken cancellationToken) =>
-            ExecuteWithCacheAsync(query, inner.GetBrandListQueryHandler, cancellationToken);
+    // public Task<Result<IEnumerable<BrandListResponse>>> GetBrandListQueryHandler(
+    //     GetBrandListQuery query,
+    //     CancellationToken cancellationToken) =>
+    //         ExecuteWithCacheAsync(query, inner.GetBrandListQueryHandler, cancellationToken);
 
     private async Task<Result<T>> ExecuteWithCacheAsync<T, TRequest>(
         TRequest query,

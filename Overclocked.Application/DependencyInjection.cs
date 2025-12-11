@@ -13,6 +13,8 @@ using Overclocked.Application.Category.Queries;
 using Overclocked.Application.Category.Queries.Decorators;
 using Overclocked.Application.Product.Commands;
 using Overclocked.Application.Product.Commands.Decorators;
+using Overclocked.Application.Product.Queries;
+using Overclocked.Application.Product.Queries.Decorators;
 using Overclocked.Application.Tag.Commands;
 using Overclocked.Application.Tag.Commands.Decorators;
 using Overclocked.Application.Tag.Queries;
@@ -89,6 +91,10 @@ public static class DependencyInjection
         services.Decorate<ITagQueries, CachingTagQueriesDecorator>();
         services.Decorate<ITagQueries, ValidatingTagQueriesDecorator>();
         services.Decorate<ITagQueries, LoggingTagQueriesDecorator>();
+
+        services.Decorate<IProductQueries, CachingProductQueriesDecorator>();
+        // services.Decorate<IProductQueries, ValidatingTagQueriesDecorator>();
+        services.Decorate<IProductQueries, LoggingProductQueriesDecorator>();
 
         return services;
     }

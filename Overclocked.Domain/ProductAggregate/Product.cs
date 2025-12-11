@@ -1,4 +1,6 @@
+using Overclocked.Domain.BrandAggregate;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
+using Overclocked.Domain.CategoryAggregate;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Primitives;
 using Overclocked.Domain.ProductAggregate.Entities;
@@ -35,6 +37,10 @@ public sealed class Product : AggregateRoot<ProductId>
 
     private readonly List<ProductTag> _tags = [];
     public IReadOnlyCollection<ProductTag> Tags => _tags.AsReadOnly();
+
+    // Navigation Properties
+    public Brand? Brand { get; }
+    public Category? Category { get; }
 
     private Product()
     {
@@ -214,6 +220,17 @@ public sealed class Product : AggregateRoot<ProductId>
                     value));
             }
         }
+    }
+
+    public decimal CalculateFinalPrice()
+    {
+        if(Discount == Money.Zero)
+        {
+            return Price.Amount;
+        }
+
+        var discountedAmount = Price.Amount * (1 - Discount.Amount);
+        return Math.Round(discountedAmount, 2);
     }
 
     public void DeleteProduct()
