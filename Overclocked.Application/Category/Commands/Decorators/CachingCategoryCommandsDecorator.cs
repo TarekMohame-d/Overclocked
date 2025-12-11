@@ -39,9 +39,9 @@ public class CachingCategoryCommandsDecorator(
         {
             var key = CacheKeys.Category(command.Id.ToString());
 
-            logger.LogInformation("Removing cache for Categories key: {CacheKey}", key);
+            logger.LogInformation("Removing cache for Category key: {CacheKey}", key);
             await cacheService.RemoveAsync(key, cancellationToken);
-            logger.LogInformation("Removed cache for Categories key: {CacheKey}", key);
+            logger.LogInformation("Removed cache for Category key: {CacheKey}", key);
 
             logger.LogInformation("Removing cache for Categories key: {CacheKey}", CacheKeys.AllCategories);
             await cacheService.RemoveAsync(CacheKeys.AllCategories, cancellationToken);
@@ -61,9 +61,9 @@ public class CachingCategoryCommandsDecorator(
         {
             var key = CacheKeys.Category(command.Id.ToString());
 
-            logger.LogInformation("Removing cache for Categories key: {CacheKey}", key);
+            logger.LogInformation("Removing cache for Category key: {CacheKey}", key);
             await cacheService.RemoveAsync(key, cancellationToken);
-            logger.LogInformation("Removed cache for Categories key: {CacheKey}", key);
+            logger.LogInformation("Removed cache for Category key: {CacheKey}", key);
 
             logger.LogInformation("Removing cache for Categories key: {CacheKey}", CacheKeys.AllCategories);
             await cacheService.RemoveAsync(CacheKeys.AllCategories, cancellationToken);

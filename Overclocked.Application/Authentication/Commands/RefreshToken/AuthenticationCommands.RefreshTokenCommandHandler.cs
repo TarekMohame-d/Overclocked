@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Overclocked.Application.Authentication.Commands.Common;
 using Overclocked.Application.Authentication.Commands.RefreshToken;
 using Overclocked.Contracts.Authentication;
@@ -23,9 +24,10 @@ public sealed partial class AuthenticationCommands
             return Result<AuthResponse>.Failure(AuthenticationErrors.InvalidAccessToken);
         }
 
-        User? user = await userRepository.SingleOrDefaultAsync(
+        User? user = await userRepository.FirstOrDefaultAsync(
             x => x.Id == UserId.Create(claims.Value.userId),
-            asNoTracking: false,
+            include: x => x.Include(u => u.RefreshTokens),
+            false,
             cancellationToken: cancellationToken);
 
         if(user is null)

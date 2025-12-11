@@ -8,10 +8,11 @@ namespace Overclocked.Infrastructure.Persistence.Repositories;
 public class UserRepository(ApplicationDbContext context)
     : GenericRepository<User, UserId>(context), IUserRepository
 {
-    private readonly ApplicationDbContext _context = context;
-    public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
+    private readonly ApplicationDbContext _dbContext = context;
+    public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        return _context.Users.AsTracking().AsSplitQuery()
-            .SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
+        return _dbContext.Users.AsTracking()
+            .Include(u => u.EmailConfirmationCode)
+            .FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
     }
 }

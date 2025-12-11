@@ -13,6 +13,6 @@ public class CartRepository(ApplicationDbContext context)
 
     public Task<Cart?> GetByUserIdAsync(UserId userId, CancellationToken cancellationToken = default)
     {
-        return _context.Carts.AsNoTracking().SingleOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+        return _context.Carts.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
     }
 }

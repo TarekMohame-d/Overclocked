@@ -15,7 +15,7 @@ public class CategoryRepository(ApplicationDbContext context)
         CancellationToken cancellationToken = default)
     {
         return _dbContext.Categories.AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken: cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken: cancellationToken);
     }
 
     public Task<List<Category>> GetCategoryListAsync(CancellationToken cancellationToken = default)

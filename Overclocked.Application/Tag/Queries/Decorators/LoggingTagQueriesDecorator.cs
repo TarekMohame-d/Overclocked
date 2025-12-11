@@ -9,7 +9,7 @@ public class LoggingTagQueriesDecorator(
     ITagQueries inner,
     ILogger<LoggingTagQueriesDecorator> logger) : ITagQueries
 {
-    public Task<Result<PagedResult<Contracts.Tag.TagListResponse>>> GetPagedTagsQueryHandler(GetPagedTagsQuery query, CancellationToken cancellationToken) =>
+    public Task<Result<PagedResult<Contracts.Tag.TagPagedResponse>>> GetPagedTagsQueryHandler(GetPagedTagsQuery query, CancellationToken cancellationToken) =>
         ExecuteWithLoggingAsync(query, () => inner.GetPagedTagsQueryHandler(query, cancellationToken));
 
     private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object command, Func<Task<TResult>> action)

@@ -15,7 +15,7 @@ public class BrandRepository(ApplicationDbContext context)
         CancellationToken cancellationToken = default)
     {
         return _dbContext.Brands.AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken: cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken: cancellationToken);
     }
 
     public Task<List<Brand>> GetBrandListAsync(CancellationToken cancellationToken = default)

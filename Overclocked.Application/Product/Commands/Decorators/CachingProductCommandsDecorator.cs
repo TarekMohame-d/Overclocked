@@ -17,33 +17,57 @@ public class CachingProductCommandsDecorator(
         CreateProductCommand command,
         CancellationToken cancellationToken)
     {
-        return await RemoveCache(() => inner.CreateProductCommandHandler(command, cancellationToken));
+        Result result = await inner.CreateProductCommandHandler(command, cancellationToken);
+
+        if(result.IsSuccess)
+        {
+            logger.LogInformation("Removing cache for Product set: {SetKey}", CacheKeys.ProductSet);
+            await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
+            logger.LogInformation("Removed cache for Product set: {SetKey}", CacheKeys.ProductSet);
+        }
+
+        return result;
     }
 
     public async Task<Result> UpdateProductCommandHandler(
         UpdateProductCommand command,
         CancellationToken cancellationToken)
     {
-        return await RemoveCache(() => inner.UpdateProductCommandHandler(command, cancellationToken));
+        Result result = await inner.UpdateProductCommandHandler(command, cancellationToken);
+
+        if(result.IsSuccess)
+        {
+            var key = CacheKeys.Product(command.Id.ToString());
+
+            logger.LogInformation("Removing cache for Product key: {CacheKey}", key);
+            await cacheService.RemoveAsync(key, cancellationToken);
+            logger.LogInformation("Removed cache for Product key: {CacheKey}", key);
+
+            logger.LogInformation("Removing cache for Products key: {CacheKey}", CacheKeys.ProductSet);
+            await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
+            logger.LogInformation("Removed cache for Products key: {CacheKey}", CacheKeys.ProductSet);
+        }
+
+        return result;
     }
 
     public async Task<Result> DeleteProductCommandHandler(
         DeleteProductCommand command,
         CancellationToken cancellationToken)
     {
-        return await RemoveCache(() => inner.DeleteProductCommandHandler(command, cancellationToken));
-    }
-
-    private async Task<TResult> RemoveCache<TResult>(Func<Task<TResult>> action)
-        where TResult : Result
-    {
-        TResult result = await action();
+        Result result = await inner.DeleteProductCommandHandler(command, cancellationToken);
 
         if(result.IsSuccess)
         {
-            logger.LogInformation("Removing cache for Product set: {SetKey}", CacheKeys.ProductSet);
-            await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet);
-            logger.LogInformation("Removed cache for Product set: {SetKey}", CacheKeys.ProductSet);
+            var key = CacheKeys.Product(command.Id.ToString());
+
+            logger.LogInformation("Removing cache for Product key: {CacheKey}", key);
+            await cacheService.RemoveAsync(key, cancellationToken);
+            logger.LogInformation("Removed cache for Product key: {CacheKey}", key);
+
+            logger.LogInformation("Removing cache for Products key: {CacheKey}", CacheKeys.ProductSet);
+            await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
+            logger.LogInformation("Removed cache for Products key: {CacheKey}", CacheKeys.ProductSet);
         }
 
         return result;

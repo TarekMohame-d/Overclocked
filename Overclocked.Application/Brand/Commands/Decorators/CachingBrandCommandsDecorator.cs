@@ -35,9 +35,9 @@ public class CachingBrandCommandsDecorator(
         {
             var key = CacheKeys.Brand(command.Id.ToString());
 
-            logger.LogInformation("Removing cache for Brands key: {CacheKey}", key);
+            logger.LogInformation("Removing cache for Brand key: {CacheKey}", key);
             await cacheService.RemoveAsync(key, cancellationToken);
-            logger.LogInformation("Removed cache for Brands key: {CacheKey}", key);
+            logger.LogInformation("Removed cache for Brand key: {CacheKey}", key);
 
             logger.LogInformation("Removing cache for Brands key: {CacheKey}", CacheKeys.AllBrands);
             await cacheService.RemoveAsync(CacheKeys.AllBrands, cancellationToken);
@@ -55,9 +55,9 @@ public class CachingBrandCommandsDecorator(
         {
             var key = CacheKeys.Brand(command.Id.ToString());
 
-            logger.LogInformation("Removing cache for Brands key: {CacheKey}", key);
+            logger.LogInformation("Removing cache for Brand key: {CacheKey}", key);
             await cacheService.RemoveAsync(key, cancellationToken);
-            logger.LogInformation("Removed cache for Brands key: {CacheKey}", key);
+            logger.LogInformation("Removed cache for Brand key: {CacheKey}", key);
 
             logger.LogInformation("Removing cache for Brands key: {CacheKey}", CacheKeys.AllBrands);
             await cacheService.RemoveAsync(CacheKeys.AllBrands, cancellationToken);

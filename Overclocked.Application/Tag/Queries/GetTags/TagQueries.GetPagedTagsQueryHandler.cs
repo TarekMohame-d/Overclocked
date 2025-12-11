@@ -7,7 +7,7 @@ namespace Overclocked.Application.Tag.Queries;
 
 public sealed partial class TagQueries
 {
-    public async Task<Result<PagedResult<TagListResponse>>> GetPagedTagsQueryHandler(
+    public async Task<Result<PagedResult<TagPagedResponse>>> GetPagedTagsQueryHandler(
         GetPagedTagsQuery query,
         CancellationToken cancellationToken)
     {
@@ -15,8 +15,8 @@ public sealed partial class TagQueries
 
         if(totalCount == 0)
         {
-            return Result<PagedResult<TagListResponse>>
-                .Success(PagedResult<TagListResponse>.Empty(query.Page, query.PageSize));
+            return Result<PagedResult<TagPagedResponse>>
+                .Success(PagedResult<TagPagedResponse>.Empty(query.Page, query.PageSize));
         }
 
         List<Domain.TagAggregate.Tag> tags = await tagRepository.GetTagsAsync(
@@ -27,8 +27,8 @@ public sealed partial class TagQueries
             query.SortDirection,
             cancellationToken);
 
-        return Result<PagedResult<TagListResponse>>.Success(
-            PagedResult<TagListResponse>.Create(
+        return Result<PagedResult<TagPagedResponse>>.Success(
+            PagedResult<TagPagedResponse>.Create(
                 tags.ToDto(),
                 query.Page,
                 query.PageSize,

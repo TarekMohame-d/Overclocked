@@ -1,4 +1,6 @@
 using Overclocked.Application.Product.Commands.CreateProduct;
+using Overclocked.Contracts.Brand;
+using Overclocked.Contracts.Product;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.ProductAggregate.Entities;
@@ -26,6 +28,27 @@ public static class ProductMapping
             specifications: CreateSpecifications(command.Specifications),
             tags: CreateProductTags(command.Tags)
         );
+    }
+
+    public static IEnumerable<ProductPagedResponse> ToDto(this List<ProductEntity> entities)
+    {
+        return entities.Select(x => new ProductPagedResponse
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Thumbnail = x.Thumbnail,
+            Price = x.Price.Amount,
+            Discount = x.Discount.Amount,
+            FinalPrice = x.CalculateFinalPrice(),
+            Rating = x.ProductRating.Rating,
+            ReviewCount = x.ProductRating.ReviewCount,
+            Brand = new BrandResponse
+            {
+                Id = x.Brand!.Id,
+                Name = x.Brand.Name,
+                ImageUrl = x.Brand.ImageUrl
+            }
+        });
     }
 
     private static IEnumerable<Specification> CreateSpecifications(IEnumerable<(string Name, string Value)> specs)

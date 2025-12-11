@@ -46,6 +46,11 @@ public class CachingCategoryQueriesDecorator(
         if(result.IsSuccess)
         {
             await cacheService.SetAsync(cacheKey, result.Value, query.SlidingExpiration, cancellationToken);
+
+            if(!string.IsNullOrWhiteSpace(query.CacheSetKey))
+            {
+                await cacheService.AddToSetAsync(query.CacheSetKey, cacheKey);
+            }
         }
 
         return result;

@@ -41,7 +41,7 @@ public class GetPagedTagsQueryHandlerTest
             .Returns(0);
 
         // Act
-        Result<PagedResult<TagListResponse>> result = await _tagQueries
+        Result<PagedResult<TagPagedResponse>> result = await _tagQueries
             .GetPagedTagsQueryHandler(query, CancellationToken.None);
 
         // Assert
@@ -82,7 +82,7 @@ public class GetPagedTagsQueryHandlerTest
             .Returns(tags);
 
         // Act
-        Result<PagedResult<TagListResponse>> result = await _tagQueries
+        Result<PagedResult<TagPagedResponse>> result = await _tagQueries
             .GetPagedTagsQueryHandler(query, CancellationToken.None);
 
         // Assert

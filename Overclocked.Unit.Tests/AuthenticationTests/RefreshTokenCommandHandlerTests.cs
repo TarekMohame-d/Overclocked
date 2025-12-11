@@ -169,9 +169,10 @@ public class RefreshTokenCommandHandlerTests
         _tokenReaderServiceMock.GetUserIdAndDeviceIdFromToken(Arg.Any<string>())
             .Returns((userId, "cf:3d:35:08:e9:df"));
 
-        _userRepositoryMock.SingleOrDefaultAsync(
+        _userRepositoryMock.FirstOrDefaultAsync(
             Arg.Any<Expression<Func<User, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<User>, IQueryable<User>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>())
             .Returns((User)null!);
 
@@ -188,9 +189,10 @@ public class RefreshTokenCommandHandlerTests
             .GetUserIdAndDeviceIdFromToken(Arg.Any<string>());
 
         await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
+            .FirstOrDefaultAsync(
             Arg.Any<Expression<Func<User, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<User>, IQueryable<User>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -221,9 +223,10 @@ public class RefreshTokenCommandHandlerTests
 
         user.CreateRefreshToken("cf:3d:35:08:e9:df", "refresh-token-hash");
 
-        _userRepositoryMock.SingleOrDefaultAsync(
+        _userRepositoryMock.FirstOrDefaultAsync(
             Arg.Any<Expression<Func<User, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<User>, IQueryable<User>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>())
             .Returns(user);
 
@@ -243,9 +246,10 @@ public class RefreshTokenCommandHandlerTests
             .GetUserIdAndDeviceIdFromToken(Arg.Any<string>());
 
         await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
+            .FirstOrDefaultAsync(
             Arg.Any<Expression<Func<User, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<User>, IQueryable<User>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>());
 
         _refreshTokenHasherMock.Received(1)
@@ -279,9 +283,10 @@ public class RefreshTokenCommandHandlerTests
 
         user.CreateRefreshToken("cf:3d:35:08:e9:df", "refresh-token-hash");
 
-        _userRepositoryMock.SingleOrDefaultAsync(
+        _userRepositoryMock.FirstOrDefaultAsync(
             Arg.Any<Expression<Func<User, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<User>, IQueryable<User>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>())
             .Returns(user);
 
@@ -306,9 +311,10 @@ public class RefreshTokenCommandHandlerTests
             .GetUserIdAndDeviceIdFromToken(Arg.Any<string>());
 
         await _userRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
+            .FirstOrDefaultAsync(
             Arg.Any<Expression<Func<User, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<User>, IQueryable<User>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>());
 
         _refreshTokenHasherMock.Received(1)

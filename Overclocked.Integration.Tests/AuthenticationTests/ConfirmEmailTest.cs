@@ -44,7 +44,9 @@ public class ConfirmEmailTest(CustomWebApplicationFactory factory) : IAsyncLifet
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        User? userDb = await dbContext.Users.SingleOrDefaultAsync(x => x.Email == user.Email);
+        User? userDb = await dbContext.Users.Include(u => u.EmailConfirmationCode)
+            .FirstOrDefaultAsync(x => x.Email == user.Email);
+
         userDb.ShouldNotBeNull();
         userDb.EmailConfirmed.ShouldBeTrue();
         userDb.EmailConfirmationCode.IsUsed.ShouldBeTrue();

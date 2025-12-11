@@ -6,6 +6,9 @@ using Overclocked.Application.Product.Commands;
 using Overclocked.Application.Product.Commands.CreateProduct;
 using Overclocked.Application.Product.Commands.DeleteProduct;
 using Overclocked.Application.Product.Commands.UpdateProduct;
+using Overclocked.Application.Product.Queries;
+using Overclocked.Application.Product.Queries.GetPagedProducts;
+using Overclocked.Application.Product.Queries.GetProduct;
 using Overclocked.Contracts.Product;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.Common.StaticData;
@@ -13,8 +16,38 @@ using Overclocked.Domain.Common.StaticData;
 namespace Overclocked.Api.Controllers;
 
 [ApiController]
-public class ProductController(IProductCommands productCommands) : ControllerBase
+public class ProductController(IProductQueries productQueries, IProductCommands productCommands) : ControllerBase
 {
+    [HttpGet]
+    [Route(ProductRoutes.GetById)]
+    public async Task<IActionResult> GetById(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetProductQuery
+        {
+            Id = id
+        };
+
+        Result<ProductResponse> response = await productQueries.GetProductQueryHandler(query, cancellationToken);
+
+        return response.ToActionResult(this);
+    }
+
+    [HttpGet]
+    [Route(ProductRoutes.GetPaged)]
+    public async Task<IActionResult> GetPaged(
+        [FromQuery] GetPagedProductsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var query = GetPagedProductsQuery.ToQuery(request);
+
+        Result<PagedResult<ProductPagedResponse>> response = await productQueries
+            .GetPagedProductsQueryHandler(query, cancellationToken);
+
+        return response.ToActionResult(this);
+    }
+
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
     [HttpPost]
     [Route(ProductRoutes.Create)]

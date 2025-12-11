@@ -107,12 +107,12 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired();
 
         // Relationships
-        builder.HasOne<Brand>()
+        builder.HasOne(p => p.Brand)
             .WithMany()
             .HasForeignKey(p => p.BrandId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne<Category>()
+        builder.HasOne(p => p.Category)
             .WithMany()
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -189,19 +189,28 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
             pt.HasKey("ProductId", "TagId");
 
-            pt.HasOne<Tag>()
+            pt.HasOne(t => t.Tag)
                 .WithMany()
                 .HasForeignKey(t => t.TagId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Navigation(p => p.Images)
+            .AutoInclude(false)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Navigation(p => p.Specifications)
+            .AutoInclude(false)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Navigation(p => p.Tags)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(p => p.Brand)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(p => p.Category)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         // Indexes

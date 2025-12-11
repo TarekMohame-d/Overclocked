@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Overclocked.Domain.Common.Primitives;
 using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.RoleAggregate;
 using Overclocked.Domain.RoleAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate.Entities;
 using Overclocked.Domain.UserAggregate.Events;
@@ -32,6 +33,8 @@ public class User : AggregateRoot<UserId>
 
     private readonly List<Address> _addresses = [];
     public IReadOnlyList<Address> Addresses => _addresses.AsReadOnly();
+
+    public Role? Role { get; }
 
     private User()
     {

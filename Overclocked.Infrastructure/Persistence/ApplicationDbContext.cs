@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Overclocked.Application.Abstraction.Services;
 using Overclocked.Domain.BrandAggregate;
 using Overclocked.Domain.CartAggregate;
 using Overclocked.Domain.CategoryAggregate;
@@ -10,7 +11,6 @@ using Overclocked.Domain.RoleAggregate;
 using Overclocked.Domain.TagAggregate;
 using Overclocked.Domain.UserAggregate;
 using Overclocked.Domain.WishlistAggregate;
-using Overclocked.Infrastructure.Outbox;
 
 namespace Overclocked.Infrastructure.Persistence;
 

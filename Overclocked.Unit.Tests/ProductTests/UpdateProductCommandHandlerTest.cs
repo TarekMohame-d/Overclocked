@@ -49,9 +49,10 @@ public class UpdateProductCommandHandlerTest
             Images = null
         };
 
-        _productRepositoryMock.SingleOrDefaultAsync(
+        _productRepositoryMock.FirstOrDefaultAsync(
             Arg.Any<Expression<Func<Product, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>())
             .Returns((Product)null!);
 
@@ -65,9 +66,10 @@ public class UpdateProductCommandHandlerTest
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
         await _productRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
+            .FirstOrDefaultAsync(
             Arg.Any<Expression<Func<Product, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -93,9 +95,10 @@ public class UpdateProductCommandHandlerTest
             Images = null
         };
 
-        _productRepositoryMock.SingleOrDefaultAsync(
+        _productRepositoryMock.FirstOrDefaultAsync(
             Arg.Any<Expression<Func<Product, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>())
             .Returns(product);
 
@@ -114,9 +117,10 @@ public class UpdateProductCommandHandlerTest
         result.Error.ShouldBe(Error.None);
 
         await _productRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
+            .FirstOrDefaultAsync(
             Arg.Any<Expression<Func<Product, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)
@@ -148,9 +152,10 @@ public class UpdateProductCommandHandlerTest
             Images = null
         };
 
-        _productRepositoryMock.SingleOrDefaultAsync(
+        _productRepositoryMock.FirstOrDefaultAsync(
             Arg.Any<Expression<Func<Product, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>())
             .Returns(product);
 
@@ -167,9 +172,10 @@ public class UpdateProductCommandHandlerTest
         result.Error.Type.ShouldBe(ErrorType.Conflict);
 
         await _productRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
+            .FirstOrDefaultAsync(
             Arg.Any<Expression<Func<Product, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
+            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
+            Arg.Any<bool>(),
             Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.DidNotReceive()

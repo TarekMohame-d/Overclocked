@@ -59,7 +59,7 @@ public class RefreshTokenTest(CustomWebApplicationFactory factory) : IAsyncLifet
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        User? userId = await dbContext.Users.SingleOrDefaultAsync(x => x.Id == user.Id);
+        User? userId = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
         userId.ShouldNotBeNull();
     }
 

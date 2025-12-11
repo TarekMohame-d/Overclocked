@@ -41,8 +41,8 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        PagedResult<TagListResponse>? result = await response.Content
-            .ReadFromJsonAsync<PagedResult<TagListResponse>>();
+        PagedResult<TagPagedResponse>? result = await response.Content
+            .ReadFromJsonAsync<PagedResult<TagPagedResponse>>();
 
         result.ShouldNotBeNull();
         result.ShouldNotBeNull();
@@ -54,7 +54,7 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
     public async Task GetPagedTags_Should_ReturnFromCache_When_ThereIsDataAndCacheHit()
     {
         // Arrange
-        IEnumerable<TagListResponse> tagListDtos = await SeedCacheAsync();
+        IEnumerable<TagPagedResponse> tagListDtos = await SeedCacheAsync();
 
         var searchTerm = tagListDtos.First().Name;
 
@@ -67,8 +67,8 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        PagedResult<TagListResponse>? result = await response.Content
-            .ReadFromJsonAsync<PagedResult<TagListResponse>>();
+        PagedResult<TagPagedResponse>? result = await response.Content
+            .ReadFromJsonAsync<PagedResult<TagPagedResponse>>();
 
         result.ShouldNotBeNull();
         result.ShouldNotBeNull();
@@ -88,8 +88,8 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        PagedResult<TagListResponse>? result = await response.Content
-            .ReadFromJsonAsync<PagedResult<TagListResponse>>();
+        PagedResult<TagPagedResponse>? result = await response.Content
+            .ReadFromJsonAsync<PagedResult<TagPagedResponse>>();
 
         result.ShouldNotBeNull();
         result.ShouldNotBeNull();
@@ -110,7 +110,7 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         return tags;
     }
 
-    private async Task<IEnumerable<TagListResponse>> SeedCacheAsync()
+    private async Task<IEnumerable<TagPagedResponse>> SeedCacheAsync()
     {
         using IServiceScope scope = factory.Services.CreateScope();
 
@@ -122,8 +122,8 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         ICacheService cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
         var key = CacheKeys.TagPaged(1, 20, searchTerm, "Id", "Asc");
 
-        IEnumerable<TagListResponse> tagListDtos = cachedTags.ToDto();
-        var pagedResult = PagedResult<TagListResponse>.Create(tagListDtos, 1, 20, tagListDtos.Count());
+        IEnumerable<TagPagedResponse> tagListDtos = cachedTags.ToDto();
+        var pagedResult = PagedResult<TagPagedResponse>.Create(tagListDtos, 1, 20, tagListDtos.Count());
 
         await cache.SetAsync(key, pagedResult, TimeSpan.FromMinutes(5));
 
