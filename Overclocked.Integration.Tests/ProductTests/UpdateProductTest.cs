@@ -93,7 +93,7 @@ public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         StringContent form = CreateJsonContent("New Name", brandId, categoryId, tags);
         await _client.PutAsync(ProductRoutes.Update.Replace("{id:guid}", product.Id.Value.ToString()), form);
 
-        StringContent form2 = CreateJsonContent("New Name", brandId, categoryId, tags, newImages);
+        StringContent form2 = CreateJsonContent("New Name 2", brandId, categoryId, tags, newImages);
 
         // Act
         HttpResponseMessage response = await _client.PutAsync(
@@ -106,9 +106,11 @@ public class UpdateProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        Product? updatedProduct = await dbContext.Products.FindAsync(product.Id);
+        Product? updatedProduct = await dbContext.Products.Include(x => x.Images)
+            .FirstOrDefaultAsync(x => x.Id == product.Id);
+
         updatedProduct.ShouldNotBeNull();
-        updatedProduct.Name.ShouldBe("New Name");
+        updatedProduct.Name.ShouldBe("New Name 2");
         updatedProduct.Images.Select(x => x.ImageUrl).ShouldBe(newImages);
         updatedProduct.Images.Count.ShouldBe(1);
 

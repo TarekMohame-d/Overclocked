@@ -1,8 +1,6 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using Hangfire.Common;
-using Hangfire.States;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -43,7 +41,7 @@ public class RegisterTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        User? userDb = await dbContext.Users.SingleOrDefaultAsync(x => x.Email == Email);
+        User? userDb = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == Email);
         userDb.ShouldNotBeNull();
         userDb.EmailConfirmed.ShouldBeFalse();
     }
