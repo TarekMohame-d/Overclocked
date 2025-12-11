@@ -14,9 +14,9 @@ public static class TagMapping
         };
     }
 
-    public static IEnumerable<TagListResponse> ToDto(this IEnumerable<TagEntity> entities)
+    public static IEnumerable<TagPagedResponse> ToDto(this IEnumerable<TagEntity> entities)
     {
-        return entities.Select(x => new TagListResponse
+        return entities.Select(x => new TagPagedResponse
         {
             Id = x.Id,
             Name = x.Name

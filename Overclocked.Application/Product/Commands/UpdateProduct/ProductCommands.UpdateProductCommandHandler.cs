@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.EntityFrameworkCore;
 using Overclocked.Application.Product.Commands.UpdateProduct;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
@@ -16,9 +17,12 @@ public sealed partial class ProductCommands
         CancellationToken cancellationToken)
     {
         ProductEntity? product = await productRepository
-            .SingleOrDefaultAsync(
+            .FirstOrDefaultAsync(
             x => x.Id == ProductId.Create(command.Id),
-            asNoTracking: false,
+            include: x => x.Include(x => x.Images)
+                .Include(x => x.Tags)
+                .Include(x => x.Specifications),
+            false,
             cancellationToken);
 
         if(product is null)

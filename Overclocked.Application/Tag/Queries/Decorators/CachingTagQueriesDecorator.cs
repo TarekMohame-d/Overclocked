@@ -12,22 +12,22 @@ public class CachingTagQueriesDecorator(
     ICacheService cacheService,
     ILogger<CachingTagQueriesDecorator> logger) : ITagQueries
 {
-    public async Task<Result<PagedResult<TagListResponse>>> GetPagedTagsQueryHandler(GetPagedTagsQuery query, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<TagPagedResponse>>> GetPagedTagsQueryHandler(GetPagedTagsQuery query, CancellationToken cancellationToken)
     {
         var cacheKey = query.CacheKey;
 
         // Try get from cache
-        PagedResult<TagListResponse>? cachedValue = await cacheService
-            .GetAsync<PagedResult<TagListResponse>>(cacheKey, cancellationToken);
+        PagedResult<TagPagedResponse>? cachedValue = await cacheService
+            .GetAsync<PagedResult<TagPagedResponse>>(cacheKey, cancellationToken);
 
         if(cachedValue is not null)
         {
             logger.LogInformation("Cache hit for {QueryName}", nameof(GetPagedTagsQuery));
-            return Result<PagedResult<TagListResponse>>.Success(cachedValue);
+            return Result<PagedResult<TagPagedResponse>>.Success(cachedValue);
         }
 
         logger.LogInformation("Cache miss for {QueryName}", nameof(GetPagedTagsQuery));
-        Result<PagedResult<TagListResponse>> result = await inner.GetPagedTagsQueryHandler(query, cancellationToken);
+        Result<PagedResult<TagPagedResponse>> result = await inner.GetPagedTagsQueryHandler(query, cancellationToken);
 
         if(result.IsSuccess)
         {

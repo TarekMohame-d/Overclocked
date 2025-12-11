@@ -9,7 +9,7 @@ namespace Overclocked.Application.Tag.Queries.Decorators;
 public class ValidatingTagQueriesDecorator(ITagQueries inner,
         IValidator<GetPagedTagsQuery> getPagedValidator) : ITagQueries
 {
-    public async Task<Result<PagedResult<TagListResponse>>> GetPagedTagsQueryHandler(GetPagedTagsQuery query, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<TagPagedResponse>>> GetPagedTagsQueryHandler(GetPagedTagsQuery query, CancellationToken cancellationToken)
     {
         ValidationResult validationResult = await getPagedValidator.ValidateAsync(query, cancellationToken);
 
@@ -20,10 +20,10 @@ public class ValidatingTagQueriesDecorator(ITagQueries inner,
                 .GroupBy(e => e.PropertyName)
                 .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
-            return Result<PagedResult<TagListResponse>>.ValidationError<GetPagedTagsQuery>(errorDictionary);
+            return Result<PagedResult<TagPagedResponse>>.ValidationError<GetPagedTagsQuery>(errorDictionary);
         }
 
-        Result<PagedResult<TagListResponse>> result = await inner.GetPagedTagsQueryHandler(query, cancellationToken);
+        Result<PagedResult<TagPagedResponse>> result = await inner.GetPagedTagsQueryHandler(query, cancellationToken);
 
         return result;
     }

@@ -110,9 +110,10 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
 
                 if(missingTags.Count != 0)
                 {
+                    var formatted = string.Join(", ", missingTags);
                     context.AddFailure(
                         "Tags",
-                        $"The following tags do not exist: [\n{string.Join(",\n", missingTags)}\n]");
+                        $"The following tags do not exist:[{formatted}]");
                 }
             });
     }

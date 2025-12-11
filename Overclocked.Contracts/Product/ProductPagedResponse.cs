@@ -1,0 +1,16 @@
+using Overclocked.Contracts.Brand;
+
+namespace Overclocked.Contracts.Product;
+
+public record ProductPagedResponse
+{
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
+    public required string Thumbnail { get; init; }
+    public required decimal Price { get; init; }
+    public required decimal Discount { get; init; }
+    public required decimal FinalPrice { get; init; }
+    public required double Rating { get; init; }
+    public required int ReviewCount { get; init; }
+    public required BrandResponse Brand { get; init; }
+}

@@ -61,7 +61,7 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
                 .HasColumnType("timestamptz")
                 .IsRequired();
 
-            cib.Property(ci => ci.CreatedAt)
+            cib.Property(ci => ci.UpdatedAt)
                 .HasColumnType("timestamptz")
                 .IsRequired();
         });

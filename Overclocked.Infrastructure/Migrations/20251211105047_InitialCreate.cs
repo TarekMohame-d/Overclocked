@@ -415,7 +415,7 @@ namespace Overclocked.Infrastructure.Migrations
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -645,7 +645,8 @@ namespace Overclocked.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_DeviceId",
                 table: "RefreshTokens",
-                column: "DeviceId");
+                column: "DeviceId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_UserId",

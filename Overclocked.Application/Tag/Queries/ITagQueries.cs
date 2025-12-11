@@ -6,7 +6,7 @@ namespace Overclocked.Application.Tag.Queries;
 
 public interface ITagQueries
 {
-    Task<Result<PagedResult<TagListResponse>>> GetPagedTagsQueryHandler(
+    Task<Result<PagedResult<TagPagedResponse>>> GetPagedTagsQueryHandler(
         GetPagedTagsQuery query,
         CancellationToken cancellationToken);
 }

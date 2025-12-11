@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Overclocked.Application.Abstraction.Messaging;
 using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Product.Queries.GetPagedProducts;
 using Overclocked.Application.Product.Queries.GetProduct;
 using Overclocked.Contracts.Product;
 using Overclocked.Domain.Common.Results;
@@ -17,10 +18,10 @@ public class CachingProductQueriesDecorator(
         CancellationToken cancellationToken) =>
             ExecuteWithCacheAsync(query, inner.GetProductQueryHandler, cancellationToken);
 
-    // public Task<Result<IEnumerable<BrandListResponse>>> GetBrandListQueryHandler(
-    //     GetBrandListQuery query,
-    //     CancellationToken cancellationToken) =>
-    //         ExecuteWithCacheAsync(query, inner.GetBrandListQueryHandler, cancellationToken);
+    public Task<Result<PagedResult<ProductPagedResponse>>> GetPagedProductsQueryHandler(
+        GetPagedProductsQuery query,
+        CancellationToken cancellationToken) =>
+            ExecuteWithCacheAsync(query, inner.GetPagedProductsQueryHandler, cancellationToken);
 
     private async Task<Result<T>> ExecuteWithCacheAsync<T, TRequest>(
         TRequest query,

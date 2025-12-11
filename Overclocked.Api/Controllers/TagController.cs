@@ -11,7 +11,6 @@ using Overclocked.Application.Tag.Queries.GetTags;
 using Overclocked.Contracts.Tag;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.Common.StaticData;
-using Overclocked.Domain.TagAggregate.ValueObjects;
 
 namespace Overclocked.Api.Controllers;
 
@@ -24,16 +23,9 @@ public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : C
         [FromQuery] GetPagedTagsRequest request,
         CancellationToken cancellationToken)
     {
-        var query = new GetPagedTagsQuery
-        {
-            Page = request.Page,
-            PageSize = request.PageSize,
-            SearchTerm = request.SearchTerm,
-            SortBy = request.SortBy,
-            Direction = request.Direction
-        };
+        var query = GetPagedTagsQuery.ToQuery(request);
 
-        Result<PagedResult<TagListResponse>> response = await tagQueries
+        Result<PagedResult<TagPagedResponse>> response = await tagQueries
             .GetPagedTagsQueryHandler(query, cancellationToken);
 
         return response.ToActionResult(this);

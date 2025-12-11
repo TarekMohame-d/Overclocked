@@ -64,7 +64,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         // Relationships
-        builder.HasOne<Role>()
+        builder.HasOne(u => u.Role)
             .WithMany()
             .HasForeignKey(u => u.RoleId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -100,7 +100,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 .HasColumnType("timestamptz")
                 .IsRequired();
 
-            rtBuilder.HasIndex(rt => rt.DeviceId);
+            rtBuilder.HasIndex(rt => rt.DeviceId)
+                .IsUnique();
         });
 
         builder.OwnsMany(u => u.Addresses, ua =>
@@ -148,9 +149,18 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         });
 
         builder.Navigation(u => u.RefreshTokens)
+            .AutoInclude(false)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Navigation(u => u.Addresses)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(u => u.EmailConfirmationCode)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(u => u.Role)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         // Indexes

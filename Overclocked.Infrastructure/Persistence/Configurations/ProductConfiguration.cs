@@ -196,12 +196,15 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         });
 
         builder.Navigation(p => p.Images)
+            .AutoInclude(false)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Navigation(p => p.Specifications)
+            .AutoInclude(false)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Navigation(p => p.Tags)
+            .AutoInclude(false)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Navigation(p => p.Brand)

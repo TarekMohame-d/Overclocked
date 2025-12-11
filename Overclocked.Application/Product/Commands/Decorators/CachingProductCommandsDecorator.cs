@@ -22,7 +22,7 @@ public class CachingProductCommandsDecorator(
         if(result.IsSuccess)
         {
             logger.LogInformation("Removing cache for Product set: {SetKey}", CacheKeys.ProductSet);
-            await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet);
+            await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
             logger.LogInformation("Removed cache for Product set: {SetKey}", CacheKeys.ProductSet);
         }
 
@@ -44,7 +44,7 @@ public class CachingProductCommandsDecorator(
             logger.LogInformation("Removed cache for Product key: {CacheKey}", key);
 
             logger.LogInformation("Removing cache for Products key: {CacheKey}", CacheKeys.ProductSet);
-            await cacheService.RemoveAsync(CacheKeys.ProductSet, cancellationToken);
+            await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
             logger.LogInformation("Removed cache for Products key: {CacheKey}", CacheKeys.ProductSet);
         }
 
@@ -66,7 +66,7 @@ public class CachingProductCommandsDecorator(
             logger.LogInformation("Removed cache for Product key: {CacheKey}", key);
 
             logger.LogInformation("Removing cache for Products key: {CacheKey}", CacheKeys.ProductSet);
-            await cacheService.RemoveAsync(CacheKeys.ProductSet, cancellationToken);
+            await cacheService.RemoveKeysInSetAsync(CacheKeys.ProductSet, cancellationToken);
             logger.LogInformation("Removed cache for Products key: {CacheKey}", CacheKeys.ProductSet);
         }
 

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Overclocked.Application.Brand.Commands.Decorators;
+using Overclocked.Application.Product.Queries.GetPagedProducts;
 using Overclocked.Application.Product.Queries.GetProduct;
 using Overclocked.Contracts.Product;
 using Overclocked.Domain.Common.Results;
@@ -16,10 +17,10 @@ public class LoggingProductQueriesDecorator(
         CancellationToken cancellationToken) =>
             ExecuteWithLoggingAsync(query, () => inner.GetProductQueryHandler(query, cancellationToken));
 
-    // public Task<Result<IEnumerable<BrandListResponse>>> GetBrandListQueryHandler(
-    //     GetBrandListQuery query,
-    //     CancellationToken cancellationToken) =>
-    //         ExecuteWithLoggingAsync(query, () => inner.GetBrandListQueryHandler(query, cancellationToken));
+    public Task<Result<PagedResult<ProductPagedResponse>>> GetPagedProductsQueryHandler(
+        GetPagedProductsQuery query,
+        CancellationToken cancellationToken) =>
+            ExecuteWithLoggingAsync(query, () => inner.GetPagedProductsQueryHandler(query, cancellationToken));
 
     private async Task<TResult> ExecuteWithLoggingAsync<TResult>(object query, Func<Task<TResult>> action)
         where TResult : Result

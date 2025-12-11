@@ -19,11 +19,11 @@ public static class CacheKeys
         int pageSize,
         string sortBy,
         string direction,
-        string category,
-        string brand,
+        string categoryId,
+        string brandId,
         string tagId,
         string searchTerm
     ) =>
-        $"products:page={page}:size={pageSize}:sortBy={sortBy}:direction={direction}:category={category}:brand={brand}:searchTerm={searchTerm}:tagId={tagId}";
+        $"products:page={page}:size={pageSize}:sortBy={sortBy}:direction={direction}:categoryId={categoryId}:brandId={brandId}:searchTerm={searchTerm}:tagId={tagId}";
     public static string ProductSet => "products:pages";
 }
