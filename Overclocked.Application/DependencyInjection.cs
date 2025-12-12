@@ -7,6 +7,8 @@ using Overclocked.Application.Brand.Commands;
 using Overclocked.Application.Brand.Commands.Decorators;
 using Overclocked.Application.Brand.Queries;
 using Overclocked.Application.Brand.Queries.Decorators;
+using Overclocked.Application.Cart.Commands;
+using Overclocked.Application.Cart.Commands.Decorators;
 using Overclocked.Application.Category.Commands;
 using Overclocked.Application.Category.Commands.Decorators;
 using Overclocked.Application.Category.Queries;
@@ -76,6 +78,10 @@ public static class DependencyInjection
         services.Decorate<IProductCommands, CachingProductCommandsDecorator>();
         services.Decorate<IProductCommands, ValidatingProductCommandsDecorator>();
         services.Decorate<IProductCommands, LoggingProductCommandsDecorator>();
+
+        services.Decorate<ICartCommands, CachingCartCommandsDecorator>();
+        services.Decorate<ICartCommands, ValidatingCartCommandsDecorator>();
+        services.Decorate<ICartCommands, LoggingCartCommandsDecorator>();
 
         return services;
     }

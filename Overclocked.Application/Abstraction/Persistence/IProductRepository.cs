@@ -1,5 +1,4 @@
 using Overclocked.Application.Common.Enums;
-using Overclocked.Contracts.Product;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 using ProductEntity = Overclocked.Domain.ProductAggregate.Product;
 
@@ -7,7 +6,8 @@ namespace Overclocked.Application.Abstraction.Persistence;
 
 public interface IProductRepository : IGenericRepository<ProductEntity, ProductId>
 {
-    Task<ProductEntity?> GetByIdWithDetailsAsync(ProductId id, CancellationToken cancellationToken);
+    Task<bool> ExistsAsync(ProductId id, CancellationToken cancellationToken = default);
+    Task<ProductEntity?> GetByIdWithDetailsAsync(ProductId id, CancellationToken cancellationToken = default);
     Task<int> CountAsync(
         string searchTerm,
         Guid brandId,
@@ -24,4 +24,6 @@ public interface IProductRepository : IGenericRepository<ProductEntity, ProductI
         ProductSortField sortBy,
         SortDirection direction,
         CancellationToken cancellationToken = default);
+
+    Task<List<ProductEntity>> GetByIdsAsync(List<ProductId> ids, CancellationToken cancellationToken = default);
 }

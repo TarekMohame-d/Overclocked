@@ -26,4 +26,6 @@ public static class CacheKeys
     ) =>
         $"products:page={page}:size={pageSize}:sortBy={sortBy}:direction={direction}:categoryId={categoryId}:brandId={brandId}:searchTerm={searchTerm}:tagId={tagId}";
     public static string ProductSet => "products:pages";
+
+    public static string Cart(string id) => $"cart-{id}";
 }
