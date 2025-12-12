@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Overclocked.Application.Abstraction.Persistence;
 using Overclocked.Application.Common.Enums;
-using Overclocked.Contracts.Brand;
-using Overclocked.Contracts.Product;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.ProductAggregate;
@@ -15,7 +13,21 @@ public class ProductRepository(ApplicationDbContext context)
     : GenericRepository<Product, ProductId>(context), IProductRepository
 {
     private readonly ApplicationDbContext _dbContext = context;
-    public Task<Product?> GetByIdWithDetailsAsync(ProductId id, CancellationToken cancellationToken)
+
+    public Task<bool> ExistsAsync(ProductId id, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Products.AnyAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public Task<List<Product>> GetByIdsAsync(List<ProductId> ids, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Products
+            .AsNoTracking()
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<Product?> GetByIdWithDetailsAsync(ProductId id, CancellationToken cancellationToken = default)
     {
         return _dbContext.Products
             .AsNoTracking()

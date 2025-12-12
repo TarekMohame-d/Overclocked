@@ -11,8 +11,13 @@ public class WishlistRepository(ApplicationDbContext context)
 {
     private readonly ApplicationDbContext _context = context;
 
-    public Task<Wishlist?> GetByUserIdAsync(UserId userId, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsAsync(UserId userId, CancellationToken cancellationToken = default)
     {
-        return _context.Wishlists.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+        return _context.Wishlists.AnyAsync(x => x.UserId == userId, cancellationToken);
+    }
+
+    public Task<Wishlist?> GetWishlistAsync(UserId userId, CancellationToken cancellationToken = default)
+    {
+        return _context.Wishlists.AsTracking().FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
     }
 }
