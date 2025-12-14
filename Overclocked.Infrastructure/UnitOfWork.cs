@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Overclocked.Application.Abstraction;
+using Overclocked.Application.Abstractions;
 using Overclocked.Infrastructure.Persistence;
 
 namespace Overclocked.Infrastructure;

@@ -54,7 +54,7 @@ public class DeleteBrandTest(CustomWebApplicationFactory factory) : IAsyncLifeti
             BrandRoutes.Delete.Replace("{id:guid}", brand.Id.Value.ToString()));
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

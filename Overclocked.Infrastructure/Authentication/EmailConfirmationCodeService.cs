@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 
 namespace Overclocked.Infrastructure.Authentication;
 

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 using StackExchange.Redis;
 
 namespace Overclocked.Infrastructure.Services;

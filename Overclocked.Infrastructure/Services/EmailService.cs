@@ -3,7 +3,7 @@ using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Text;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 
 namespace Overclocked.Infrastructure.Services;
 

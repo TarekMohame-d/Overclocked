@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Overclocked.Domain.ReviewAggregate;
 using Overclocked.Domain.ReviewAggregate.ValueObjects;
@@ -13,7 +13,7 @@ public class ReviewRepository(ApplicationDbContext context)
         ProductId productId,
         CancellationToken cancellationToken = default)
     {
-        var grouped = await Query()
+        var grouped = await _dbSet
             .Where(r => r.ProductId == productId)
             .GroupBy(r => r.Rating)
             .Select(g => new { Rating = g.Key, Count = g.Count() })

@@ -1,10 +1,7 @@
-using System.Linq.Expressions;
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Abstraction.Services;
-using Overclocked.Application.Authentication.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Authentication.Commands.ResetPassword;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.Common.Enums;
@@ -18,35 +15,23 @@ namespace Overclocked.Unit.Tests.AuthenticationTests;
 public class ResetPasswordCommandHandlerTest
 {
     private readonly IUserRepository _userRepositoryMock;
-    private readonly IPermissionRepository _permissionRepositoryMock;
-    private readonly ITokenProvider _tokenProviderMock;
-    private readonly ITokenReaderService _tokenReaderServiceMock;
     private readonly IEmailConfirmationCodeService _emailConfirmationCodeServiceMock;
-    private readonly IRefreshTokenHasher _refreshTokenHasherMock;
     private readonly IPasswordHasher _passwordHasherMock;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IAuthenticationCommands _authenticationCommands;
+    private readonly ResetPasswordCommandHandler _resetPasswordCommandHandler;
 
     public ResetPasswordCommandHandlerTest()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
-        _permissionRepositoryMock = Substitute.For<IPermissionRepository>();
         _emailConfirmationCodeServiceMock = Substitute.For<IEmailConfirmationCodeService>();
         _passwordHasherMock = Substitute.For<IPasswordHasher>();
-        _tokenProviderMock = Substitute.For<ITokenProvider>();
-        _refreshTokenHasherMock = Substitute.For<IRefreshTokenHasher>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _tokenReaderServiceMock = Substitute.For<ITokenReaderService>();
 
-        _authenticationCommands = new AuthenticationCommands(
+        _resetPasswordCommandHandler = new ResetPasswordCommandHandler(
             _userRepositoryMock,
-            _permissionRepositoryMock,
-            _tokenProviderMock,
-            _refreshTokenHasherMock,
+            _unitOfWorkMock,
             _passwordHasherMock,
-            _emailConfirmationCodeServiceMock,
-            _tokenReaderServiceMock,
-            _unitOfWorkMock);
+            _emailConfirmationCodeServiceMock);
     }
 
     [Fact]
@@ -64,11 +49,10 @@ public class ResetPasswordCommandHandlerTest
             .Returns((User)null!);
 
         // Act
-        Result result = await _authenticationCommands.ResetPasswordCommandHandler(command, CancellationToken.None);
+        Result result = await _resetPasswordCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
@@ -94,11 +78,10 @@ public class ResetPasswordCommandHandlerTest
             .Returns(user);
 
         // Act
-        Result result = await _authenticationCommands.ResetPasswordCommandHandler(command, CancellationToken.None);
+        Result result = await _resetPasswordCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
@@ -127,11 +110,10 @@ public class ResetPasswordCommandHandlerTest
             .Returns(false);
 
         // Act
-        Result result = await _authenticationCommands.ResetPasswordCommandHandler(command, CancellationToken.None);
+        Result result = await _resetPasswordCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
@@ -166,11 +148,10 @@ public class ResetPasswordCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result result = await _authenticationCommands.ResetPasswordCommandHandler(command, CancellationToken.None);
+        Result result = await _resetPasswordCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         await _userRepositoryMock.Received(1)
             .GetByEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());

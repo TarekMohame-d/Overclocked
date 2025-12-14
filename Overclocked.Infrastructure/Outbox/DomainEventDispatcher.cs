@@ -1,6 +1,6 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Overclocked.Application.Abstraction.Messaging;
+using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Domain.Common.Primitives;
 
 namespace Overclocked.Infrastructure.Outbox;

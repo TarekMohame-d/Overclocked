@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Authentication.Commands.Common;
 using Overclocked.Application.Common.Constants;
 using Overclocked.Infrastructure.Configurations;

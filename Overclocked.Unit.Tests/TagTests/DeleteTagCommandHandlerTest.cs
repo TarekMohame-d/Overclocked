@@ -1,8 +1,6 @@
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Tag.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Tag.Commands.DeleteTag;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.Common.Enums;
@@ -16,14 +14,14 @@ namespace Overclocked.Unit.Tests.TagTests;
 public class DeleteTagCommandHandlerTest
 {
     private readonly ITagRepository _tagRepositoryMock;
-    private readonly ITagCommands _tagCommands;
     private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly DeleteTagCommandHandler _deleteTagCommandHandler;
 
     public DeleteTagCommandHandlerTest()
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _tagRepositoryMock = Substitute.For<ITagRepository>();
-        _tagCommands = new TagCommands(_tagRepositoryMock, _unitOfWorkMock);
+        _deleteTagCommandHandler = new DeleteTagCommandHandler(_tagRepositoryMock, _unitOfWorkMock);
     }
 
     [Fact]
@@ -37,20 +35,19 @@ public class DeleteTagCommandHandlerTest
             Id = tagId
         };
 
-        _tagRepositoryMock.GetByIdAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>())
+        _tagRepositoryMock.FindAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>())
             .Returns((Tag)null!);
 
         // Act
-        Result result = await _tagCommands.DeleteTagCommandHandler(command, CancellationToken.None);
+        Result result = await _deleteTagCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBe(Error.None);
-        result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
         await _tagRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>());
+            .FindAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -65,7 +62,7 @@ public class DeleteTagCommandHandlerTest
 
         Tag? tag = new TagFaker().Generate();
 
-        _tagRepositoryMock.GetByIdAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>())
+        _tagRepositoryMock.FindAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>())
             .Returns(tag);
 
         _tagRepositoryMock.Delete(Arg.Any<Tag>());
@@ -74,15 +71,14 @@ public class DeleteTagCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result result = await _tagCommands.DeleteTagCommandHandler(command, CancellationToken.None);
+        Result result = await _deleteTagCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Error.ShouldBe(Error.None);
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         await _tagRepositoryMock.Received(1)
-            .GetByIdAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>());
+            .FindAsync(Arg.Any<TagId>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)
             .SaveChangesAsync(Arg.Any<CancellationToken>());

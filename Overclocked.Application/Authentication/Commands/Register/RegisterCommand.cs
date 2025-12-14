@@ -1,6 +1,8 @@
+using Overclocked.Application.Abstractions.Messaging;
+
 namespace Overclocked.Application.Authentication.Commands.Register;
 
-public record RegisterCommand
+public record RegisterCommand : ICommand
 {
     public required string Email { get; init; }
     public required string Password { get; init; }

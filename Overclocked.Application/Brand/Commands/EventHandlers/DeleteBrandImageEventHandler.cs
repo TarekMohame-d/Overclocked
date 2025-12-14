@@ -1,6 +1,6 @@
 using Hangfire;
 using Microsoft.Extensions.Logging;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Domain.BrandAggregate.Events;
 using Overclocked.Domain.Common.Primitives;
 

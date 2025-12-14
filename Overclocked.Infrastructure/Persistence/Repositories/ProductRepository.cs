@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Common.Enums;
-using Overclocked.Contracts.Brand;
-using Overclocked.Contracts.Product;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.ProductAggregate;
@@ -14,19 +12,42 @@ namespace Overclocked.Infrastructure.Persistence.Repositories;
 public class ProductRepository(ApplicationDbContext context)
     : GenericRepository<Product, ProductId>(context), IProductRepository
 {
-    private readonly ApplicationDbContext _dbContext = context;
-    public Task<Product?> GetByIdWithDetailsAsync(ProductId id, CancellationToken cancellationToken)
+    public Task<List<Product>> GetByIdsAsync(List<ProductId> ids, CancellationToken cancellationToken = default)
     {
-        return _dbContext.Products
+        return _dbSet
             .AsNoTracking()
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<Product?> GetByIdAsync(ProductId id, CancellationToken cancellationToken = default)
+    {
+        return _dbSet
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(p => p.Brand)
             .Include(p => p.Category)
             .Include(p => p.Images)
             .Include(p => p.Specifications)
             .Include(p => p.Tags)
                 .ThenInclude(pt => pt.Tag)
-            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
+    public Task<Product?> GetForUpdateAsync(ProductId id, CancellationToken cancellationToken = default)
+    {
+        return _dbSet
+            .AsTracking()
+            .AsSplitQuery()
+            .Include(p => p.Images)
+            .Include(p => p.Specifications)
+            .Include(p => p.Tags)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
+    public Task<Product?> FindAsync(ProductId id, CancellationToken cancellationToken = default)
+    {
+        return _dbSet.FindAsync([id], cancellationToken: cancellationToken).AsTask();
     }
 
     public Task<int> CountAsync(
@@ -44,7 +65,7 @@ public class ProductRepository(ApplicationDbContext context)
         return query.CountAsync(cancellationToken);
     }
 
-    public Task<List<Product>> GetProductsPageAsync(
+    public Task<List<Product>> GetPagedAsync(
         int pageNumber,
         int pageSize,
         string searchTerm,
@@ -55,7 +76,7 @@ public class ProductRepository(ApplicationDbContext context)
         SortDirection direction,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<Product> query = _dbContext.Products.AsNoTracking();
+        IQueryable<Product> query = _dbSet.AsNoTracking();
         query = query.Include(p => p.Brand);
 
         query = ApplySearch(query, searchTerm);

@@ -5,8 +5,9 @@ namespace Overclocked.Domain.Common.Enums;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ErrorType
 {
-    None,
+    None = 0,
     Failure,
+    Problem,
     NotFound,
     Validation,
     BadRequest,

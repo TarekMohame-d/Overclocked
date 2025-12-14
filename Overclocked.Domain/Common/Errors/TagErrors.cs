@@ -7,11 +7,11 @@ public static class TagErrors
 {
     public static Error TagNotFound(Guid id)
     {
-        return new(nameof(TagNotFound), ErrorType.NotFound, $"The tag with ID '{id}' was not found.");
+        return new("Tag.NotFound", $"The tag with ID '{id}' was not found.", ErrorType.NotFound);
     }
 
     public static readonly Error TagNameAlreadyExists = new(
-        nameof(TagNameAlreadyExists),
-        ErrorType.Conflict,
-        "Tag name already exists.");
+        "Tag.NameAlreadyExists",
+        "Tag name already exists.",
+        ErrorType.Conflict);
 }

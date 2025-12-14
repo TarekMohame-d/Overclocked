@@ -1,9 +1,7 @@
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Common.Enums;
-using Overclocked.Application.Tag.Queries;
-using Overclocked.Application.Tag.Queries.GetTags;
+using Overclocked.Application.Tag.Queries.GetPagedTags;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Contracts.Tag;
 using Overclocked.Domain.Common.Results;
@@ -16,12 +14,12 @@ namespace Overclocked.Unit.Tests.TagTests;
 public class GetPagedTagsQueryHandlerTest
 {
     private readonly ITagRepository _tagRepositoryMock;
-    private readonly ITagQueries _tagQueries;
+    private readonly GetPagedTagsQueryHandler _getPagedTagsQueryHandler;
 
     public GetPagedTagsQueryHandlerTest()
     {
         _tagRepositoryMock = Substitute.For<ITagRepository>();
-        _tagQueries = new TagQueries(_tagRepositoryMock);
+        _getPagedTagsQueryHandler = new GetPagedTagsQueryHandler(_tagRepositoryMock);
     }
 
     [Fact]
@@ -41,8 +39,8 @@ public class GetPagedTagsQueryHandlerTest
             .Returns(0);
 
         // Act
-        Result<PagedResult<TagPagedResponse>> result = await _tagQueries
-            .GetPagedTagsQueryHandler(query, CancellationToken.None);
+        Result<PagedResult<TagPagedResponse>> result = await _getPagedTagsQueryHandler
+            .Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -50,7 +48,6 @@ public class GetPagedTagsQueryHandlerTest
         result.Value.Items.ShouldBeEmpty();
         result.Value.HasNextPage.ShouldBeFalse();
         result.Error.ShouldBe(Error.None);
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         await _tagRepositoryMock.Received(1)
             .CountAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
@@ -73,7 +70,7 @@ public class GetPagedTagsQueryHandlerTest
         _tagRepositoryMock.CountAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(10);
 
-        _tagRepositoryMock.GetTagsAsync(
+        _tagRepositoryMock.GetPagedAsync(
             Arg.Any<int>(),
             Arg.Any<int>(),
             Arg.Any<string>(),
@@ -82,21 +79,20 @@ public class GetPagedTagsQueryHandlerTest
             .Returns(tags);
 
         // Act
-        Result<PagedResult<TagPagedResponse>> result = await _tagQueries
-            .GetPagedTagsQueryHandler(query, CancellationToken.None);
+        Result<PagedResult<TagPagedResponse>> result = await _getPagedTagsQueryHandler
+            .Handle(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         result.Error.ShouldBe(Error.None);
         result.Value.Items.ShouldNotBeEmpty();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         await _tagRepositoryMock.Received(1)
             .CountAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
 
         await _tagRepositoryMock.Received(1)
-            .GetTagsAsync(
+            .GetPagedAsync(
             Arg.Any<int>(),
             Arg.Any<int>(),
             Arg.Any<string>(),

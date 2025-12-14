@@ -1,7 +1,7 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Domain.Common.Exceptions;
 using Overclocked.Infrastructure.Configurations;
 

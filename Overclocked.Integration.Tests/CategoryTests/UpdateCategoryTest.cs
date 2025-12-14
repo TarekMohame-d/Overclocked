@@ -62,7 +62,7 @@ public class UpdateCategoryTest(CustomWebApplicationFactory factory) : IAsyncLif
             CategoryRoutes.Update.Replace("{id:guid}", category.Id.Value.ToString()), form);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -86,7 +86,7 @@ public class UpdateCategoryTest(CustomWebApplicationFactory factory) : IAsyncLif
             CategoryRoutes.Update.Replace("{id:guid}", category.Id.Value.ToString()), form);
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

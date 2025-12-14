@@ -1,8 +1,6 @@
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Category.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Category.Commands.CreateCategory;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.CategoryAggregate;
@@ -14,15 +12,15 @@ namespace Overclocked.Unit.Tests.CategoryTests;
 public class CreateCategoryCommandHandlerTest
 {
     private readonly ICategoryRepository _categoryRepositoryMock;
-    private readonly ICategoryCommands _categoryCommands;
     private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly CreateCategoryCommandHandler _createCategoryCommandHandler;
 
     public CreateCategoryCommandHandlerTest()
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _categoryRepositoryMock = Substitute.For<ICategoryRepository>();
 
-        _categoryCommands = new CategoryCommands(_categoryRepositoryMock, _unitOfWorkMock);
+        _createCategoryCommandHandler = new CreateCategoryCommandHandler(_categoryRepositoryMock, _unitOfWorkMock);
     }
 
     [Fact]
@@ -44,11 +42,10 @@ public class CreateCategoryCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result result = await _categoryCommands.CreateCategoryCommandHandler(command, CancellationToken.None);
+        Result result = await _createCategoryCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.Created);
         result.Error.ShouldBe(Error.None);
 
         await _categoryRepositoryMock.Received(1)

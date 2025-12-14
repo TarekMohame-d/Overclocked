@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using FluentValidation.TestHelper;
 using NSubstitute;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Category.Commands.CreateCategory;
 using Overclocked.Unit.Tests.Validations.Category.TestCases;
 using Shouldly;

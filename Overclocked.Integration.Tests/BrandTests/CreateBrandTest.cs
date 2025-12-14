@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +8,6 @@ using NSubstitute;
 using Overclocked.Api.Routing;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.BrandAggregate;
-using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.Common.StaticData;
 using Overclocked.Infrastructure.Persistence;
 using Overclocked.Integration.Tests.Shared;

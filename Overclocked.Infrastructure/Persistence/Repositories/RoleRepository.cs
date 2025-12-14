@@ -1,4 +1,4 @@
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Domain.RoleAggregate;
 using Overclocked.Domain.RoleAggregate.ValueObjects;
 

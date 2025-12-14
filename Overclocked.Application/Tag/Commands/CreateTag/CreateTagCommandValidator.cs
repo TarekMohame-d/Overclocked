@@ -1,5 +1,5 @@
 using FluentValidation;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 
 namespace Overclocked.Application.Tag.Commands.CreateTag;
 

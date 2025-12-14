@@ -52,7 +52,7 @@ public class DeleteTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
             TagRoutes.Delete.Replace("{id:guid}", tag.Id.Value.ToString()));
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

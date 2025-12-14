@@ -7,11 +7,11 @@ public static class CategoryErrors
 {
     public static Error CategoryNotFound(Guid id)
     {
-        return new(nameof(CategoryNotFound), ErrorType.NotFound, $"The category with ID '{id}' was not found.");
+        return new("Category.NotFound", $"The category with ID '{id}' was not found.", ErrorType.NotFound);
     }
 
     public static readonly Error CategoryNameAlreadyExists = new(
-        nameof(CategoryNameAlreadyExists),
-        ErrorType.Conflict,
-        "Category name already exists.");
+        "Category.NameAlreadyExists",
+        "Category name already exists.",
+        ErrorType.Conflict);
 }

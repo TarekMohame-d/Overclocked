@@ -1,11 +1,11 @@
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Domain.CartAggregate;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Domain.CartAggregate.ValueObjects;
 using Overclocked.Domain.Common.Primitives;
 using Overclocked.Domain.UserAggregate.Events;
 using Overclocked.Domain.UserAggregate.ValueObjects;
-using Overclocked.Domain.WishlistAggregate;
 using Overclocked.Domain.WishlistAggregate.ValueObjects;
+using CartEntity = Overclocked.Domain.CartAggregate.Cart;
+using WishlistEntity = Overclocked.Domain.WishlistAggregate.Wishlist;
 
 namespace Overclocked.Application.Authentication.Commands.EventHandlers;
 
@@ -17,17 +17,17 @@ public class UserEmailConfirmedDomainEventHandler(
     {
         var userId = UserId.Create(domainEvent.UserId);
 
-        Cart? existingCart = await cartRepository.GetByUserIdAsync(userId, cancellationToken);
-        if(existingCart is null)
+        var existingCart = await cartRepository.ExistsAsync(userId, cancellationToken);
+        if(!existingCart)
         {
-            var cart = Cart.Create(CartId.Create(), userId);
+            var cart = CartEntity.Create(CartId.Create(), userId);
             await cartRepository.AddAsync(cart, cancellationToken);
         }
 
-        Wishlist? existingWishlist = await wishlistRepository.GetByUserIdAsync(userId, cancellationToken);
-        if(existingWishlist is null)
+        var existingWishlist = await wishlistRepository.ExistsAsync(userId, cancellationToken);
+        if(!existingWishlist)
         {
-            var wishlist = Wishlist.Create(WishlistId.Create(), userId);
+            var wishlist = WishlistEntity.Create(WishlistId.Create(), userId);
             await wishlistRepository.AddAsync(wishlist, cancellationToken);
         }
     }

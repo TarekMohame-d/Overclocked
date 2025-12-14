@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Domain.PermissionAggregate;
 using Overclocked.Domain.PermissionAggregate.ValueObjects;
 using Overclocked.Domain.RoleAggregate;
@@ -10,7 +10,6 @@ namespace Overclocked.Infrastructure.Persistence.Repositories;
 public class PermissionRepository(ApplicationDbContext context)
     : GenericRepository<Permission, PermissionId>(context), IPermissionRepository
 {
-    private readonly ApplicationDbContext _dbContext = context;
     public Task<List<string>> GetPermissionsByRoleIdAsync(RoleId roleId, CancellationToken cancellationToken)
     {
         Task<List<string>> permissionNames = _dbContext.Set<Permission>()
