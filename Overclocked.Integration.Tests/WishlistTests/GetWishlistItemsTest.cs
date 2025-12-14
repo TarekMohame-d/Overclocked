@@ -4,22 +4,22 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Overclocked.Api.Routing;
 using Overclocked.Architecture.Tests.FakeData;
-using Overclocked.Contracts.Cart;
+using Overclocked.Contracts.Wishlist;
 using Overclocked.Domain.BrandAggregate;
-using Overclocked.Domain.CartAggregate;
-using Overclocked.Domain.CartAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate;
 using Overclocked.Domain.ProductAggregate;
 using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.WishlistAggregate;
+using Overclocked.Domain.WishlistAggregate.ValueObjects;
 using Overclocked.Infrastructure.Authentication;
 using Overclocked.Infrastructure.Persistence;
 using Overclocked.Integration.Tests.Shared;
 using Shouldly;
 
-namespace Overclocked.Integration.Tests.CartTests;
+namespace Overclocked.Integration.Tests.WishlistTests;
 
 [Collection(nameof(SharedTestCollection))]
-public class GetCartItemsTest(CustomWebApplicationFactory factory) : IAsyncLifetime
+public class GetWishlistItemsTest(CustomWebApplicationFactory factory) : IAsyncLifetime
 {
     private readonly HttpClient _client = factory.HttpClient;
 
@@ -34,21 +34,21 @@ public class GetCartItemsTest(CustomWebApplicationFactory factory) : IAsyncLifet
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
-    public async Task GetCartItems_Should_ReturnForbidden_When_UserDoesNotHaveRole()
+    public async Task GetWishlistItems_Should_ReturnForbidden_When_UserDoesNotHaveRole()
     {
         // Arrange
         var token = CustomWebApplicationFactory.GenerateJwtToken(role: "Admin");
         factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        HttpResponseMessage response = await _client.GetAsync(CartRoutes.GetCartItems);
+        HttpResponseMessage response = await _client.GetAsync(WishlistRoutes.GetWishlistItems);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
     }
 
     [Fact]
-    public async Task GetCartItems_Should_ReturnSuccess_When_DataIsValid()
+    public async Task GetWishlistItems_Should_ReturnSuccess_When_DataIsValid()
     {
         // Arrange
         User user = await SeedDatabaseAsync();
@@ -57,16 +57,16 @@ public class GetCartItemsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        HttpResponseMessage response = await _client.GetAsync(CartRoutes.GetCartItems);
+        HttpResponseMessage response = await _client.GetAsync(WishlistRoutes.GetWishlistItems);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        CartResponse? result = await response.Content.ReadFromJsonAsync<CartResponse>();
+        WishlistResponse? result = await response.Content.ReadFromJsonAsync<WishlistResponse>();
 
         result.ShouldNotBeNull();
-        result.CartItems.ShouldNotBeEmpty();
-        result.CartItems.Count().ShouldBe(3);
+        result.WishlistItems.ShouldNotBeEmpty();
+        result.WishlistItems.Count().ShouldBe(3);
     }
 
     private async Task<User> SeedDatabaseAsync()
@@ -75,10 +75,10 @@ public class GetCartItemsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         Category category = new CategoryFaker().Generate();
         List<Product> products = new ProductFaker(brand.Id.Value, category.Id.Value).Generate(5);
         User user = new UserFaker(new PasswordHasher()).Generate();
-        var cart = Cart.Create(CartId.Create(), user.Id);
-        CartItemId cartItemId = cart.AddCartItem(products[0].Id, 1);
-        cart.AddCartItem(products[1].Id, 4);
-        cart.AddCartItem(products[2].Id, 2);
+        var wishlist = Wishlist.Create(WishlistId.Create(), user.Id);
+        wishlist.AddWishlistItem(products[0].Id);
+        wishlist.AddWishlistItem(products[1].Id);
+        wishlist.AddWishlistItem(products[2].Id);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -87,7 +87,7 @@ public class GetCartItemsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         await dbContext.Categories.AddAsync(category);
         await dbContext.Products.AddRangeAsync(products);
         await dbContext.Users.AddAsync(user);
-        await dbContext.Carts.AddAsync(cart);
+        await dbContext.Wishlists.AddAsync(wishlist);
         await dbContext.SaveChangesAsync();
 
         return user;

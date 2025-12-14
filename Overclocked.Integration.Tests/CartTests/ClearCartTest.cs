@@ -47,7 +47,7 @@ public class ClearCartTest(CustomWebApplicationFactory factory) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddCartItem_Should_ReturnSuccess_When_DataIsValid()
+    public async Task ClearCart_Should_ReturnSuccess_When_DataIsValid()
     {
         // Arrange
         User user = await SeedDatabaseAsync();
