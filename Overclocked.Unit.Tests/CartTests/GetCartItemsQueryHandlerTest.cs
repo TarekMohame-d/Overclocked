@@ -13,18 +13,18 @@ using Shouldly;
 
 namespace Overclocked.Unit.Tests.CartTests;
 
-public class GetCartItemQueryHandlerTest
+public class GetCartItemsQueryHandlerTest
 {
     private readonly ICartRepository _cartRepositoryMock;
     private readonly IProductRepository _productRepositoryMock;
-    private readonly GetCartItemQueryHandler _getCartItemQueryHandler;
+    private readonly GetCartItemsQueryHandler _getCartItemQueryHandler;
 
-    public GetCartItemQueryHandlerTest()
+    public GetCartItemsQueryHandlerTest()
     {
         _cartRepositoryMock = Substitute.For<ICartRepository>();
         _productRepositoryMock = Substitute.For<IProductRepository>();
 
-        _getCartItemQueryHandler = new GetCartItemQueryHandler(
+        _getCartItemQueryHandler = new GetCartItemsQueryHandler(
             _cartRepositoryMock,
             _productRepositoryMock);
     }
@@ -41,12 +41,12 @@ public class GetCartItemQueryHandlerTest
         cart.AddCartItem(products[1].Id, 4);
         cart.AddCartItem(products[2].Id, 2);
 
-        var command = new GetCartItemQuery
+        var command = new GetCartItemsQuery
         {
             UserId = userId.Value
         };
 
-        _cartRepositoryMock.GetCartAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
+        _cartRepositoryMock.GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
             .Returns(cart);
 
         _productRepositoryMock.GetByIdsAsync(Arg.Any<List<ProductId>>(), Arg.Any<CancellationToken>())
@@ -61,7 +61,7 @@ public class GetCartItemQueryHandlerTest
         result.Error.ShouldBe(Error.None);
 
         await _cartRepositoryMock.Received(1)
-            .GetCartAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
+            .GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
 
         await _productRepositoryMock.Received(1)
             .GetByIdsAsync(Arg.Any<List<ProductId>>(), Arg.Any<CancellationToken>());

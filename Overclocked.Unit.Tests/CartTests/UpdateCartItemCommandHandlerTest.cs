@@ -50,7 +50,7 @@ public class UpdateCartItemCommandHandlerTest
             Quantity = 2
         };
 
-        _cartRepositoryMock.GetCartAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
+        _cartRepositoryMock.GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
             .Returns(cart);
 
         _productRepositoryMock.GetByIdsAsync(Arg.Any<List<ProductId>>(), Arg.Any<CancellationToken>())
@@ -68,7 +68,7 @@ public class UpdateCartItemCommandHandlerTest
         result.Error.ShouldBe(Error.None);
 
         await _cartRepositoryMock.Received(1)
-            .GetCartAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
+            .GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
 
         await _productRepositoryMock.Received(1)
             .GetByIdsAsync(Arg.Any<List<ProductId>>(), Arg.Any<CancellationToken>());

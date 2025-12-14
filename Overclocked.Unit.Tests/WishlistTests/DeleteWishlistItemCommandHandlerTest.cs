@@ -1,55 +1,58 @@
 using NSubstitute;
 using Overclocked.Application.Abstractions;
 using Overclocked.Application.Abstractions.Persistence;
-using Overclocked.Application.Cart.Commands.AddCartItem;
+using Overclocked.Application.Wishlist.Commands.DeleteWishlistItem;
 using Overclocked.Architecture.Tests.FakeData;
-using Overclocked.Contracts.Cart;
-using Overclocked.Domain.CartAggregate;
-using Overclocked.Domain.CartAggregate.ValueObjects;
+using Overclocked.Contracts.Wishlist;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.ProductAggregate;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate.ValueObjects;
+using Overclocked.Domain.WishlistAggregate;
+using Overclocked.Domain.WishlistAggregate.ValueObjects;
 using Shouldly;
 
-namespace Overclocked.Unit.Tests.CartTests;
+namespace Overclocked.Unit.Tests.WishlistTests;
 
-public class AddCartItemCommandHandlerTest
+public class DeleteWishlistItemCommandHandlerTest
 {
-    private readonly ICartRepository _cartRepositoryMock;
+    private readonly IWishlistRepository _wishlistRepositoryMock;
     private readonly IProductRepository _productRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly AddCartItemCommandHandler _addCartItemCommandHandler;
+    private readonly DeleteWishlistItemCommandHandler _deleteWishlistItemCommandHandler;
 
-    public AddCartItemCommandHandlerTest()
+    public DeleteWishlistItemCommandHandlerTest()
     {
-        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _cartRepositoryMock = Substitute.For<ICartRepository>();
+        _wishlistRepositoryMock = Substitute.For<IWishlistRepository>();
         _productRepositoryMock = Substitute.For<IProductRepository>();
+        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
 
-        _addCartItemCommandHandler = new AddCartItemCommandHandler(
-            _cartRepositoryMock,
-            _unitOfWorkMock,
-            _productRepositoryMock);
+        _deleteWishlistItemCommandHandler = new DeleteWishlistItemCommandHandler(
+            _wishlistRepositoryMock,
+            _productRepositoryMock,
+            _unitOfWorkMock);
     }
 
     [Fact]
-    public async Task AddCartItemCommandHandler_Should_ReturnSuccess_When_ThereIsNoError()
+    public async Task DeleteWishlistItemCommandHandler_Should_ReturnSuccess_When_ThereIsNoError()
     {
         // Arrange
         List<Product> products = new ProductFaker(Guid.NewGuid(), Guid.NewGuid()).Generate(3);
         var userId = UserId.Create(Guid.NewGuid());
-        var command = new AddCartItemCommand
+
+        var wishlist = Wishlist.Create(WishlistId.Create(), userId);
+        wishlist.AddWishlistItem(products[0].Id);
+        wishlist.AddWishlistItem(products[1].Id);
+        wishlist.AddWishlistItem(products[2].Id);
+
+        var command = new DeleteWishlistItemCommand
         {
             UserId = userId.Value,
-            ProductId = products[0].Id.Value,
-            Quantity = 1
+            ProductId = products[0].Id
         };
 
-        var cart = Cart.Create(CartId.Create(), userId);
-
-        _cartRepositoryMock.GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
-            .Returns(cart);
+        _wishlistRepositoryMock.GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
+            .Returns(wishlist);
 
         _productRepositoryMock.GetByIdsAsync(Arg.Any<List<ProductId>>(), Arg.Any<CancellationToken>())
             .Returns(products);
@@ -58,14 +61,15 @@ public class AddCartItemCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result<CartResponse> result = await _addCartItemCommandHandler
+        Result<WishlistResponse> result = await _deleteWishlistItemCommandHandler
             .Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        result.Value.WishlistItems.Count().ShouldBe(2);
         result.Error.ShouldBe(Error.None);
 
-        await _cartRepositoryMock.Received(1)
+        await _wishlistRepositoryMock.Received(1)
             .GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
 
         await _productRepositoryMock.Received(1)
