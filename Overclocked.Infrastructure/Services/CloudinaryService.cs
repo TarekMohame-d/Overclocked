@@ -1,6 +1,6 @@
 using CloudinaryDotNet;
 using Microsoft.Extensions.Options;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Common;
 using Overclocked.Infrastructure.Configurations;
 

@@ -6,42 +6,42 @@ namespace Overclocked.Domain.Common.Errors;
 public static class AuthenticationErrors
 {
     public static readonly Error InvalidConfirmationCodeCredentials = new(
-        nameof(InvalidConfirmationCodeCredentials),
-        ErrorType.BadRequest,
-        "Email or Code is incorrect.");
+        "Authentication.InvalidConfirmationCodeCredentials",
+        "Email or Code is incorrect.",
+        ErrorType.BadRequest);
 
     public static readonly Error EmailAlreadyConfirmed = new(
-        nameof(EmailAlreadyConfirmed),
-        ErrorType.Conflict,
-        "Email already confirmed, please login.");
+        "Authentication.EmailAlreadyConfirmed",
+        "Email already confirmed, please login.",
+        ErrorType.Conflict);
 
     public static readonly Error EmailConfirmationCodeExpired = new(
-        nameof(EmailConfirmationCodeExpired),
-        ErrorType.BadRequest,
-        "Email confirmation code expired, please request new one.");
+        "Authentication.EmailConfirmationCodeExpired",
+        "Email confirmation code expired, please request new one.",
+        ErrorType.BadRequest);
 
     public static readonly Error InvalidCredentials = new(
-        nameof(InvalidCredentials),
-        ErrorType.BadRequest,
-        "Email or password is incorrect.");
+        "Authentication.InvalidCredentials",
+        "Email or password is incorrect.",
+        ErrorType.BadRequest);
 
     public static readonly Error EmailNotConfirmed = new(
-        nameof(EmailNotConfirmed),
-        ErrorType.BadRequest,
-        "Email not confirmed, please confirm email first.");
+        "Authentication.EmailNotConfirmed",
+        "Email not confirmed, please confirm email first.",
+        ErrorType.BadRequest);
 
     public static readonly Error InvalidAccessToken = new(
-        nameof(InvalidAccessToken),
-        ErrorType.BadRequest,
-        "Invalid access token.");
+        "Authentication.InvalidAccessToken",
+        "Invalid access token.",
+        ErrorType.BadRequest);
 
     public static readonly Error InvalidRefreshToken = new(
-        nameof(InvalidRefreshToken),
-        ErrorType.BadRequest,
-        "Invalid refresh token.");
+        "Authentication.InvalidRefreshToken",
+        "Invalid refresh token.",
+        ErrorType.BadRequest);
 
     public static readonly Error InvalidResetPasswordCredentials = new(
-        nameof(InvalidResetPasswordCredentials),
-        ErrorType.BadRequest,
-        "Email or Code is incorrect.");
+        "Authentication.InvalidResetPasswordCredentials",
+        "Email or Code is incorrect.",
+        ErrorType.BadRequest);
 }

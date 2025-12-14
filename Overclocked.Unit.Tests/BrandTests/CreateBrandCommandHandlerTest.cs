@@ -1,8 +1,6 @@
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Brand.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Brand.Commands.CreateBrand;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.BrandAggregate;
@@ -14,15 +12,15 @@ namespace Overclocked.Unit.Tests.BrandTests;
 public class CreateBrandCommandHandlerTest
 {
     private readonly IBrandRepository _brandRepositoryMock;
-    private readonly IBrandCommands _brandCommands;
     private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly CreateBrandCommandHandler _createBrandCommandHandler;
 
     public CreateBrandCommandHandlerTest()
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
 
-        _brandCommands = new BrandCommands(_brandRepositoryMock, _unitOfWorkMock);
+        _createBrandCommandHandler = new CreateBrandCommandHandler(_brandRepositoryMock, _unitOfWorkMock);
     }
 
     [Fact]
@@ -44,11 +42,10 @@ public class CreateBrandCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result result = await _brandCommands.CreateBrandCommandHandler(command, CancellationToken.None);
+        Result result = await _createBrandCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.Created);
         result.Error.ShouldBe(Error.None);
 
         await _brandRepositoryMock.Received(1)

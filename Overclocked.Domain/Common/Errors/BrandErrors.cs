@@ -7,11 +7,11 @@ public static class BrandErrors
 {
     public static Error BrandNotFound(Guid id)
     {
-        return new(nameof(BrandNotFound), ErrorType.NotFound, $"The brand with ID '{id}' was not found.");
+        return new("Brand.NotFound", $"The brand with ID '{id}' was not found.", ErrorType.NotFound);
     }
 
     public static readonly Error BrandNameAlreadyExists = new(
-        nameof(BrandNameAlreadyExists),
-        ErrorType.Conflict,
-        "Brand name already exists.");
+        "Brand.NameAlreadyExists",
+        "Brand name already exists.",
+        ErrorType.Conflict);
 }

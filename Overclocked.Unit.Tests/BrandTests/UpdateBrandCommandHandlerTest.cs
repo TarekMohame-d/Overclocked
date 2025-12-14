@@ -1,9 +1,7 @@
 using System.Linq.Expressions;
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Brand.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Brand.Commands.UpdateBrand;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.BrandAggregate;
@@ -17,15 +15,15 @@ namespace Overclocked.Unit.Tests.BrandTests;
 public class UpdateBrandCommandHandlerTest
 {
     private readonly IBrandRepository _brandRepositoryMock;
-    private readonly IBrandCommands _brandCommands;
     private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly UpdateBrandCommandHandler _updateBrandCommandHandler;
 
     public UpdateBrandCommandHandlerTest()
     {
         _brandRepositoryMock = Substitute.For<IBrandRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
 
-        _brandCommands = new BrandCommands(_brandRepositoryMock, _unitOfWorkMock);
+        _updateBrandCommandHandler = new UpdateBrandCommandHandler(_brandRepositoryMock, _unitOfWorkMock);
     }
 
     [Fact]
@@ -40,26 +38,19 @@ public class UpdateBrandCommandHandlerTest
             ImageUrl = "image.png"
         };
 
-        _brandRepositoryMock.SingleOrDefaultAsync(
-            Arg.Any<Expression<Func<Brand, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
-            Arg.Any<CancellationToken>())
+        _brandRepositoryMock.FindAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>())
             .Returns((Brand)null!);
 
         // Act
-        Result result = await _brandCommands.UpdateBrandCommandHandler(command, CancellationToken.None);
+        Result result = await _updateBrandCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
         await _brandRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
-            Arg.Any<Expression<Func<Brand, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
-            Arg.Any<CancellationToken>());
+            .FindAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -76,10 +67,7 @@ public class UpdateBrandCommandHandlerTest
 
         Brand brand = new BrandFaker().Generate();
 
-        _brandRepositoryMock.SingleOrDefaultAsync(
-            Arg.Any<Expression<Func<Brand, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
-            Arg.Any<CancellationToken>())
+        _brandRepositoryMock.FindAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
         _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>())
@@ -89,18 +77,14 @@ public class UpdateBrandCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result result = await _brandCommands.UpdateBrandCommandHandler(command, CancellationToken.None);
+        Result result = await _updateBrandCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBe(Error.None);
 
         await _brandRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
-            Arg.Any<Expression<Func<Brand, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
-            Arg.Any<CancellationToken>());
+            .FindAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>());
 
         await _brandRepositoryMock.Received(1)
             .AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>());
@@ -123,28 +107,21 @@ public class UpdateBrandCommandHandlerTest
 
         Brand brand = new BrandFaker().Generate();
 
-        _brandRepositoryMock.SingleOrDefaultAsync(
-            Arg.Any<Expression<Func<Brand, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
-            Arg.Any<CancellationToken>())
+        _brandRepositoryMock.FindAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
         _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         // Act
-        Result result = await _brandCommands.UpdateBrandCommandHandler(command, CancellationToken.None);
+        Result result = await _updateBrandCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.Conflict);
         result.Error.ShouldNotBe(Error.None);
 
         await _brandRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
-            Arg.Any<Expression<Func<Brand, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
-            Arg.Any<CancellationToken>());
+            .FindAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>());
 
         await _brandRepositoryMock.Received(1)
             .AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>());
@@ -164,28 +141,21 @@ public class UpdateBrandCommandHandlerTest
 
         Brand brand = new BrandFaker().Generate();
 
-        _brandRepositoryMock.SingleOrDefaultAsync(
-            Arg.Any<Expression<Func<Brand, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
-            Arg.Any<CancellationToken>())
+        _brandRepositoryMock.FindAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>())
             .Returns(brand);
 
         _brandRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         // Act
-        Result result = await _brandCommands.UpdateBrandCommandHandler(command, CancellationToken.None);
+        Result result = await _updateBrandCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBe(Error.None);
 
         await _brandRepositoryMock.Received(1)
-            .SingleOrDefaultAsync(
-            Arg.Any<Expression<Func<Brand, bool>>>(),
-            asNoTracking: Arg.Any<bool>(),
-            Arg.Any<CancellationToken>());
+            .FindAsync(Arg.Any<BrandId>(), Arg.Any<CancellationToken>());
 
         await _brandRepositoryMock.Received(1)
             .AnyAsync(Arg.Any<Expression<Func<Brand, bool>>>(), Arg.Any<CancellationToken>());

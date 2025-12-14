@@ -1,8 +1,6 @@
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Product.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Product.Commands.CreateProduct;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.Common.Results;
@@ -15,14 +13,14 @@ public class CreateProductCommandHandlerTest
 {
     private readonly IProductRepository _productRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IProductCommands _productCommands;
+    private readonly CreateProductCommandHandler _createProductCommandHandler;
 
     public CreateProductCommandHandlerTest()
     {
         _productRepositoryMock = Substitute.For<IProductRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
 
-        _productCommands = new ProductCommands(
+        _createProductCommandHandler = new CreateProductCommandHandler(
             _productRepositoryMock,
             _unitOfWorkMock);
     }
@@ -55,11 +53,10 @@ public class CreateProductCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result result = await _productCommands.CreateProductCommandHandler(command, CancellationToken.None);
+        Result result = await _createProductCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.Created);
 
         await _productRepositoryMock.Received(1)
             .AddAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>());

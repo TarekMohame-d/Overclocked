@@ -2,12 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Overclocked.Api.Extensions;
 using Overclocked.Api.Routing;
-using Overclocked.Application.Tag.Commands;
+using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Application.Tag.Commands.CreateTag;
 using Overclocked.Application.Tag.Commands.DeleteTag;
 using Overclocked.Application.Tag.Commands.UpdateTag;
-using Overclocked.Application.Tag.Queries;
-using Overclocked.Application.Tag.Queries.GetTags;
+using Overclocked.Application.Tag.Queries.GetPagedTags;
 using Overclocked.Contracts.Tag;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.Common.StaticData;
@@ -15,20 +14,25 @@ using Overclocked.Domain.Common.StaticData;
 namespace Overclocked.Api.Controllers;
 
 [ApiController]
-public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : ControllerBase
+public class TagController(
+    ICommandHandler<CreateTagCommand> createHandler,
+    ICommandHandler<UpdateTagCommand> updateHandler,
+    ICommandHandler<DeleteTagCommand> deleteHandler,
+    IQueryHandler<GetPagedTagsQuery, PagedResult<TagPagedResponse>> getPagedHandler) : ControllerBase
 {
     [HttpGet]
-    [Route(TagRoutes.GetAll)]
-    public async Task<IActionResult> GetAll(
+    [Route(TagRoutes.GetPaged)]
+    public async Task<IActionResult> GetPaged(
         [FromQuery] GetPagedTagsRequest request,
         CancellationToken cancellationToken)
     {
         var query = GetPagedTagsQuery.ToQuery(request);
 
-        Result<PagedResult<TagPagedResponse>> response = await tagQueries
-            .GetPagedTagsQueryHandler(query, cancellationToken);
+        Result<PagedResult<TagPagedResponse>> result = await getPagedHandler.Handle(query, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: Ok,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -41,9 +45,11 @@ public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : C
             Name = request.Name,
         };
 
-        Result response = await tagCommands.CreateTagCommandHandler(command, cancellationToken);
+        Result result = await createHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: Created,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -60,9 +66,11 @@ public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : C
             Name = request.Name
         };
 
-        Result response = await tagCommands.UpdateTagCommandHandler(command, cancellationToken);
+        Result result = await updateHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: NoContent,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -75,8 +83,10 @@ public class TagController(ITagQueries tagQueries, ITagCommands tagCommands) : C
             Id = id
         };
 
-        Result response = await tagCommands.DeleteTagCommandHandler(command, cancellationToken);
+        Result result = await deleteHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: NoContent,
+            onFailure: error => error.ToProblemDetails(this));
     }
 }

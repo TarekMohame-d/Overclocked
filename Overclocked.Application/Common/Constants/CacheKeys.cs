@@ -8,7 +8,6 @@ public static class CacheKeys
     public static string Category(string id) => $"category-{id}";
     public static string AllCategories => "categories:all";
 
-    public static string Tag(string id) => $"tag-{id}";
     public static string TagPaged(int page, int pageSize, string searchTerm, string sortBy, string direction) =>
         $"tags:page={page}:size={pageSize}:searchTerm={searchTerm}:sortBy={sortBy}:direction={direction}";
     public static string TagSet => "tags:pages";
@@ -27,5 +26,5 @@ public static class CacheKeys
         $"products:page={page}:size={pageSize}:sortBy={sortBy}:direction={direction}:categoryId={categoryId}:brandId={brandId}:searchTerm={searchTerm}:tagId={tagId}";
     public static string ProductSet => "products:pages";
 
-    public static string Cart(string id) => $"cart-{id}";
+    public static string Cart(string id) => $"cart-UserId={id}";
 }

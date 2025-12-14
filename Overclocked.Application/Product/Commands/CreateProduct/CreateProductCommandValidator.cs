@@ -1,5 +1,5 @@
 using FluentValidation;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 

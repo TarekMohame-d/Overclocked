@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Overclocked.Api.Routing;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Category.Mapping;
 using Overclocked.Application.Common.Constants;
 using Overclocked.Architecture.Tests.FakeData;

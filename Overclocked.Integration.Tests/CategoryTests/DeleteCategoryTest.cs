@@ -54,7 +54,7 @@ public class DeleteCategoryTest(CustomWebApplicationFactory factory) : IAsyncLif
             CategoryRoutes.Delete.Replace("{id:guid}", category.Id.Value.ToString()));
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

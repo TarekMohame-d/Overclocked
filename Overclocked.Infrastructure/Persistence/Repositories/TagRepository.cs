@@ -1,5 +1,6 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Common.Enums;
 using Overclocked.Domain.TagAggregate;
 using Overclocked.Domain.TagAggregate.ValueObjects;
@@ -9,18 +10,19 @@ namespace Overclocked.Infrastructure.Persistence.Repositories;
 public class TagRepository(ApplicationDbContext context)
     : GenericRepository<Tag, TagId>(context), ITagRepository
 {
-    private readonly ApplicationDbContext _dbContext = context;
-
     public Task<int> CountAsync(string searchTerm, CancellationToken cancellationToken = default)
     {
-        var normalizedTerm = searchTerm.ToUpper();
-
-        IQueryable<Tag> query = _dbContext.Tags.Where(t => t.NormalizedName.Contains(normalizedTerm));
+        IQueryable<Tag> query = _dbSet.AsNoTracking();
+        if(!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var normalizedTerm = searchTerm.ToUpper();
+            query = query.Where(t => t.NormalizedName.Contains(normalizedTerm));
+        }
 
         return query.CountAsync(cancellationToken);
     }
 
-    public Task<List<Tag>> GetTagsAsync(
+    public Task<List<Tag>> GetPagedAsync(
         int pageNumber,
         int pageSize,
         string searchTerm,
@@ -28,17 +30,26 @@ public class TagRepository(ApplicationDbContext context)
         SortDirection direction,
         CancellationToken cancellationToken = default)
     {
-        var normalizedTerm = searchTerm.ToUpper();
+        IQueryable<Tag> query = _dbSet.AsNoTracking();
 
-        IQueryable<Tag> query = _dbContext.Tags.AsNoTracking();
-
-        query = query.Where(t => t.NormalizedName.Contains(normalizedTerm));
+        if(!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var normalizedTerm = searchTerm.ToUpper();
+            query = query.Where(t => t.NormalizedName.Contains(normalizedTerm));
+        }
 
         query = ApplySorting(query, sortBy, direction);
 
         query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
         return query.ToListAsync(cancellationToken);
+    }
+
+    public Task<List<Tag>> WhereAsync(
+        Expression<Func<Tag, bool>> predicate,
+        CancellationToken cancellationToken = default)
+    {
+        return _dbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
     }
 
     private static IQueryable<Tag> ApplySorting(IQueryable<Tag> query, TagSortField sortBy, SortDirection direction)
@@ -51,5 +62,15 @@ public class TagRepository(ApplicationDbContext context)
 
             TagSortField.Id or _ => isDescending ? query.OrderByDescending(p => p.Id) : query.OrderBy(p => p.Id),
         };
+    }
+
+    public Task<Tag?> FindAsync(TagId id, CancellationToken cancellationToken = default)
+    {
+        return _dbSet.FindAsync([id], cancellationToken: cancellationToken).AsTask();
+    }
+    public Task<Tag?> GetByIdAsync(TagId id, CancellationToken cancellationToken = default)
+    {
+        return _dbSet.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken: cancellationToken);
     }
 }

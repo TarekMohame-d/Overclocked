@@ -2,13 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Overclocked.Api.Extensions;
 using Overclocked.Api.Routing;
-using Overclocked.Application.Category.Commands;
+using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Application.Category.Commands.CreateCategory;
 using Overclocked.Application.Category.Commands.DeleteCategory;
 using Overclocked.Application.Category.Commands.UpdateCategory;
-using Overclocked.Application.Category.Queries;
 using Overclocked.Application.Category.Queries.GetAllCategories;
-using Overclocked.Application.Category.Queries.GetCategory;
+using Overclocked.Application.Category.Queries.GetCategoryById;
 using Overclocked.Contracts.Category;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Results;
@@ -17,32 +16,40 @@ using Overclocked.Domain.Common.StaticData;
 namespace Overclocked.Api.Controllers;
 
 [ApiController]
-public class CategoryController(ICategoryQueries categoryQueries, ICategoryCommands categoryCommands) : ControllerBase
+public class CategoryController(
+    ICommandHandler<CreateCategoryCommand> createHandler,
+    ICommandHandler<UpdateCategoryCommand> updateHandler,
+    ICommandHandler<DeleteCategoryCommand> deleteHandler,
+    IQueryHandler<GetCategoryByIdQuery, CategoryResponse> getByIdHandler,
+    IQueryHandler<GetAllCategoriesQuery, IEnumerable<CategoryListResponse>> getAllHandler) : ControllerBase
 {
     [HttpGet]
     [Route(CategoryRoutes.GetById)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetCategoryQuery
+        var query = new GetCategoryByIdQuery
         {
             Id = CategoryId.Create(id)
         };
 
-        Result<CategoryResponse> response = await categoryQueries.GetCategoryQueryHandler(query, cancellationToken);
+        Result<CategoryResponse> result = await getByIdHandler.Handle(query, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: Ok,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [HttpGet]
     [Route(CategoryRoutes.GetAll)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var query = new GetCategoryListQuery();
+        var query = new GetAllCategoriesQuery();
 
-        Result<IEnumerable<CategoryListResponse>> response = await categoryQueries
-            .GetCategoryListQueryHandler(query, cancellationToken);
+        Result<IEnumerable<CategoryListResponse>> result = await getAllHandler.Handle(query, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: Ok,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -58,9 +65,11 @@ public class CategoryController(ICategoryQueries categoryQueries, ICategoryComma
             ImageUrl = request.ImageUrl
         };
 
-        Result response = await categoryCommands.CreateCategoryCommandHandler(command, cancellationToken);
+        Result result = await createHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: Created,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -78,9 +87,11 @@ public class CategoryController(ICategoryQueries categoryQueries, ICategoryComma
             ImageUrl = request.ImageUrl
         };
 
-        Result response = await categoryCommands.UpdateCategoryCommandHandler(command, cancellationToken);
+        Result result = await updateHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: NoContent,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -93,8 +104,10 @@ public class CategoryController(ICategoryQueries categoryQueries, ICategoryComma
             Id = id
         };
 
-        Result response = await categoryCommands.DeleteCategoryCommandHandler(command, cancellationToken);
+        Result result = await deleteHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: NoContent,
+            onFailure: error => error.ToProblemDetails(this));
     }
 }

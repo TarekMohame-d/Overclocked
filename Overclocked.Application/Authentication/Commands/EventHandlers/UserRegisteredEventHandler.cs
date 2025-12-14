@@ -1,4 +1,4 @@
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Domain.Common.Primitives;
 using Overclocked.Domain.UserAggregate.Events;
 

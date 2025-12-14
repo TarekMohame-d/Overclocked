@@ -1,4 +1,4 @@
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Domain.CartAggregate.ValueObjects;
 using Overclocked.Domain.Common.Primitives;
 using Overclocked.Domain.UserAggregate.Events;

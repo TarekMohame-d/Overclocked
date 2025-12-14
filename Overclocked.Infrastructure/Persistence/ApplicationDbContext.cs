@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Overclocked.Application.Abstraction.Services;
 using Overclocked.Domain.BrandAggregate;
 using Overclocked.Domain.CartAggregate;
 using Overclocked.Domain.CategoryAggregate;

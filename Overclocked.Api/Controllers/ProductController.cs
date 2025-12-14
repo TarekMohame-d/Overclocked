@@ -2,13 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Overclocked.Api.Extensions;
 using Overclocked.Api.Routing;
-using Overclocked.Application.Product.Commands;
+using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Application.Product.Commands.CreateProduct;
 using Overclocked.Application.Product.Commands.DeleteProduct;
 using Overclocked.Application.Product.Commands.UpdateProduct;
-using Overclocked.Application.Product.Queries;
 using Overclocked.Application.Product.Queries.GetPagedProducts;
-using Overclocked.Application.Product.Queries.GetProduct;
+using Overclocked.Application.Product.Queries.GetProductById;
 using Overclocked.Contracts.Product;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.Common.StaticData;
@@ -16,7 +15,11 @@ using Overclocked.Domain.Common.StaticData;
 namespace Overclocked.Api.Controllers;
 
 [ApiController]
-public class ProductController(IProductQueries productQueries, IProductCommands productCommands) : ControllerBase
+public class ProductController(ICommandHandler<CreateProductCommand> createHandler,
+    ICommandHandler<UpdateProductCommand> updateHandler,
+    ICommandHandler<DeleteProductCommand> deleteHandler,
+    IQueryHandler<GetProductByIdQuery, ProductResponse> getByIdHandler,
+    IQueryHandler<GetPagedProductsQuery, PagedResult<ProductPagedResponse>> getPagedHandler) : ControllerBase
 {
     [HttpGet]
     [Route(ProductRoutes.GetById)]
@@ -24,14 +27,16 @@ public class ProductController(IProductQueries productQueries, IProductCommands 
         [FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        var query = new GetProductQuery
+        var query = new GetProductByIdQuery
         {
             Id = id
         };
 
-        Result<ProductResponse> response = await productQueries.GetProductQueryHandler(query, cancellationToken);
+        Result<ProductResponse> result = await getByIdHandler.Handle(query, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: Ok,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [HttpGet]
@@ -42,10 +47,12 @@ public class ProductController(IProductQueries productQueries, IProductCommands 
     {
         var query = GetPagedProductsQuery.ToQuery(request);
 
-        Result<PagedResult<ProductPagedResponse>> response = await productQueries
-            .GetPagedProductsQueryHandler(query, cancellationToken);
+        Result<PagedResult<ProductPagedResponse>> result = await getPagedHandler
+            .Handle(query, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: Ok,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -57,9 +64,11 @@ public class ProductController(IProductQueries productQueries, IProductCommands 
     {
         var command = CreateProductCommand.Create(request);
 
-        Result response = await productCommands.CreateProductCommandHandler(command, cancellationToken);
+        Result result = await createHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: Created,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -72,9 +81,11 @@ public class ProductController(IProductQueries productQueries, IProductCommands 
     {
         var command = UpdateProductCommand.Create(request, id);
 
-        Result response = await productCommands.UpdateProductCommandHandler(command, cancellationToken);
+        Result result = await updateHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: NoContent,
+            onFailure: error => error.ToProblemDetails(this));
     }
 
     [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
@@ -89,8 +100,10 @@ public class ProductController(IProductQueries productQueries, IProductCommands 
             Id = id
         };
 
-        Result response = await productCommands.DeleteProductCommandHandler(command, cancellationToken);
+        Result result = await deleteHandler.Handle(command, cancellationToken);
 
-        return response.ToActionResult(this);
+        return result.Match(
+            onSuccess: NoContent,
+            onFailure: error => error.ToProblemDetails(this));
     }
 }

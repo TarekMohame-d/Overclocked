@@ -1,11 +1,10 @@
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Abstraction.Services;
-using Overclocked.Application.Authentication.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Authentication.Commands.Login;
 using Overclocked.Architecture.Tests.FakeData;
+using Overclocked.Contracts.Authentication;
 using Overclocked.Domain.Common.Enums;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.RoleAggregate.ValueObjects;
@@ -19,13 +18,12 @@ public class LoginCommandHandlerTest
 {
     private readonly IUserRepository _userRepositoryMock;
     private readonly IPermissionRepository _permissionRepositoryMock;
-    private readonly ITokenProvider _tokenProviderMock;
-    private readonly ITokenReaderService _tokenReaderServiceMock;
-    private readonly IEmailConfirmationCodeService _emailConfirmationCodeServiceMock;
-    private readonly IRefreshTokenHasher _refreshTokenHasherMock;
-    private readonly IPasswordHasher _passwordHasherMock;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IAuthenticationCommands _authenticationCommands;
+    private readonly IEmailConfirmationCodeService _emailConfirmationCodeServiceMock;
+    private readonly IPasswordHasher _passwordHasherMock;
+    private readonly IRefreshTokenHasher _refreshTokenHasherMock;
+    private readonly ITokenProvider _tokenProviderMock;
+    private readonly LoginCommandHandler _loginCommandHandler;
 
     public LoginCommandHandlerTest()
     {
@@ -36,17 +34,15 @@ public class LoginCommandHandlerTest
         _tokenProviderMock = Substitute.For<ITokenProvider>();
         _refreshTokenHasherMock = Substitute.For<IRefreshTokenHasher>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
-        _tokenReaderServiceMock = Substitute.For<ITokenReaderService>();
 
-        _authenticationCommands = new AuthenticationCommands(
+        _loginCommandHandler = new LoginCommandHandler(
             _userRepositoryMock,
             _permissionRepositoryMock,
-            _tokenProviderMock,
-            _refreshTokenHasherMock,
-            _passwordHasherMock,
+            _unitOfWorkMock,
             _emailConfirmationCodeServiceMock,
-            _tokenReaderServiceMock,
-            _unitOfWorkMock);
+            _passwordHasherMock,
+            _refreshTokenHasherMock,
+            _tokenProviderMock);
     }
 
     [Fact]
@@ -67,11 +63,10 @@ public class LoginCommandHandlerTest
             .Returns(false);
 
         // Act
-        Result result = await _authenticationCommands.LoginCommandHandler(command, CancellationToken.None);
+        Result result = await _loginCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
@@ -102,11 +97,10 @@ public class LoginCommandHandlerTest
             .Returns(false);
 
         // Act
-        Result result = await _authenticationCommands.LoginCommandHandler(command, CancellationToken.None);
+        Result<AuthResponse> result = await _loginCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
@@ -137,11 +131,10 @@ public class LoginCommandHandlerTest
             .Returns(true);
 
         // Act
-        Result result = await _authenticationCommands.LoginCommandHandler(command, CancellationToken.None);
+        Result<AuthResponse> result = await _loginCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.BadRequest);
         user.DomainEvents.ShouldNotBeEmpty();
@@ -181,11 +174,10 @@ public class LoginCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result result = await _authenticationCommands.LoginCommandHandler(command, CancellationToken.None);
+        Result<AuthResponse> result = await _loginCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBe(Error.None);
 
         await _userRepositoryMock.Received(1)

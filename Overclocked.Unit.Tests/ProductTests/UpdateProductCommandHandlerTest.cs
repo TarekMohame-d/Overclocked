@@ -1,14 +1,13 @@
 using System.Linq.Expressions;
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Product.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Product.Commands.UpdateProduct;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.Common.Enums;
 using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.ProductAggregate;
+using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Shouldly;
 
 namespace Overclocked.Unit.Tests.ProductTests;
@@ -17,14 +16,14 @@ public class UpdateProductCommandHandlerTest
 {
     private readonly IProductRepository _productRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
-    private readonly IProductCommands _productCommands;
+    private readonly UpdateProductCommandHandler _updateProductCommandHandler;
 
     public UpdateProductCommandHandlerTest()
     {
         _productRepositoryMock = Substitute.For<IProductRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
 
-        _productCommands = new ProductCommands(
+        _updateProductCommandHandler = new UpdateProductCommandHandler(
             _productRepositoryMock,
             _unitOfWorkMock);
     }
@@ -49,28 +48,19 @@ public class UpdateProductCommandHandlerTest
             Images = null
         };
 
-        _productRepositoryMock.FirstOrDefaultAsync(
-            Arg.Any<Expression<Func<Product, bool>>>(),
-            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
-            Arg.Any<bool>(),
-            Arg.Any<CancellationToken>())
+        _productRepositoryMock.GetForUpdateAsync(Arg.Any<ProductId>(), Arg.Any<CancellationToken>())
             .Returns((Product)null!);
 
         // Act
-        Result result = await _productCommands.UpdateProductCommandHandler(command, CancellationToken.None);
+        Result result = await _updateProductCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.NotFound);
 
         await _productRepositoryMock.Received(1)
-            .FirstOrDefaultAsync(
-            Arg.Any<Expression<Func<Product, bool>>>(),
-            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
-            Arg.Any<bool>(),
-            Arg.Any<CancellationToken>());
+            .GetForUpdateAsync(Arg.Any<ProductId>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -95,11 +85,7 @@ public class UpdateProductCommandHandlerTest
             Images = null
         };
 
-        _productRepositoryMock.FirstOrDefaultAsync(
-            Arg.Any<Expression<Func<Product, bool>>>(),
-            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
-            Arg.Any<bool>(),
-            Arg.Any<CancellationToken>())
+        _productRepositoryMock.GetForUpdateAsync(Arg.Any<ProductId>(), Arg.Any<CancellationToken>())
             .Returns(product);
 
         _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Product, bool>>>(), Arg.Any<CancellationToken>())
@@ -109,19 +95,14 @@ public class UpdateProductCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result result = await _productCommands.UpdateProductCommandHandler(command, CancellationToken.None);
+        Result result = await _updateProductCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBe(Error.None);
 
         await _productRepositoryMock.Received(1)
-            .FirstOrDefaultAsync(
-            Arg.Any<Expression<Func<Product, bool>>>(),
-            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
-            Arg.Any<bool>(),
-            Arg.Any<CancellationToken>());
+            .GetForUpdateAsync(Arg.Any<ProductId>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)
             .SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -152,31 +133,22 @@ public class UpdateProductCommandHandlerTest
             Images = null
         };
 
-        _productRepositoryMock.FirstOrDefaultAsync(
-            Arg.Any<Expression<Func<Product, bool>>>(),
-            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
-            Arg.Any<bool>(),
-            Arg.Any<CancellationToken>())
+        _productRepositoryMock.GetForUpdateAsync(Arg.Any<ProductId>(), Arg.Any<CancellationToken>())
             .Returns(product);
 
         _productRepositoryMock.AnyAsync(Arg.Any<Expression<Func<Product, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         // Act
-        Result result = await _productCommands.UpdateProductCommandHandler(command, CancellationToken.None);
+        Result result = await _updateProductCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
-        result.StatusCode.ShouldBe(HttpStatusCode.Conflict);
         result.Error.ShouldNotBe(Error.None);
         result.Error.Type.ShouldBe(ErrorType.Conflict);
 
         await _productRepositoryMock.Received(1)
-            .FirstOrDefaultAsync(
-            Arg.Any<Expression<Func<Product, bool>>>(),
-            include: Arg.Any<Func<IQueryable<Product>, IQueryable<Product>>>(),
-            Arg.Any<bool>(),
-            Arg.Any<CancellationToken>());
+            .GetForUpdateAsync(Arg.Any<ProductId>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.DidNotReceive()
             .SaveChangesAsync(Arg.Any<CancellationToken>());

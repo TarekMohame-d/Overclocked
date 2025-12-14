@@ -1,6 +1,8 @@
 using Overclocked.Domain.CartAggregate.Entities;
 using Overclocked.Domain.CartAggregate.ValueObjects;
+using Overclocked.Domain.Common.Errors;
 using Overclocked.Domain.Common.Primitives;
+using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 
@@ -26,27 +28,49 @@ public class Cart : AggregateRoot<CartId>
         return new(id, userId);
     }
 
-    public void AddCartItem(ProductId productId, int quantity)
+    public CartItemId AddCartItem(ProductId productId, int quantity)
     {
         CartItem? existingItem = _cartItems.FirstOrDefault(i => i.ProductId == productId);
 
         if(existingItem is not null)
         {
-            existingItem.AddQuantity(quantity);
+            existingItem.UpdateQuantity(quantity);
+            return existingItem.Id;
         }
         else
         {
-            var cartItem = CartItem.Create(CartItemId.Create(), Id, productId, quantity);
+            var cartItemId = CartItemId.Create();
+            var cartItem = CartItem.Create(cartItemId, Id, productId, quantity);
             _cartItems.Add(cartItem);
+            return cartItemId;
         }
     }
 
-    public void RemoveCartItem(ProductId productId)
+    public Result UpdateCartItem(CartItemId cartItemId, int quantity)
     {
-        CartItem? item = _cartItems.FirstOrDefault(i => i.ProductId == productId);
+        CartItem? existingItem = _cartItems.FirstOrDefault(ci => ci.Id == cartItemId);
+
+        if(existingItem is null)
+        {
+            return Result.Failure(CartErrors.CartItemNotFound(cartItemId.Value));
+        }
+
+        existingItem.UpdateQuantity(quantity);
+
+        return Result.Success();
+    }
+
+    public void RemoveCartItem(CartItemId cartItemId)
+    {
+        CartItem? item = _cartItems.FirstOrDefault(ci => ci.Id == cartItemId);
         if(item is not null)
         {
             _cartItems.Remove(item);
         }
+    }
+
+    public void ClearCart()
+    {
+        _cartItems.Clear();
     }
 }

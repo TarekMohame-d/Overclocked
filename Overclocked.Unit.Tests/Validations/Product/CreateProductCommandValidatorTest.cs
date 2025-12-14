@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using FluentValidation.TestHelper;
 using NSubstitute;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Product.Commands.CreateProduct;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
@@ -40,10 +40,10 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_BrandId_DoesNotExist()
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
+        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags[0].Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
             .Returns((BrandEntity)null!);
@@ -69,10 +69,10 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_CategoryId_DoesNotExist()
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
+        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags[0].Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
             .Returns(brand);
@@ -101,11 +101,11 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Name_Is_Invalid(string? name)
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value], name: name!);
+        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags[0].Id.Value], name: name!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
             .Returns(brand);
@@ -131,11 +131,11 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Name_Is_Already_Exists()
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
-        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags.First().Id.Value]);
+        CreateProductCommand command = CreateProductCommand(specs: specs, tags: [tags[0].Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
             .Returns(brand);
@@ -164,13 +164,13 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Thumbnail_Is_Invalid(string? thumbnail)
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
-            tags: [tags.First().Id.Value],
+            tags: [tags[0].Id.Value],
             thumbnail: thumbnail!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -200,13 +200,13 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Description_Is_Invalid(string? description)
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
-            tags: [tags.First().Id.Value],
+            tags: [tags[0].Id.Value],
             description: description!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -236,13 +236,13 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Price_Is_Invalid(decimal? price)
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
-            tags: [tags.First().Id.Value],
+            tags: [tags[0].Id.Value],
             price: (decimal)price!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -272,13 +272,13 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Stock_Is_Invalid(int? stock)
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
-            tags: [tags.First().Id.Value],
+            tags: [tags[0].Id.Value],
             stock: (int)stock!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -308,13 +308,13 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Discount_Is_Invalid(decimal? discount)
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
-            tags: [tags.First().Id.Value],
+            tags: [tags[0].Id.Value],
             discount: (decimal)discount!);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -344,13 +344,13 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Images_Is_Invalid(string[] images)
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
-            tags: [tags.First().Id.Value],
+            tags: [tags[0].Id.Value],
             images: images);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
@@ -380,7 +380,7 @@ public class CreateProductCommandValidatorTest
     public async Task CreateProductCommandValidator_Should_HaveError_When_Tags_Is_Invalid(List<Guid> tags)
     {
         // Arrange
-        IEnumerable<TagEntity> tagEntities = new TagFaker().Generate(3);
+        List<TagEntity> tagEntities = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         IEnumerable<(string Name, string Value)> specs = [new("Name", "Value")];
@@ -416,12 +416,12 @@ public class CreateProductCommandValidatorTest
         IEnumerable<(string Name, string Value)> specs)
     {
         // Arrange
-        IEnumerable<TagEntity> tags = new TagFaker().Generate(3);
+        List<TagEntity> tags = new TagFaker().Generate(3);
         BrandEntity brand = new BrandFaker().Generate();
         CategoryEntity category = new CategoryFaker().Generate();
         CreateProductCommand command = CreateProductCommand(
             specs: specs,
-            tags: [tags.First().Id.Value]);
+            tags: [tags[0].Id.Value]);
 
         _brandRepositoryMock.GetByIdAsync(Arg.Any<BrandId>())
             .Returns(brand);

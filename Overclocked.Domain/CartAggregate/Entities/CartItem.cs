@@ -1,6 +1,5 @@
 using Overclocked.Domain.CartAggregate.ValueObjects;
 using Overclocked.Domain.Common.Primitives;
-using Overclocked.Domain.ProductAggregate;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 
 namespace Overclocked.Domain.CartAggregate.Entities;
@@ -35,9 +34,9 @@ public class CartItem : Entity<CartItemId>
             quantity: quantity);
     }
 
-    internal void AddQuantity(int quantity)
+    internal void UpdateQuantity(int quantity)
     {
-        Quantity += quantity;
+        Quantity = quantity;
         UpdatedAt = DateTime.UtcNow;
     }
 }

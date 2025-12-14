@@ -1,8 +1,6 @@
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Tag.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Tag.Commands.CreateTag;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.Common.Results;
@@ -14,15 +12,15 @@ namespace Overclocked.Unit.Tests.TagTests;
 public class CreateTagCommandHandlerTest
 {
     private readonly ITagRepository _tagRepositoryMock;
-    private readonly ITagCommands _tagCommands;
     private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly CreateTagCommandHandler _createTagCommandHandler;
 
     public CreateTagCommandHandlerTest()
     {
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _tagRepositoryMock = Substitute.For<ITagRepository>();
 
-        _tagCommands = new TagCommands(_tagRepositoryMock, _unitOfWorkMock);
+        _createTagCommandHandler = new CreateTagCommandHandler(_tagRepositoryMock, _unitOfWorkMock);
     }
 
     [Fact]
@@ -42,11 +40,10 @@ public class CreateTagCommandHandlerTest
         _unitOfWorkMock.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(1);
 
         // Act
-        Result result = await _tagCommands.CreateTagCommandHandler(command, CancellationToken.None);
+        Result result = await _createTagCommandHandler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.Created);
         result.Error.ShouldBe(Error.None);
 
         await _tagRepositoryMock.Received(1)

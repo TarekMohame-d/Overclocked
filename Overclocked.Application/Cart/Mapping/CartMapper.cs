@@ -7,10 +7,10 @@ namespace Overclocked.Application.Cart.Mapping;
 
 public static class CartMapper
 {
-    public static CartItemResponse MapToResponse(CartEntity cart, IEnumerable<ProductEntity> products)
+    public static CartResponse MapToResponse(CartEntity cart, IEnumerable<ProductEntity> products)
     {
         var productMap = products.ToDictionary(p => p.Id);
-        var responseItems = new List<CartItemResponse.CartItem>();
+        var responseItems = new List<CartResponse.CartItemResponse>();
 
         foreach(CartItem item in cart.CartItems)
         {
@@ -20,7 +20,7 @@ public static class CartMapper
             var discount = product.Discount.Amount;
             var lineTotal = Math.Round(unitPrice * (1m - discount) * item.Quantity, 2);
 
-            responseItems.Add(new CartItemResponse.CartItem
+            responseItems.Add(new CartResponse.CartItemResponse
             {
                 CartItemId = item.Id.Value,
                 ProductId = item.ProductId.Value,
@@ -34,9 +34,8 @@ public static class CartMapper
             });
         }
 
-        return new CartItemResponse
+        return new CartResponse
         {
-            CartId = cart.Id.Value,
             CartItems = responseItems,
             Total = Math.Round(responseItems.Sum(ci => ci.LineTotal), 2),
         };

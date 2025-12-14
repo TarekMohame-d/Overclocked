@@ -1,8 +1,10 @@
+using Overclocked.Application.Abstractions.Caching;
+using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Contracts.Product;
 
 namespace Overclocked.Application.Product.Commands.UpdateProduct;
 
-public record UpdateProductCommand
+public record UpdateProductCommand : ICommand, ICacheInvalidatorCommand
 {
     public required Guid Id { get; init; }
     public required Guid BrandId { get; init; }
@@ -16,6 +18,13 @@ public record UpdateProductCommand
     public required IEnumerable<Guid> Tags { get; init; }
     public required IEnumerable<(string Name, string Value)> Specifications { get; init; }
     public IEnumerable<string>? Images { get; init; }
+
+    public string[] CacheKeys =>
+    [
+        Common.Constants.CacheKeys.Product(Id.ToString())
+    ];
+
+    public string? CacheSetKey => Common.Constants.CacheKeys.ProductSet;
 
     public static UpdateProductCommand Create(UpdateProductRequest request, Guid id)
     {

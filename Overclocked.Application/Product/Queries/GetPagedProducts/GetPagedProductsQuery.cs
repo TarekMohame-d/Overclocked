@@ -1,11 +1,13 @@
-using Overclocked.Application.Abstraction.Messaging;
+using Overclocked.Application.Abstractions.Caching;
+using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Application.Common.Constants;
 using Overclocked.Application.Common.Enums;
 using Overclocked.Contracts.Product;
+using Overclocked.Domain.Common.Results;
 
 namespace Overclocked.Application.Product.Queries.GetPagedProducts;
 
-public record GetPagedProductsQuery : ICachedQuery
+public record GetPagedProductsQuery : IQuery<PagedResult<ProductPagedResponse>>, ICachedQuery
 {
     public required int Page { get; init; } = 1;
     public required int PageSize { get; init; } = 10;
@@ -34,7 +36,8 @@ public record GetPagedProductsQuery : ICachedQuery
             searchTerm: SearchTerm);
 
     public string CacheSetKey => CacheKeys.ProductSet;
-    public TimeSpan SlidingExpiration => TimeSpan.FromMinutes(5);
+
+    public TimeSpan Expiration => TimeSpan.FromMinutes(5);
 
     public static GetPagedProductsQuery ToQuery(GetPagedProductsRequest request)
     {

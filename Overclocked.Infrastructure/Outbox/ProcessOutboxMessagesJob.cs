@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Overclocked.Application.Abstraction.Messaging;
+using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Domain.Common.Primitives;
 using Overclocked.Infrastructure.Persistence;
 

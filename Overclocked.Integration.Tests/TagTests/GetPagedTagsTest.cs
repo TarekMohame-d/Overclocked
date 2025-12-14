@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Overclocked.Api.Routing;
-using Overclocked.Application.Abstraction.Services;
+using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Common.Constants;
 using Overclocked.Application.Tag.Mapping;
 using Overclocked.Architecture.Tests.FakeData;
@@ -35,7 +35,7 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         var count = tags.Count(x => x.Name.Contains(searchTerm));
 
         // Act
-        var url = $"{TagRoutes.GetAll}?Page=1&PageSize=10&SearchTerm={searchTerm}&SortBy=name&Direction=asc";
+        var url = $"{TagRoutes.GetPaged}?Page=1&PageSize=10&SearchTerm={searchTerm}&SortBy=name&Direction=asc";
         HttpResponseMessage response = await _client.GetAsync(url);
 
         // Assert
@@ -61,7 +61,7 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         var count = tagListDtos.Count(x => x.Name.Contains(searchTerm));
 
         // Act
-        var url = $"{TagRoutes.GetAll}?Page=1&PageSize=20&SearchTerm={searchTerm}&SortBy=Id&Direction=Asc";
+        var url = $"{TagRoutes.GetPaged}?Page=1&PageSize=20&SearchTerm={searchTerm}&SortBy=Id&Direction=Asc";
         HttpResponseMessage response = await _client.GetAsync(url);
 
         // Assert
@@ -82,7 +82,7 @@ public class GetPagedTagsTest(CustomWebApplicationFactory factory) : IAsyncLifet
         // Arrange
 
         // Act
-        const string Url = $"{TagRoutes.GetAll}?Page=1&PageSize=10&SearchTerm=test&SortBy=name&Direction=asc";
+        const string Url = $"{TagRoutes.GetPaged}?Page=1&PageSize=10&SearchTerm=test&SortBy=name&Direction=asc";
         HttpResponseMessage response = await _client.GetAsync(Url);
 
         // Assert

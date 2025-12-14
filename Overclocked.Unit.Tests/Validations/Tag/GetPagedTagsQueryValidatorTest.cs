@@ -1,5 +1,5 @@
 using FluentValidation.TestHelper;
-using Overclocked.Application.Tag.Queries.GetTags;
+using Overclocked.Application.Tag.Queries.GetPagedTags;
 using Shouldly;
 
 namespace Overclocked.Unit.Tests.Validations.Tag;
@@ -134,7 +134,7 @@ public class GetPagedTagsQueryValidatorTest
         {
             Page = 0,
             PageSize = 0,
-            SearchTerm = string.Empty,
+            SearchTerm = new string('a', 101),
             SortBy = "wrong",
             Direction = "wrong",
         };

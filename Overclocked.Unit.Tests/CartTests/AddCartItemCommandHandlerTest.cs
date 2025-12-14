@@ -1,8 +1,6 @@
-using System.Net;
 using NSubstitute;
-using Overclocked.Application.Abstraction;
-using Overclocked.Application.Abstraction.Persistence;
-using Overclocked.Application.Cart.Commands;
+using Overclocked.Application.Abstractions;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Cart.Commands.AddCartItem;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Contracts.Cart;
@@ -20,8 +18,8 @@ public class AddCartItemCommandHandlerTest
 {
     private readonly ICartRepository _cartRepositoryMock;
     private readonly IProductRepository _productRepositoryMock;
-    private readonly ICartCommands _cartCommands;
     private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly AddCartItemCommandHandler _addCartItemCommandHandler;
 
     public AddCartItemCommandHandlerTest()
     {
@@ -29,7 +27,10 @@ public class AddCartItemCommandHandlerTest
         _cartRepositoryMock = Substitute.For<ICartRepository>();
         _productRepositoryMock = Substitute.For<IProductRepository>();
 
-        _cartCommands = new CartCommands(_cartRepositoryMock, _productRepositoryMock, _unitOfWorkMock);
+        _addCartItemCommandHandler = new AddCartItemCommandHandler(
+            _cartRepositoryMock,
+            _unitOfWorkMock,
+            _productRepositoryMock);
     }
 
     [Fact]
@@ -57,12 +58,11 @@ public class AddCartItemCommandHandlerTest
             .Returns(1);
 
         // Act
-        Result<CartItemResponse> result = await _cartCommands
-            .AddCartItemCommandHandler(command, CancellationToken.None);
+        Result<CartResponse> result = await _addCartItemCommandHandler
+            .Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
         result.Error.ShouldBe(Error.None);
 
         await _cartRepositoryMock.Received(1)

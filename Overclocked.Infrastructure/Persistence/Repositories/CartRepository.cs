@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Overclocked.Application.Abstraction.Persistence;
+using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Domain.CartAggregate;
 using Overclocked.Domain.CartAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate.ValueObjects;
