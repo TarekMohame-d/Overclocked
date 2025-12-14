@@ -25,7 +25,7 @@ public class UpdateCartItemCommandHandler(
         var userId = UserId.Create(command.UserId);
         var carItemId = CartItemId.Create(command.CartItemId);
 
-        CartEntity cart = await cartRepository.GetCartAsync(userId, cancellationToken)
+        CartEntity cart = await cartRepository.GetAsync(userId, cancellationToken)
             ?? throw new CartNotFoundException(command.UserId);
 
         Result result = cart.UpdateCartItem(carItemId, command.Quantity);

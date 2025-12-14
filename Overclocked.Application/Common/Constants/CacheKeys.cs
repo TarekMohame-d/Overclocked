@@ -27,4 +27,5 @@ public static class CacheKeys
     public static string ProductSet => "products:pages";
 
     public static string Cart(string id) => $"cart-UserId={id}";
+    public static string Wishlist(string id) => $"wishlist-UserId={id}";
 }

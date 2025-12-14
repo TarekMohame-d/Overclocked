@@ -10,15 +10,15 @@ using ProductEntity = Overclocked.Domain.ProductAggregate.Product;
 
 namespace Overclocked.Application.Cart.Queries.GetCartItems;
 
-public class GetCartItemQueryHandler(
+public class GetCartItemsQueryHandler(
     ICartRepository cartRepository,
-    IProductRepository productRepository) : IQueryHandler<GetCartItemQuery, CartResponse>
+    IProductRepository productRepository) : IQueryHandler<GetCartItemsQuery, CartResponse>
 {
-    public async Task<Result<CartResponse>> Handle(GetCartItemQuery query, CancellationToken cancellationToken)
+    public async Task<Result<CartResponse>> Handle(GetCartItemsQuery query, CancellationToken cancellationToken)
     {
         var userId = UserId.Create(query.UserId);
 
-        CartEntity cart = await cartRepository.GetCartAsync(userId, cancellationToken)
+        CartEntity cart = await cartRepository.GetAsync(userId, cancellationToken)
             ?? throw new CartNotFoundException(query.UserId);
 
         var productIds = cart.CartItems.Select(x => x.ProductId).ToList();

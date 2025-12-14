@@ -22,7 +22,7 @@ public class AddCartItemCommandHandler(
         var userId = UserId.Create(command.UserId);
         var productId = ProductId.Create(command.ProductId);
 
-        CartEntity cart = await cartRepository.GetCartAsync(userId, cancellationToken)
+        CartEntity cart = await cartRepository.GetAsync(userId, cancellationToken)
             ?? throw new CartNotFoundException(command.UserId);
 
         cart.AddCartItem(productId, command.Quantity);

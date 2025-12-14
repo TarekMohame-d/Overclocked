@@ -20,7 +20,7 @@ public class CartController(
     ICommandHandler<UpdateCartItemCommand, CartResponse> updateHandler,
     ICommandHandler<DeleteCartItemCommand, CartResponse> deleteHandler,
     ICommandHandler<ClearCartCommand> clearHandler,
-    IQueryHandler<GetCartItemQuery, CartResponse> queryHandler) : ControllerBase
+    IQueryHandler<GetCartItemsQuery, CartResponse> queryHandler) : ControllerBase
 {
     [Authorize(Roles = nameof(RoleType.Customer))]
     [HttpGet]
@@ -33,7 +33,7 @@ public class CartController(
             return Unauthorized();
         }
 
-        var query = new GetCartItemQuery
+        var query = new GetCartItemsQuery
         {
             UserId = (Guid)userId
         };
@@ -129,7 +129,7 @@ public class CartController(
     [Authorize(Roles = nameof(RoleType.Customer))]
     [HttpDelete]
     [Route(CartRoutes.ClearCart)]
-    public async Task<IActionResult> DeleteCartItem(CancellationToken cancellationToken)
+    public async Task<IActionResult> ClearCart(CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
         if(userId == null)

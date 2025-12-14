@@ -15,7 +15,7 @@ public class ClearCartCommandHandler(ICartRepository cartRepository, IUnitOfWork
     {
         var userId = UserId.Create(command.UserId);
 
-        CartEntity cart = await cartRepository.GetCartAsync(userId, cancellationToken)
+        CartEntity cart = await cartRepository.GetAsync(userId, cancellationToken)
             ?? throw new CartNotFoundException(command.UserId);
 
         cart.ClearCart();
