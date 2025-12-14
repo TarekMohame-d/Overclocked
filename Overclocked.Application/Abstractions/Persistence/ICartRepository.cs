@@ -7,5 +7,5 @@ namespace Overclocked.Application.Abstractions.Persistence;
 public interface ICartRepository : IGenericRepository<CartEntity, CartId>
 {
     Task<bool> ExistsAsync(UserId userId, CancellationToken cancellationToken = default);
-    Task<CartEntity?> GetCartAsync(UserId userId, CancellationToken cancellationToken = default);
+    Task<CartEntity?> GetAsync(UserId userId, CancellationToken cancellationToken = default);
 }

@@ -14,7 +14,7 @@ public class WishlistRepository(ApplicationDbContext context)
         return _dbContext.Wishlists.AnyAsync(x => x.UserId == userId, cancellationToken);
     }
 
-    public Task<Wishlist?> GetWishlistAsync(UserId userId, CancellationToken cancellationToken = default)
+    public Task<Wishlist?> GetAsync(UserId userId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Wishlists.AsTracking().FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
     }

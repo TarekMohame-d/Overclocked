@@ -45,7 +45,7 @@ public class ClearCartCommandHandlerTest
             UserId = userId.Value
         };
 
-        _cartRepositoryMock.GetCartAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
+        _cartRepositoryMock.GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
             .Returns(cart);
 
         _unitOfWorkMock.SaveChangesAsync(Arg.Any<CancellationToken>())
@@ -60,7 +60,7 @@ public class ClearCartCommandHandlerTest
         result.Error.ShouldBe(Error.None);
 
         await _cartRepositoryMock.Received(1)
-            .GetCartAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
+            .GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)
             .SaveChangesAsync(Arg.Any<CancellationToken>());
