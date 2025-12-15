@@ -6,6 +6,7 @@ namespace Overclocked.Application.Abstractions.Persistence;
 
 public interface IProductRepository : IGenericRepository<ProductEntity, ProductId>
 {
+    Task<ProductEntity?> FetchPrimitiveAsync(ProductId id, CancellationToken cancellationToken = default);
     Task<ProductEntity?> GetByIdAsync(ProductId id, CancellationToken cancellationToken = default);
     Task<ProductEntity?> GetForUpdateAsync(ProductId id, CancellationToken cancellationToken = default);
     Task<ProductEntity?> FindAsync(ProductId id, CancellationToken cancellationToken = default);

@@ -28,4 +28,8 @@ public static class CacheKeys
 
     public static string Cart(string id) => $"cart-UserId={id}";
     public static string Wishlist(string id) => $"wishlist-UserId={id}";
+
+    public static string ReviewPaged(int page, int pageSize, string sortBy, string direction) =>
+        $"reviews:page={page}:size={pageSize}:sortBy={sortBy}:direction={direction}";
+    public static string ReviewSet => "reviews:pages";
 }

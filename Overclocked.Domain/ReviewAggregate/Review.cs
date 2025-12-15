@@ -1,7 +1,10 @@
+using Overclocked.Domain.Common.Errors;
 using Overclocked.Domain.Common.Primitives;
+using Overclocked.Domain.Common.Results;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Overclocked.Domain.ReviewAggregate.Entities;
 using Overclocked.Domain.ReviewAggregate.ValueObjects;
+using Overclocked.Domain.UserAggregate;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 
 namespace Overclocked.Domain.ReviewAggregate;
@@ -15,6 +18,8 @@ public class Review : AggregateRoot<ReviewId>
     public DateTime CreatedAt { get; private init; }
     public DateTime UpdatedAt { get; private set; }
     public ReviewReply? ReviewReply { get; private set; }
+
+    public User User { get; }
 
     private Review()
     {
@@ -42,9 +47,58 @@ public class Review : AggregateRoot<ReviewId>
         UserId userId,
         ProductId productId,
         string comment,
-        int rating,
-        ReviewReply? reviewReply = null)
+        int rating)
     {
-        return new(reviewId, userId, productId, comment, rating, reviewReply);
+        return new(reviewId, userId, productId, comment, rating);
+    }
+
+    public void Update(string comment, int rating)
+    {
+        Comment = comment;
+        Rating = rating;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddReviewReply(ReviewReply reviewReply)
+    {
+        ReviewReply = reviewReply;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public Result UpdateReply(ReviewReplyId replyId, UserId employeeId, string newReply)
+    {
+        if(ReviewReply is null || ReviewReply.Id != replyId)
+        {
+            return Result.Failure(ReviewErrors.ReviewReplyNotFound(replyId.Value));
+        }
+
+        if(ReviewReply.EmployeeId != employeeId)
+        {
+            return Result.Failure(ReviewErrors.UnauthorizedReplyUpdate);
+        }
+
+        ReviewReply.Update(newReply);
+
+        UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
+    public Result DeleteReply(ReviewReplyId replyId, UserId employeeId)
+    {
+        if(ReviewReply is null || ReviewReply.Id != replyId)
+        {
+            return Result.Failure(ReviewErrors.ReviewReplyNotFound(replyId.Value));
+        }
+
+        if(ReviewReply.EmployeeId != employeeId)
+        {
+            return Result.Failure(ReviewErrors.UnauthorizedReplyDelete);
+        }
+
+        ReviewReply = null;
+        UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
     }
 }

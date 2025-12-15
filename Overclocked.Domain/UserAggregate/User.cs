@@ -144,4 +144,10 @@ public class User : AggregateRoot<UserId>
     {
         EmailConfirmationCode = EmailConfirmationCode.Create(codeHash, false, DateTime.UtcNow.AddMinutes(10));
     }
+
+    public void ChangeRole(RoleType roleType)
+    {
+        RoleId = RoleId.Create((int)roleType);
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

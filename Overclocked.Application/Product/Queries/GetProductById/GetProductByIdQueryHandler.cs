@@ -36,7 +36,7 @@ public class GetProductByIdQueryHandler(
             Price = p.Price.Amount,
             Discount = p.Discount.Amount,
             FinalPrice = p.CalculateFinalPrice(),
-            Rating = p.ProductRating.Rating,
+            Rating = p.ProductRating.AverageRating,
             ReviewCount = p.ProductRating.ReviewCount,
 
             Brand = new BrandResponse

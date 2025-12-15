@@ -17,11 +17,13 @@ public class GetPagedProductsQueryValidator : AbstractValidator<GetPagedProducts
 
         RuleFor(x => x.SortBy)
             .Must(value => string.IsNullOrWhiteSpace(value) || Enum.TryParse<ProductSortField>(value, true, out _))
-            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<ProductSortField>()));
+            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<ProductSortField>()))
+            .When(x => !string.IsNullOrEmpty(x.SortBy));
 
         RuleFor(x => x.Direction)
             .Must(value => string.IsNullOrWhiteSpace(value) || Enum.TryParse<SortDirection>(value, true, out _))
-            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<SortDirection>()));
+            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<SortDirection>()))
+            .When(x => !string.IsNullOrEmpty(x.SortBy));
 
         RuleFor(x => x.SearchTerm)
             .MaximumLength(100)
