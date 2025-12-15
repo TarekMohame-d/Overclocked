@@ -51,7 +51,7 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
             .IsRequired();
 
         // Relationships
-        builder.HasOne<User>()
+        builder.HasOne(r => r.User)
             .WithMany()
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.SetNull);
@@ -98,6 +98,9 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
                 .HasForeignKey(rr => rr.EmployeeId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        builder.Navigation(r => r.User)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         // Indexes
         builder.HasIndex(r => r.UserId);
