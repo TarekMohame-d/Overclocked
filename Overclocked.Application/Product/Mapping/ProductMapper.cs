@@ -40,7 +40,7 @@ public static class ProductMapper
             Price = x.Price.Amount,
             Discount = x.Discount.Amount,
             FinalPrice = x.CalculateFinalPrice(),
-            Rating = x.ProductRating.Rating,
+            Rating = x.ProductRating.AverageRating,
             ReviewCount = x.ProductRating.ReviewCount,
             Brand = new BrandResponse
             {

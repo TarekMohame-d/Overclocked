@@ -33,7 +33,12 @@ public class PagedResult<T>
 
     public static PagedResult<T> Create(IEnumerable<T> items, int pageNumber, int pageSize, int totalItemCount)
     {
-        var totalPages = (int)Math.Ceiling((double)totalItemCount / pageSize);
+        var totalPages = totalItemCount == 0
+            ? 0
+            : (int)Math.Ceiling(totalItemCount / (double)pageSize);
+
+        var hasPreviousPage = pageNumber > 1 && pageNumber <= totalPages;
+        var hasNextPage = pageNumber < totalPages;
 
         return new PagedResult<T>(
             items: items,
@@ -41,8 +46,8 @@ public class PagedResult<T>
             pageSize: pageSize,
             totalItemCount: totalItemCount,
             totalPageCount: totalPages,
-            hasPreviousPage: pageNumber > 1,
-            hasNextPage: pageNumber < totalPages
+            hasPreviousPage: hasPreviousPage,
+            hasNextPage: hasNextPage
         );
     }
 

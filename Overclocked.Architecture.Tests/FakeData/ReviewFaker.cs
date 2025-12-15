@@ -1,18 +1,22 @@
-// using Bogus;
-// using Domain.Entities;
+using Bogus;
+using Overclocked.Domain.ProductAggregate.ValueObjects;
+using Overclocked.Domain.ReviewAggregate;
+using Overclocked.Domain.ReviewAggregate.ValueObjects;
+using Overclocked.Domain.UserAggregate.ValueObjects;
 
-// namespace ArchitectureTests.FakeData;
+namespace Overclocked.Architecture.Tests.FakeData;
 
-// public class ReviewFaker : Faker<Review>
-// {
-//     public ReviewFaker()
-//     {
-//         RuleFor(r => r.Id, f => Guid.CreateVersion7());
-//         RuleFor(r => r.UserId, f => Guid.CreateVersion7());
-//         RuleFor(r => r.ProductId, f => Guid.CreateVersion7());
-//         RuleFor(r => r.Comment, f => "Comment");
-//         RuleFor(r => r.Rating, f => f.Random.Int(0, 5));
-//         RuleFor(r => r.CreatedAt, f => DateTime.UtcNow);
-//         RuleFor(r => r.UpdatedAt, f => DateTime.UtcNow);
-//     }
-// }
+public class ReviewFaker : Faker<Review>
+{
+    public ReviewFaker(Guid userId, Guid productId)
+    {
+        CustomInstantiator(f =>
+            Review.Create(
+                ReviewId.Create(),
+                UserId.Create(userId),
+                ProductId.Create(productId),
+                $"Comment",
+                f.Random.Int(1, 5)
+            ));
+    }
+}

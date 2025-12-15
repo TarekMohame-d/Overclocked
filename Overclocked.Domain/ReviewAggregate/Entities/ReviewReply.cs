@@ -27,4 +27,10 @@ public class ReviewReply : Entity<ReviewReplyId>
     {
         return new(id, employeeId, reply);
     }
+
+    public void Update(string reply)
+    {
+        Reply = reply;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

@@ -53,6 +53,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasMaxLength(500)
             .IsRequired();
 
+        builder.Property(p => p.RowVersion).IsRowVersion();
+
         builder.ComplexProperty(p => p.Price, money =>
         {
             money.Property(m => m.Amount)
@@ -78,16 +80,17 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.OwnsOne(p => p.ProductRating, rating =>
         {
-            rating.Property(r => r.Rating)
-                .HasColumnName("Rating")
-                .HasColumnType("decimal(2,1)")
+            rating.Property(r => r.TotalScore)
+                .HasColumnName("TotalScore")
                 .IsRequired();
 
             rating.Property(r => r.ReviewCount)
                 .HasColumnName("ReviewCount")
                 .IsRequired();
 
-            rating.HasIndex(r => r.Rating);
+            rating.Ignore(r => r.AverageRating);
+
+            rating.HasIndex(r => r.TotalScore);
             rating.HasIndex(r => r.ReviewCount);
         });
 

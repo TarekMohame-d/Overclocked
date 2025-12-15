@@ -38,6 +38,9 @@ public sealed class Product : AggregateRoot<ProductId>
     private readonly List<ProductTag> _tags = [];
     public IReadOnlyCollection<ProductTag> Tags => _tags.AsReadOnly();
 
+    // EF Core Concurrency Token
+    public byte[] RowVersion { get; private set; }
+
     // Navigation Properties
     public Brand? Brand { get; }
     public Category? Category { get; }
@@ -239,44 +242,51 @@ public sealed class Product : AggregateRoot<ProductId>
         images.Add(Thumbnail);
         RaiseDomainEvent(new ProductDeletedEvent(Id.Value, images));
     }
+
     // --- Domain Behaviors ---
+    public void AddReviewVote(int newReviewRating)
+    {
+        var newTotalScore = ProductRating.TotalScore + newReviewRating;
+        var newCount = ProductRating.ReviewCount + 1;
 
-    // public void CalculateRating(int newReviewRating)
-    // {
-    //     var newRating = ((Rating * ReviewCount) + newReviewRating) / (ReviewCount + 1);
+        ProductRating = ProductRating.Create(newTotalScore, newCount);
+        UpdatedAt = DateTime.UtcNow;
+    }
 
-    //     Rating = Math.Clamp(newRating, 0, 5);
+    public void RemoveReviewVote(int reviewRating)
+    {
+        if(ProductRating.ReviewCount <= 0)
+        {
+            ProductRating = ProductRating.Zero;
+            return;
+        }
 
-    //     ReviewCount++;
-    // }
+        var newTotalScore = ProductRating.TotalScore - reviewRating;
+        var newCount = ProductRating.ReviewCount - 1;
 
-    // public void RemoveRating(int oldReviewRating)
-    // {
-    //     if(ReviewCount <= 1)
-    //     {
-    //         Rating = 0;
-    //         ReviewCount = 0;
-    //         return;
-    //     }
+        if(newTotalScore < 0)
+            newTotalScore = 0;
+        if(newCount < 0)
+            newCount = 0;
 
-    //     var currentTotalScore = Rating * ReviewCount;
-    //     var newRating = (currentTotalScore - oldReviewRating) / (ReviewCount - 1);
+        ProductRating = ProductRating.Create(newTotalScore, newCount);
+        UpdatedAt = DateTime.UtcNow;
+    }
 
-    //     Rating = Math.Clamp(newRating, 0, 5);
-    //     ReviewCount--;
-    // }
+    public void UpdateReviewVote(int oldReviewRating, int newReviewRating)
+    {
+        if(ProductRating.ReviewCount == 0)
+            return;
 
-    // public void UpdateRating(int oldReviewRating, int newReviewRating)
-    // {
-    //     if(ReviewCount == 0)
-    //         return;
+        if(oldReviewRating == newReviewRating)
+            return;
 
-    //     if(oldReviewRating == newReviewRating)
-    //         return;
+        var newTotalScore = ProductRating.TotalScore - oldReviewRating + newReviewRating;
 
-    //     var currentTotalScore = Rating * ReviewCount;
-    //     var newRating = (currentTotalScore - oldReviewRating + newReviewRating) / ReviewCount;
+        if(newTotalScore < 0)
+            newTotalScore = 0;
 
-    //     Rating = Math.Clamp(newRating, 0, 5);
-    // }
+        ProductRating = ProductRating.Create(newTotalScore, ProductRating.ReviewCount);
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

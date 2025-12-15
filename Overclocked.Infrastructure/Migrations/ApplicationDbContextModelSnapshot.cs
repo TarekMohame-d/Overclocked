@@ -247,6 +247,12 @@ namespace Overclocked.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
                     b.Property<int>("StockQuantity")
                         .HasColumnType("integer");
 
@@ -483,11 +489,11 @@ namespace Overclocked.Infrastructure.Migrations
             modelBuilder.Entity("Overclocked.Infrastructure.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Error")
-                        .HasColumnType("text");
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
 
                     b.Property<DateTime>("OccurredOnUtc")
                         .HasColumnType("timestamp with time zone");
@@ -499,11 +505,19 @@ namespace Overclocked.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessedOnUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("RetryCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProcessedOnUtc", "OccurredOnUtc");
 
                     b.ToTable("OutboxMessages", (string)null);
                 });
@@ -641,19 +655,19 @@ namespace Overclocked.Infrastructure.Migrations
                             b1.Property<Guid>("ProductId")
                                 .HasColumnType("uuid");
 
-                            b1.Property<double>("Rating")
-                                .HasColumnType("decimal(2,1)")
-                                .HasColumnName("Rating");
-
                             b1.Property<int>("ReviewCount")
                                 .HasColumnType("integer")
                                 .HasColumnName("ReviewCount");
 
+                            b1.Property<int>("TotalScore")
+                                .HasColumnType("integer")
+                                .HasColumnName("TotalScore");
+
                             b1.HasKey("ProductId");
 
-                            b1.HasIndex("Rating");
-
                             b1.HasIndex("ReviewCount");
+
+                            b1.HasIndex("TotalScore");
 
                             b1.ToTable("Products");
 

@@ -25,7 +25,7 @@ public class DomainEventDispatcher(IServiceProvider serviceProvider) : IDomainEv
                 continue;
             }
 
-            var task = (Task)method.Invoke(handler, new object[] { domainEvent, cancellationToken })!;
+            var task = (Task)method.Invoke(handler, [domainEvent, cancellationToken])!;
 
             await task;
         }

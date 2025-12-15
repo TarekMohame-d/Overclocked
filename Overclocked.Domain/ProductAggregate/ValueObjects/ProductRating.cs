@@ -4,17 +4,20 @@ namespace Overclocked.Domain.ProductAggregate.ValueObjects;
 
 public record ProductRating : IValueObject
 {
-    public double Rating { get; private set; }
+    public int TotalScore { get; private set; }
     public int ReviewCount { get; private set; }
+    public double AverageRating => ReviewCount == 0
+    ? 0
+    : Math.Round((double)TotalScore / ReviewCount, 1);
 
-    private ProductRating(double rating, int reviewCount)
+    private ProductRating(int totalScore, int reviewCount)
     {
-        Rating = rating;
+        TotalScore = totalScore;
         ReviewCount = reviewCount;
     }
 
-    public static ProductRating Create(double rating, int reviewCount)
-        => new(rating, reviewCount);
+    public static ProductRating Create(int totalScore, int reviewCount)
+        => new(totalScore, reviewCount);
 
     public static ProductRating Zero => new(0, 0);
 }

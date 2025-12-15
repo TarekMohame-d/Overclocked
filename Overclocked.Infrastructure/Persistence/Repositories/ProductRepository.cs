@@ -12,6 +12,13 @@ namespace Overclocked.Infrastructure.Persistence.Repositories;
 public class ProductRepository(ApplicationDbContext context)
     : GenericRepository<Product, ProductId>(context), IProductRepository
 {
+    public Task<Product?> FetchPrimitiveAsync(ProductId id, CancellationToken cancellationToken = default)
+    {
+        return _dbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
     public Task<List<Product>> GetByIdsAsync(List<ProductId> ids, CancellationToken cancellationToken = default)
     {
         return _dbSet
@@ -57,7 +64,7 @@ public class ProductRepository(ApplicationDbContext context)
         Guid tagId,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<Product> query = _dbContext.Products.AsNoTracking();
+        IQueryable<Product> query = _dbSet.AsNoTracking();
 
         query = ApplySearch(query, searchTerm);
         query = ApplyFilters(query, brandId, categoryId, tagId);

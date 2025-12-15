@@ -22,10 +22,12 @@ public class GetPagedTagsQueryValidator : AbstractValidator<GetPagedTagsQuery>
 
         RuleFor(x => x.SortBy)
             .Must(value => Enum.TryParse<TagSortField>(value, true, out _))
-            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<TagSortField>()));
+            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<TagSortField>()))
+            .When(x => !string.IsNullOrEmpty(x.SortBy));
 
         RuleFor(x => x.Direction)
             .Must(value => Enum.TryParse<SortDirection>(value, true, out _))
-            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<SortDirection>()));
+            .WithMessage("{PropertyName} must be one of: " + string.Join(", ", Enum.GetNames<SortDirection>()))
+            .When(x => !string.IsNullOrEmpty(x.SortBy));
     }
 }
