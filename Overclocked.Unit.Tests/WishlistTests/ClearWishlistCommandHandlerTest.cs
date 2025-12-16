@@ -35,7 +35,7 @@ public class ClearWishlistCommandHandlerTest
         List<Product> products = new ProductFaker(Guid.NewGuid(), Guid.NewGuid()).Generate(3);
         var userId = UserId.Create(Guid.NewGuid());
 
-        var wishlist = Wishlist.Create(WishlistId.Create(), userId);
+        var wishlist = Wishlist.Create(userId);
         wishlist.AddWishlistItem(products[0].Id);
         wishlist.AddWishlistItem(products[1].Id);
         wishlist.AddWishlistItem(products[2].Id);

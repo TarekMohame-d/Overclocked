@@ -1,7 +1,6 @@
 using Overclocked.Application.Review.Commands.CreateReview;
 using Overclocked.Contracts.Review;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
-using Overclocked.Domain.ReviewAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 using ReviewEntity = Overclocked.Domain.ReviewAggregate.Review;
 
@@ -11,7 +10,6 @@ public static class ReviewMapper
 {
     public static ReviewEntity ToEntity(this CreateReviewCommand command) =>
         ReviewEntity.Create(
-            reviewId: ReviewId.Create(),
             userId: UserId.Create(command.UserId),
             productId: ProductId.Create(command.ProductId),
             comment: command.Comment,

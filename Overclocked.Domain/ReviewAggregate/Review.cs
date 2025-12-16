@@ -43,13 +43,12 @@ public class Review : AggregateRoot<ReviewId>
     }
 
     public static Review Create(
-        ReviewId reviewId,
         UserId userId,
         ProductId productId,
         string comment,
         int rating)
     {
-        return new(reviewId, userId, productId, comment, rating);
+        return new(ReviewId.Create(), userId, productId, comment, rating);
     }
 
     public void Update(string comment, int rating)

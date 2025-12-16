@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Overclocked.Domain.RoleAggregate;
-using Overclocked.Domain.RoleAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate;
 using Overclocked.Domain.UserAggregate.ValueObjects;
+using Overclocked.Infrastructure.Persistence.Entities;
 
 namespace Overclocked.Infrastructure.Persistence.Configurations;
 
@@ -11,7 +10,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("Users");
+        builder.ToTable("users");
 
         // Attributes
         builder.HasKey(u => u.Id);
@@ -22,10 +21,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 value => UserId.Create(value))
             .IsRequired();
 
-        builder.Property(u => u.RoleId)
-            .HasConversion(
-                id => id.Value,
-                value => RoleId.Create(value))
+        builder.Property(u => u.Role)
+            .HasColumnName("role_id")
+            .HasConversion<int>()
             .IsRequired();
 
         builder.Property(u => u.FirstName)
@@ -64,16 +62,44 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         // Relationships
-        builder.HasOne(u => u.Role)
+        builder.HasOne<RoleLookup>()
             .WithMany()
-            .HasForeignKey(u => u.RoleId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(u => u.Role)
+            .IsRequired();
 
+        ConfigureUserRefreshTokens(builder);
+
+        ConfigureUserAddresses(builder);
+
+        ConfigureUserEmailConfirmationCode(builder);
+
+        builder.Navigation(u => u.RefreshTokens)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(u => u.Addresses)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(u => u.EmailConfirmationCode)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        // Indexes
+        builder.HasIndex(u => u.Email)
+            .IsUnique();
+
+        builder.HasIndex(u => u.Phone)
+            .IsUnique();
+    }
+
+    private static void ConfigureUserRefreshTokens(EntityTypeBuilder<User> builder)
+    {
         builder.OwnsMany(u => u.RefreshTokens, rtBuilder =>
         {
-            rtBuilder.ToTable("RefreshTokens");
+            rtBuilder.ToTable("refresh_tokens");
 
-            rtBuilder.WithOwner().HasForeignKey("UserId"); // shadow property
+            rtBuilder.WithOwner(); // shadow property
 
             rtBuilder.HasKey(rt => rt.Id);
             rtBuilder.Property(rt => rt.Id)
@@ -103,37 +129,53 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             rtBuilder.HasIndex(rt => rt.DeviceId)
                 .IsUnique();
         });
+    }
 
-        builder.OwnsMany(u => u.Addresses, ua =>
+    private static void ConfigureUserAddresses(EntityTypeBuilder<User> builder)
+    {
+        builder.OwnsMany(u => u.Addresses, uaBuilder =>
         {
-            ua.ToTable("Addresses");
+            uaBuilder.ToTable("addresses");
 
-            ua.WithOwner().HasForeignKey("UserId"); // shadow property
+            uaBuilder.WithOwner(); // shadow property
 
-            ua.HasKey("Id");
-            ua.Property<Guid>("Id")
+            uaBuilder.HasKey("Id");
+            uaBuilder.Property<Guid>("Id")
                 .ValueGeneratedOnAdd();
 
-            ua.Property(a => a.City)
+            uaBuilder.Property(a => a.City)
                 .HasMaxLength(30)
                 .IsRequired();
 
-            ua.Property(a => a.Street)
+            uaBuilder.Property(a => a.Street)
                 .HasMaxLength(100)
                 .IsRequired();
 
-            ua.Property(a => a.Description)
+            uaBuilder.Property(a => a.Description)
                 .HasMaxLength(300)
                 .IsRequired();
 
-            ua.HasIndex(a => a.City);
-        });
+            uaBuilder.Property(a => a.PostalCode)
+                .HasMaxLength(10)
+                .IsRequired();
 
+            uaBuilder.Property(a => a.IsDeleted)
+                .IsRequired();
+
+            uaBuilder.HasIndex(a => a.City);
+        });
+    }
+
+    private static void ConfigureUserEmailConfirmationCode(EntityTypeBuilder<User> builder)
+    {
         builder.OwnsOne(u => u.EmailConfirmationCode, uEmail =>
         {
-            uEmail.ToTable("EmailConfirmationCodes");
+            uEmail.ToTable("email_confirmation_codes");
 
-            uEmail.WithOwner().HasForeignKey("UserId"); // shadow property
+            uEmail.WithOwner().HasForeignKey("UserId");
+
+            uEmail.Property<UserId>("UserId")
+                .HasColumnName("user_id");
 
             uEmail.HasKey("UserId");
 
@@ -147,47 +189,5 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 .HasColumnType("timestamptz")
                 .IsRequired();
         });
-
-        builder.Navigation(u => u.RefreshTokens)
-            .AutoInclude(false)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.Navigation(u => u.Addresses)
-            .AutoInclude(false)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.Navigation(u => u.EmailConfirmationCode)
-            .AutoInclude(false)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.Navigation(u => u.Role)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        // Indexes
-        builder.HasIndex(u => u.Email)
-            .IsUnique();
-
-        builder.HasIndex(u => u.Phone)
-            .IsUnique();
-
-        // Seed Data
-        // builder.HasData(SeedingAdmin());
     }
-
-    // private static User SeedingAdmin()
-    // {
-    //     return new User
-    //     {
-    //         Id = Guid.Parse("019a497f-e294-71ac-8f28-6f772f4289e1"),
-    //         RoleType = RoleType.SuperAdmin,
-    //         FirstName = "Super",
-    //         LastName = "Admin",
-    //         Email = "overclocked.cor@gmail.com",
-    //         EmailConfirmed = true,
-    //         PasswordHash =
-    //             "83F0B98915AA027B1D0A55E018181ACC2BDD9088F085A9832CE2081337BC4743-42C24EE7A22304068F0F8745D27B3C38",
-    //         IsActive = true,
-    //         Phone = "011xxxxxx24",
-    //     };
-    // }
 }

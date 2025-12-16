@@ -20,9 +20,9 @@ public class Wishlist : AggregateRoot<WishlistId>
         UserId = userId;
     }
 
-    public static Wishlist Create(WishlistId id, UserId userId)
+    public static Wishlist Create(UserId userId)
     {
-        return new(id, userId);
+        return new(WishlistId.Create(), userId);
     }
 
     public void AddWishlistItem(ProductId productId)

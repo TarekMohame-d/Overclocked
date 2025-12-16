@@ -13,7 +13,7 @@ public class WishlistConfiguration : IEntityTypeConfiguration<Wishlist>
 {
     public void Configure(EntityTypeBuilder<Wishlist> builder)
     {
-        builder.ToTable("Wishlists");
+        builder.ToTable("wishlists");
 
         builder.HasKey(w => w.Id);
         builder.Property(w => w.Id)
@@ -35,28 +35,36 @@ public class WishlistConfiguration : IEntityTypeConfiguration<Wishlist>
             .HasForeignKey<Wishlist>(w => w.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.OwnsMany(w => w.WishlistItems, wib =>
-        {
-            wib.ToTable("WishlistItems");
-            wib.WithOwner().HasForeignKey("WishlistId");
+        ConfigureWishlistItems(builder);
 
-            wib.Property(wi => wi.ProductId)
-                .HasColumnName("ProductId")
+        // Indexes
+        builder.HasIndex(w => w.UserId)
+            .IsUnique();
+    }
+
+    private static void ConfigureWishlistItems(EntityTypeBuilder<Wishlist> builder)
+    {
+        builder.OwnsMany(w => w.WishlistItems, wiBuilder =>
+        {
+            wiBuilder.ToTable("wishlist_items");
+
+            wiBuilder.WithOwner().HasForeignKey("WishlistId");
+
+            wiBuilder.Property<WishlistId>("WishlistId")
+                .HasColumnName("wishlist_id");
+
+            wiBuilder.Property(wi => wi.ProductId)
                 .HasConversion(
                     id => id.Value,
                     value => ProductId.Create(value))
                 .IsRequired();
 
-            wib.HasKey("WishlistId", "ProductId");
+            wiBuilder.HasKey("WishlistId", "ProductId");
 
-            wib.HasOne<Product>()
+            wiBuilder.HasOne<Product>()
                 .WithMany()
-                .HasForeignKey(p => p.ProductId)
+                .HasForeignKey(wi => wi.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-
-        // Indexes
-        builder.HasIndex(w => w.UserId)
-            .IsUnique();
     }
 }

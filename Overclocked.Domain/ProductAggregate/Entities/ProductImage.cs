@@ -18,6 +18,6 @@ public sealed class ProductImage : Entity<ProductImageId>
     public string ImageUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    public static ProductImage Create(ProductImageId id, string imageUrl) =>
-        new(id: id, imageUrl: imageUrl);
+    public static ProductImage Create(string imageUrl) =>
+        new(id: ProductImageId.Create(), imageUrl: imageUrl);
 }

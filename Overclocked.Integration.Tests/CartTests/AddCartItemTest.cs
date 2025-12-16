@@ -81,7 +81,7 @@ public class AddCartItemTest(CustomWebApplicationFactory factory) : IAsyncLifeti
         Category category = new CategoryFaker().Generate();
         Product product = new ProductFaker(brand.Id.Value, category.Id.Value).Generate();
         User user = new UserFaker(new PasswordHasher()).Generate();
-        var cart = Cart.Create(CartId.Create(), user.Id);
+        var cart = Cart.Create(user.Id);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

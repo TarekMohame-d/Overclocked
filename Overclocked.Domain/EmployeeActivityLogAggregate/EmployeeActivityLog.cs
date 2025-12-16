@@ -14,7 +14,7 @@ public class EmployeeActivityLog : AggregateRoot<EmployeeActivityLogId>
     {
     }
 
-    private EmployeeActivityLog(UserId employeeId, string action)
+    private EmployeeActivityLog(EmployeeActivityLogId id, UserId employeeId, string action) : base(id)
     {
         EmployeeId = employeeId;
         Action = action;
@@ -23,6 +23,6 @@ public class EmployeeActivityLog : AggregateRoot<EmployeeActivityLogId>
 
     public static EmployeeActivityLog Create(UserId employeeId, string action)
     {
-        return new(employeeId, action);
+        return new(EmployeeActivityLogId.Create(), employeeId, action);
     }
 }

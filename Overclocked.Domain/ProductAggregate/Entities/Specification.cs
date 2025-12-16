@@ -25,8 +25,8 @@ public sealed class Specification : Entity<SpecificationId>
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    public static Specification Create(SpecificationId id, string name, string value) =>
-        new(id: id, name: name, value: value);
+    public static Specification Create(string name, string value) =>
+        new(id: SpecificationId.Create(), name: name, value: value);
 
     public void UpdateValue(string value)
     {

@@ -13,7 +13,7 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
 {
     public void Configure(EntityTypeBuilder<Review> builder)
     {
-        builder.ToTable("Reviews");
+        builder.ToTable("reviews");
 
         builder.HasKey(r => r.Id);
         builder.Property(r => r.Id)
@@ -61,11 +61,27 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
             .HasForeignKey(r => r.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        ConfigureReviewReply(builder);
+
+        builder.Navigation(r => r.User)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        // Indexes
+        builder.HasIndex(r => r.UserId);
+        builder.HasIndex(r => r.ProductId);
+        builder.HasIndex(r => r.Rating);
+    }
+
+    private static void ConfigureReviewReply(EntityTypeBuilder<Review> builder)
+    {
         builder.OwnsOne(r => r.ReviewReply, reviewReplyBuilder =>
         {
-            reviewReplyBuilder.ToTable("ReviewReplies");
+            reviewReplyBuilder.ToTable("review_replies");
 
             reviewReplyBuilder.WithOwner().HasForeignKey("ReviewId"); // shadow property
+
+            reviewReplyBuilder.Property<ReviewId>("ReviewId")
+                .HasColumnName("review_id");
 
             reviewReplyBuilder.HasKey(rr => rr.Id);
             reviewReplyBuilder.Property(rr => rr.Id)
@@ -97,14 +113,8 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
                 .WithMany()
                 .HasForeignKey(rr => rr.EmployeeId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            reviewReplyBuilder.HasIndex("ReviewId");
         });
-
-        builder.Navigation(r => r.User)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        // Indexes
-        builder.HasIndex(r => r.UserId);
-        builder.HasIndex(r => r.ProductId);
-        builder.HasIndex(r => r.Rating);
     }
 }

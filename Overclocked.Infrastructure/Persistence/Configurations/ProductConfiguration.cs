@@ -1,12 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Overclocked.Domain.BrandAggregate;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
-using Overclocked.Domain.CategoryAggregate;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.ProductAggregate;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
-using Overclocked.Domain.TagAggregate;
 using Overclocked.Domain.TagAggregate.ValueObjects;
 
 namespace Overclocked.Infrastructure.Persistence.Configurations;
@@ -15,7 +12,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
     public void Configure(EntityTypeBuilder<Product> builder)
     {
-        builder.ToTable("Products");
+        builder.ToTable("products");
 
         // Attributes
         builder.HasKey(p => p.Id);
@@ -55,44 +52,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.Property(p => p.RowVersion).IsRowVersion();
 
-        builder.ComplexProperty(p => p.Price, money =>
-        {
-            money.Property(m => m.Amount)
-                .HasColumnName("Price")
-                .HasColumnType("decimal(8,2)")
-                .IsRequired();
+        ConfigureProductPrice(builder);
 
-            money.Property(m => m.Currency)
-                .HasColumnName("Currency")
-                .HasColumnType("varchar(5)")
-                .IsRequired();
-        });
+        ConfigureProductDiscount(builder);
 
-        builder.ComplexProperty(p => p.Discount, money =>
-        {
-            money.Property(m => m.Amount)
-                .HasColumnName("Discount")
-                .HasColumnType("decimal(2,2)")
-                .IsRequired();
-
-            money.Ignore(m => m.Currency); // Not stored
-        });
-
-        builder.OwnsOne(p => p.ProductRating, rating =>
-        {
-            rating.Property(r => r.TotalScore)
-                .HasColumnName("TotalScore")
-                .IsRequired();
-
-            rating.Property(r => r.ReviewCount)
-                .HasColumnName("ReviewCount")
-                .IsRequired();
-
-            rating.Ignore(r => r.AverageRating);
-
-            rating.HasIndex(r => r.TotalScore);
-            rating.HasIndex(r => r.ReviewCount);
-        });
+        ConfigureProductRating(builder);
 
         builder.Property(p => p.StockQuantity)
             .IsRequired();
@@ -120,11 +84,97 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        ConfigureProductImages(builder);
+
+        ConfigureProductSpecifications(builder);
+
+        ConfigureProductTags(builder);
+
+        builder.Navigation(p => p.Images)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(p => p.Specifications)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(p => p.ProductTags)
+            .AutoInclude(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(p => p.Brand)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(p => p.Category)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        // Indexes
+        builder.HasIndex(p => p.Name)
+            .IsUnique();
+
+        builder.HasIndex(p => p.NormalizedName)
+            .IsUnique();
+
+        builder.HasIndex(p => p.BrandId);
+
+        builder.HasIndex(p => p.CategoryId);
+    }
+
+    private static void ConfigureProductPrice(EntityTypeBuilder<Product> builder)
+    {
+        builder.ComplexProperty(p => p.Price, moneyBuilder =>
+        {
+            moneyBuilder.Property(m => m.Amount)
+                .HasColumnName("price")
+                .HasColumnType("decimal(8,2)")
+                .IsRequired();
+
+            moneyBuilder.Property(m => m.Currency)
+                .HasColumnName("currency")
+                .HasMaxLength(3)
+                .IsRequired();
+        });
+    }
+
+    private static void ConfigureProductDiscount(EntityTypeBuilder<Product> builder)
+    {
+        builder.ComplexProperty(p => p.Discount, moneyBuilder =>
+        {
+            moneyBuilder.Property(m => m.Amount)
+                .HasColumnName("discount")
+                .HasColumnType("decimal(2,2)")
+                .IsRequired();
+
+            moneyBuilder.Ignore(m => m.Currency); // Not stored
+        });
+    }
+
+    private static void ConfigureProductRating(EntityTypeBuilder<Product> builder)
+    {
+        builder.OwnsOne(p => p.ProductRating, prBuilder =>
+        {
+            prBuilder.Property(r => r.TotalScore)
+                .HasColumnName("total_score")
+                .IsRequired();
+
+            prBuilder.Property(r => r.ReviewCount)
+                .HasColumnName("review_count")
+                .IsRequired();
+
+            prBuilder.Ignore(r => r.AverageRating);
+
+            prBuilder.HasIndex(r => r.TotalScore);
+            prBuilder.HasIndex(r => r.ReviewCount);
+        });
+    }
+
+    private static void ConfigureProductImages(EntityTypeBuilder<Product> builder)
+    {
         builder.OwnsMany(p => p.Images, pi =>
         {
-            pi.ToTable("ProductImages");
+            pi.ToTable("product_images");
 
-            pi.WithOwner().HasForeignKey("ProductId"); // shadow property
+            pi.WithOwner(); // shadow property
 
             pi.HasKey(pi => pi.Id);
             pi.Property(pi => pi.Id)
@@ -141,12 +191,15 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 .HasColumnType("timestamptz")
                 .IsRequired();
         });
+    }
 
+    private static void ConfigureProductSpecifications(EntityTypeBuilder<Product> builder)
+    {
         builder.OwnsMany(p => p.Specifications, ps =>
         {
-            ps.ToTable("ProductSpecifications");
+            ps.ToTable("product_specifications");
 
-            ps.WithOwner().HasForeignKey("ProductId"); // shadow property
+            ps.WithOwner(); // shadow property
 
             ps.HasKey(s => s.Id);
             ps.Property(s => s.Id)
@@ -176,15 +229,21 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 .HasColumnType("timestamptz")
                 .IsRequired();
         });
+    }
 
-        builder.OwnsMany(p => p.Tags, pt =>
+    private static void ConfigureProductTags(EntityTypeBuilder<Product> builder)
+    {
+        builder.OwnsMany(p => p.ProductTags, pt =>
         {
-            pt.ToTable("ProductTags");
+            pt.ToTable("product_tags");
 
             pt.WithOwner().HasForeignKey("ProductId");
 
+            pt.Property<ProductId>("ProductId")
+                .HasColumnName("product_id");
+
             pt.Property(t => t.TagId)
-                .HasColumnName("TagId")
+                .HasColumnName("tag_id")
                 .HasConversion(
                     id => id.Value,
                     value => TagId.Create(value))
@@ -197,34 +256,5 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 .HasForeignKey(t => t.TagId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-
-        builder.Navigation(p => p.Images)
-            .AutoInclude(false)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.Navigation(p => p.Specifications)
-            .AutoInclude(false)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.Navigation(p => p.Tags)
-            .AutoInclude(false)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.Navigation(p => p.Brand)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.Navigation(p => p.Category)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        // Indexes
-        builder.HasIndex(p => p.Name)
-            .IsUnique();
-
-        builder.HasIndex(p => p.NormalizedName)
-            .IsUnique();
-
-        builder.HasIndex(p => p.BrandId);
-
-        builder.HasIndex(p => p.CategoryId);
     }
 }

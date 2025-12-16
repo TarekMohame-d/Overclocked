@@ -3,6 +3,7 @@ using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Primitives;
+using Overclocked.Domain.Common.Shared.ValueObjects;
 using Overclocked.Domain.ProductAggregate.Entities;
 using Overclocked.Domain.ProductAggregate.Events;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
@@ -35,8 +36,8 @@ public sealed class Product : AggregateRoot<ProductId>
     private readonly List<Specification> _specifications = [];
     public IReadOnlyList<Specification> Specifications => _specifications.AsReadOnly();
 
-    private readonly List<ProductTag> _tags = [];
-    public IReadOnlyCollection<ProductTag> Tags => _tags.AsReadOnly();
+    private readonly List<ProductTag> _productTags = [];
+    public IReadOnlyCollection<ProductTag> ProductTags => _productTags.AsReadOnly();
 
     // EF Core Concurrency Token
     public byte[] RowVersion { get; private set; }
@@ -74,7 +75,7 @@ public sealed class Product : AggregateRoot<ProductId>
         Discount = discount;
         _images.AddRange(images);
         _specifications.AddRange(specifications);
-        _tags.AddRange(tags);
+        _productTags.AddRange(tags);
 
         ProductRating = ProductRating.Zero;
         IsDeleted = isDeleted;
@@ -167,7 +168,7 @@ public sealed class Product : AggregateRoot<ProductId>
         {
             if(!existingImageUrls.Contains(imageUrl))
             {
-                _images.Add(ProductImage.Create(ProductImageId.Create(), imageUrl));
+                _images.Add(ProductImage.Create(imageUrl));
             }
         }
     }
@@ -176,15 +177,15 @@ public sealed class Product : AggregateRoot<ProductId>
     {
         var inputTagsSet = new HashSet<Guid>(tags);
 
-        _tags.RemoveAll(x => !inputTagsSet.Contains(x.TagId.Value));
+        _productTags.RemoveAll(x => !inputTagsSet.Contains(x.TagId.Value));
 
-        var existingTagIds = new HashSet<Guid>(_tags.Select(x => x.TagId.Value));
+        var existingTagIds = new HashSet<Guid>(_productTags.Select(x => x.TagId.Value));
 
         foreach(Guid tagId in inputTagsSet)
         {
             if(!existingTagIds.Contains(tagId))
             {
-                _tags.Add(ProductTag.Create(TagId.Create(tagId)));
+                _productTags.Add(ProductTag.Create(TagId.Create(tagId)));
             }
         }
     }
@@ -217,10 +218,7 @@ public sealed class Product : AggregateRoot<ProductId>
             }
             else
             {
-                _specifications.Add(Specification.Create(
-                    SpecificationId.Create(),
-                    name,
-                    value));
+                _specifications.Add(Specification.Create(name, value));
             }
         }
     }

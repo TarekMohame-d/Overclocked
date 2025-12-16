@@ -10,7 +10,7 @@ using Overclocked.Application.Cart.Commands.UpdateCartItem;
 using Overclocked.Application.Cart.Queries.GetCartItems;
 using Overclocked.Contracts.Cart;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers;
 
@@ -22,7 +22,7 @@ public class CartController(
     ICommandHandler<ClearCartCommand> clearHandler,
     IQueryHandler<GetCartItemsQuery, CartResponse> queryHandler) : ControllerBase
 {
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpGet]
     [Route(CartRoutes.GetCartItems)]
     public async Task<IActionResult> GetCartItems(CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ public class CartController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpPost]
     [Route(CartRoutes.AddCartItem)]
     public async Task<IActionResult> AddCartItem(
@@ -72,7 +72,7 @@ public class CartController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpPut]
     [Route(CartRoutes.UpdateCartItem)]
     public async Task<IActionResult> UpdateCartItem(
@@ -100,7 +100,7 @@ public class CartController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpDelete]
     [Route(CartRoutes.DeleteCartItem)]
     public async Task<IActionResult> DeleteCartItem(
@@ -126,7 +126,7 @@ public class CartController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpDelete]
     [Route(CartRoutes.ClearCart)]
     public async Task<IActionResult> ClearCart(CancellationToken cancellationToken)

@@ -23,9 +23,9 @@ public class ReviewReply : Entity<ReviewReplyId>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public static ReviewReply Create(ReviewReplyId id, UserId employeeId, string reply)
+    public static ReviewReply Create(UserId employeeId, string reply)
     {
-        return new(id, employeeId, reply);
+        return new(ReviewReplyId.Create(), employeeId, reply);
     }
 
     public void Update(string reply)

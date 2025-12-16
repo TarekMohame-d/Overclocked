@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using NSubstitute;
+﻿using NSubstitute;
 using Overclocked.Application.Abstractions;
 using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Abstractions.Services;
@@ -9,8 +8,8 @@ using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Contracts.Authentication;
 using Overclocked.Domain.Common.Enums;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.RoleAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 using Overclocked.Infrastructure.Authentication;
 using Shouldly;
@@ -20,7 +19,6 @@ namespace Overclocked.Unit.Tests.AuthenticationTests;
 public class RefreshTokenCommandHandlerTests
 {
     private readonly IUserRepository _userRepositoryMock;
-    private readonly IPermissionRepository _permissionRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IRefreshTokenHasher _refreshTokenHasherMock;
     private readonly ITokenReaderService _tokenReaderServiceMock;
@@ -30,7 +28,6 @@ public class RefreshTokenCommandHandlerTests
     public RefreshTokenCommandHandlerTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
-        _permissionRepositoryMock = Substitute.For<IPermissionRepository>();
         _tokenProviderMock = Substitute.For<ITokenProvider>();
         _refreshTokenHasherMock = Substitute.For<IRefreshTokenHasher>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
@@ -38,7 +35,6 @@ public class RefreshTokenCommandHandlerTests
 
         _refreshTokenCommandHandler = new RefreshTokenCommandHandler(
             _userRepositoryMock,
-            _permissionRepositoryMock,
             _unitOfWorkMock,
             _refreshTokenHasherMock,
             _tokenReaderServiceMock,
@@ -262,7 +258,7 @@ public class RefreshTokenCommandHandlerTests
         _refreshTokenHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>())
             .Returns(true);
 
-        _permissionRepositoryMock.GetPermissionsByRoleIdAsync(Arg.Any<RoleId>(), Arg.Any<CancellationToken>())
+        _userRepositoryMock.GetPermissionsByRoleAsync(Arg.Any<Role>(), Arg.Any<CancellationToken>())
             .Returns([]);
 
         _unitOfWorkMock.SaveChangesAsync(Arg.Any<CancellationToken>())
@@ -284,8 +280,8 @@ public class RefreshTokenCommandHandlerTests
         _refreshTokenHasherMock.Received(1)
             .Verify(Arg.Any<string>(), Arg.Any<string>());
 
-        await _permissionRepositoryMock.Received(1)
-            .GetPermissionsByRoleIdAsync(Arg.Any<RoleId>(), Arg.Any<CancellationToken>());
+        await _userRepositoryMock.Received(1)
+            .GetPermissionsByRoleAsync(Arg.Any<Role>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)
             .SaveChangesAsync(Arg.Any<CancellationToken>());

@@ -4,9 +4,8 @@ using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Abstractions.Services;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
-using Overclocked.Domain.RoleAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 
 namespace Overclocked.Application.Authentication.Commands.Register;
@@ -23,11 +22,7 @@ public class RegisterCommandHandler(
         var code = emailConfirmationCodeService.GenerateVerificationCode();
         var codeHash = emailConfirmationCodeService.Hash(code);
 
-        var roleId = RoleId.Create((int)RoleType.Customer);
-
         var user = User.Create(
-            UserId.Create(),
-            roleId,
             command.FirstName,
             command.LastName,
             command.Email,

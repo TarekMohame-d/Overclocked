@@ -61,7 +61,7 @@ public class GetProductByIdQueryHandler(
                 Value = s.Value
             }),
 
-            Tags = p.Tags.Select(pt => new TagResponse
+            Tags = p.ProductTags.Select(pt => new TagResponse
             {
                 Id = pt.Tag!.Id.Value,
                 Name = pt.Tag.Name

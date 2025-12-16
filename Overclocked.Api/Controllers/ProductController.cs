@@ -10,7 +10,7 @@ using Overclocked.Application.Product.Queries.GetPagedProducts;
 using Overclocked.Application.Product.Queries.GetProductById;
 using Overclocked.Contracts.Product;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers;
 
@@ -55,7 +55,7 @@ public class ProductController(ICommandHandler<CreateProductCommand> createHandl
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpPost]
     [Route(ProductRoutes.Create)]
     public async Task<IActionResult> Create(
@@ -71,7 +71,7 @@ public class ProductController(ICommandHandler<CreateProductCommand> createHandl
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpPut]
     [Route(ProductRoutes.Update)]
     public async Task<IActionResult> Update(
@@ -88,7 +88,7 @@ public class ProductController(ICommandHandler<CreateProductCommand> createHandl
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpDelete]
     [Route(ProductRoutes.Delete)]
     public async Task<IActionResult> Delete(

@@ -13,7 +13,7 @@ public class CreateTagCommandHandler(
 {
     public async Task<Result> Handle(CreateTagCommand command, CancellationToken cancellationToken)
     {
-        var tag = TagEntity.Create(TagId.Create(), command.Name);
+        var tag = TagEntity.Create(command.Name);
 
         await tagRepository.AddAsync(tag, cancellationToken);
 

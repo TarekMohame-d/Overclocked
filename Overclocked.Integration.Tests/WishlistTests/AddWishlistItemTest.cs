@@ -82,7 +82,7 @@ public class AddWishlistItemTest(CustomWebApplicationFactory factory) : IAsyncLi
         Category category = new CategoryFaker().Generate();
         Product product = new ProductFaker(brand.Id.Value, category.Id.Value).Generate();
         User user = new UserFaker(new PasswordHasher()).Generate();
-        var wishlist = Wishlist.Create(WishlistId.Create(), user.Id);
+        var wishlist = Wishlist.Create(user.Id);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

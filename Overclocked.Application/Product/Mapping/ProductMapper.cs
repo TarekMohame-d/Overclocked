@@ -3,6 +3,7 @@ using Overclocked.Contracts.Brand;
 using Overclocked.Contracts.Product;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
+using Overclocked.Domain.Common.Shared.ValueObjects;
 using Overclocked.Domain.ProductAggregate.Entities;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 using Overclocked.Domain.TagAggregate.ValueObjects;
@@ -53,12 +54,12 @@ public static class ProductMapper
 
     private static IEnumerable<Specification> CreateSpecifications(IEnumerable<(string Name, string Value)> specs)
     {
-        return specs.Select(x => Specification.Create(SpecificationId.Create(), x.Name, x.Value));
+        return specs.Select(x => Specification.Create(x.Name, x.Value));
     }
 
     private static IEnumerable<ProductImage> CreateProductImages(IEnumerable<string>? images)
     {
-        return images?.Select(x => ProductImage.Create(ProductImageId.Create(), x)) ?? [];
+        return images?.Select(ProductImage.Create) ?? [];
     }
 
     private static IEnumerable<ProductTag> CreateProductTags(IEnumerable<Guid> tags)

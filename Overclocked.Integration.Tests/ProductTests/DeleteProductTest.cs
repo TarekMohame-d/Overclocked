@@ -7,10 +7,10 @@ using Overclocked.Api.Routing;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.BrandAggregate;
 using Overclocked.Domain.CategoryAggregate;
-using Overclocked.Domain.Common.StaticData;
 using Overclocked.Domain.ProductAggregate;
 using Overclocked.Domain.ProductAggregate.Events;
 using Overclocked.Domain.TagAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Infrastructure.Outbox;
 using Overclocked.Infrastructure.Persistence;
 using Overclocked.Integration.Tests.Shared;
@@ -28,7 +28,7 @@ public class DeleteProductTest(CustomWebApplicationFactory factory) : IAsyncLife
         await factory.ResetDatabaseAsync();
 
         var token = CustomWebApplicationFactory.GenerateJwtToken(
-            permissions: [PermissionType.AddEditDelete.ToString()]
+            permissions: [Permission.AddEditDelete.ToString()]
         );
         factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }

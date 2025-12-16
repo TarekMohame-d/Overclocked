@@ -2,7 +2,6 @@ using System.Net;
 using Overclocked.Application.Abstractions;
 using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Application.Abstractions.Persistence;
-using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Results;
 using CategoryEntity = Overclocked.Domain.CategoryAggregate.Category;
 
@@ -14,7 +13,7 @@ public class CreateCategoryCommandHandler(
 {
     public async Task<Result> Handle(CreateCategoryCommand command, CancellationToken cancellationToken)
     {
-        var category = CategoryEntity.Create(CategoryId.Create(), command.Name, command.ImageUrl);
+        var category = CategoryEntity.Create(command.Name, command.ImageUrl);
 
         await categoryRepository.AddAsync(category, cancellationToken);
 

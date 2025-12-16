@@ -9,7 +9,7 @@ using Overclocked.Application.Wishlist.Commands.DeleteWishlistItem;
 using Overclocked.Application.Wishlist.Queries.GetWishlistItems;
 using Overclocked.Contracts.Wishlist;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers;
 
@@ -19,7 +19,7 @@ public class WishlistController(
     ICommandHandler<ClearWishlistCommand> clearHandler,
     IQueryHandler<GetWishlistItemsQuery, WishlistResponse> queryHandler) : ControllerBase
 {
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpGet]
     [Route(WishlistRoutes.GetWishlistItems)]
     public async Task<IActionResult> GetWishlistItems(CancellationToken cancellationToken)
@@ -42,7 +42,7 @@ public class WishlistController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpPost]
     [Route(WishlistRoutes.AddWishlistItem)]
     public async Task<IActionResult> AddWishlistItems(
@@ -68,7 +68,7 @@ public class WishlistController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpDelete]
     [Route(WishlistRoutes.DeleteWishlistItem)]
     public async Task<IActionResult> DeleteWishlistItem(
@@ -94,7 +94,7 @@ public class WishlistController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpDelete]
     [Route(WishlistRoutes.ClearWishlist)]
     public async Task<IActionResult> ClearWishlist(CancellationToken cancellationToken)

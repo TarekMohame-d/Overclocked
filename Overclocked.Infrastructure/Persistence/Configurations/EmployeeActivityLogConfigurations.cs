@@ -11,7 +11,7 @@ public class EmployeeActivityLogConfigurations : IEntityTypeConfiguration<Employ
 {
     public void Configure(EntityTypeBuilder<EmployeeActivityLog> builder)
     {
-        builder.ToTable("EmployeeActivityLogs");
+        builder.ToTable("employee_activity_logs");
 
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Id)

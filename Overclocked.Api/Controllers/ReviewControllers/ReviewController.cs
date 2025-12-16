@@ -10,7 +10,7 @@ using Overclocked.Application.Review.Queries.GetPagedReviews;
 using Overclocked.Application.Review.Queries.GetProductRatingBreakdown;
 using Overclocked.Contracts.Review;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers.ReviewControllers;
 
@@ -56,7 +56,7 @@ public class ReviewController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpPost]
     [Route(ReviewRoutes.Create)]
     public async Task<IActionResult> Create(
@@ -85,7 +85,7 @@ public class ReviewController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpPut]
     [Route(ReviewRoutes.Update)]
     public async Task<IActionResult> Update(
@@ -116,7 +116,7 @@ public class ReviewController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = nameof(RoleType.Customer))]
+    [Authorize(Roles = nameof(Role.Customer))]
     [HttpDelete]
     [Route(ReviewRoutes.Delete)]
     public async Task<IActionResult> Delete(

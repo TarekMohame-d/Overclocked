@@ -1,6 +1,6 @@
-﻿namespace Overclocked.Domain.Common.StaticData;
+﻿namespace Overclocked.Domain.OrderAggregate.ValueObjects;
 
-public enum OrderStatusType
+public enum OrderStatus
 {
     Pending = 1, // Order has been placed but payment is not confirmed yet.
     Confirmed, // Payment is confirmed, and order is approved for processing.

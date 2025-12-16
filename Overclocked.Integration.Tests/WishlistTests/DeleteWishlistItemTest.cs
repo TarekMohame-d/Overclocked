@@ -81,7 +81,7 @@ public class DeleteWishlistItemTest(CustomWebApplicationFactory factory) : IAsyn
         Category category = new CategoryFaker().Generate();
         List<Product> products = new ProductFaker(brand.Id.Value, category.Id.Value).Generate(5);
         User user = new UserFaker(new PasswordHasher()).Generate();
-        var wishlist = Wishlist.Create(WishlistId.Create(), user.Id);
+        var wishlist = Wishlist.Create(user.Id);
         wishlist.AddWishlistItem(products[0].Id);
         wishlist.AddWishlistItem(products[1].Id);
         wishlist.AddWishlistItem(products[2].Id);

@@ -1,7 +1,6 @@
 using Overclocked.Application.Abstractions;
 using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Application.Abstractions.Persistence;
-using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.Common.Results;
 using BrandEntity = Overclocked.Domain.BrandAggregate.Brand;
 
@@ -13,7 +12,7 @@ public class CreateBrandCommandHandler(
 {
     public async Task<Result> Handle(CreateBrandCommand command, CancellationToken cancellationToken)
     {
-        var brand = BrandEntity.Create(BrandId.Create(), command.Name, command.ImageUrl);
+        var brand = BrandEntity.Create(command.Name, command.ImageUrl);
 
         await brandRepository.AddAsync(brand, cancellationToken);
 

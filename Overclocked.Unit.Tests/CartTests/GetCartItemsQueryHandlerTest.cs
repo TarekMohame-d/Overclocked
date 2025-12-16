@@ -36,7 +36,7 @@ public class GetCartItemsQueryHandlerTest
         List<Product> products = new ProductFaker(Guid.NewGuid(), Guid.NewGuid()).Generate(3);
         var userId = UserId.Create(Guid.NewGuid());
 
-        var cart = Cart.Create(CartId.Create(), userId);
+        var cart = Cart.Create(userId);
         CartItemId cartItemId = cart.AddCartItem(products[0].Id, 1);
         cart.AddCartItem(products[1].Id, 4);
         cart.AddCartItem(products[2].Id, 2);

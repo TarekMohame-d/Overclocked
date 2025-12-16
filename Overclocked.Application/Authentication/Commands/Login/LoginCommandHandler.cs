@@ -6,14 +6,13 @@ using Overclocked.Application.Authentication.Commands.Common;
 using Overclocked.Contracts.Authentication;
 using Overclocked.Domain.Common.Errors;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
 using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Application.Authentication.Commands.Login;
 
 public class LoginCommandHandler(
     IUserRepository userRepository,
-    IPermissionRepository permissionRepository,
     IUnitOfWork unitOfWork,
     IEmailConfirmationCodeService emailConfirmationCodeService,
     IPasswordHasher passwordHasher,
@@ -46,14 +45,14 @@ public class LoginCommandHandler(
             return Result.Failure<AuthResponse>(AuthenticationErrors.EmailNotConfirmed);
         }
 
-        List<string> permissions = await permissionRepository
-            .GetPermissionsByRoleIdAsync(user.RoleId, cancellationToken);
+        List<string> permissions = await userRepository
+            .GetPermissionsByRoleAsync(user.Role, cancellationToken);
 
         var tokenClaims = new TokenClaims(
             user.Id.Value.ToString(),
             user.Email,
             command.DeviceId,
-            ((RoleType)user.RoleId.Value).ToString(),
+            user.Role.ToString(),
             permissions);
 
         var accessToken = tokenProvider.GenerateAccessToken(tokenClaims);

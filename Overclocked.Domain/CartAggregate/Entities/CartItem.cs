@@ -6,7 +6,6 @@ namespace Overclocked.Domain.CartAggregate.Entities;
 
 public class CartItem : Entity<CartItemId>
 {
-    public CartId CartId { get; private set; }
     public ProductId ProductId { get; private set; }
     public int Quantity { get; private set; }
     public DateTime CreatedAt { get; private init; }
@@ -15,9 +14,8 @@ public class CartItem : Entity<CartItemId>
     private CartItem()
     {
     }
-    private CartItem(CartItemId id, CartId cartId, ProductId productId, int quantity) : base(id)
+    private CartItem(CartItemId id, ProductId productId, int quantity) : base(id)
     {
-        CartId = cartId;
         ProductId = productId;
         Quantity = quantity;
 
@@ -25,11 +23,10 @@ public class CartItem : Entity<CartItemId>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public static CartItem Create(CartItemId id, CartId cartId, ProductId productId, int quantity)
+    public static CartItem Create(ProductId productId, int quantity)
     {
         return new(
-            id: id,
-            cartId: cartId,
+            id: CartItemId.Create(),
             productId: productId,
             quantity: quantity);
     }

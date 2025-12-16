@@ -1,6 +1,6 @@
 using Overclocked.Domain.Common.Primitives;
 
-namespace Overclocked.Domain.ProductAggregate.ValueObjects;
+namespace Overclocked.Domain.Common.Shared.ValueObjects;
 
 public record Money : IValueObject
 {
@@ -23,4 +23,14 @@ public record Money : IValueObject
     }
 
     public static Money Zero => new(0);
+
+    public static Money operator +(Money a, Money b)
+    {
+        if(a.Currency != b.Currency)
+            throw new Exception("Currency mismatch");
+        return new Money(a.Amount + b.Amount, a.Currency);
+    }
+
+    public static Money operator *(Money a, int multiplier)
+        => new(a.Amount * multiplier, a.Currency);
 }

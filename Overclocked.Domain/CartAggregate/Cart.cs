@@ -23,9 +23,9 @@ public class Cart : AggregateRoot<CartId>
         UserId = userId;
     }
 
-    public static Cart Create(CartId id, UserId userId)
+    public static Cart Create(UserId userId)
     {
-        return new(id, userId);
+        return new(CartId.Create(), userId);
     }
 
     public CartItemId AddCartItem(ProductId productId, int quantity)
@@ -39,10 +39,9 @@ public class Cart : AggregateRoot<CartId>
         }
         else
         {
-            var cartItemId = CartItemId.Create();
-            var cartItem = CartItem.Create(cartItemId, Id, productId, quantity);
+            var cartItem = CartItem.Create(productId, quantity);
             _cartItems.Add(cartItem);
-            return cartItemId;
+            return cartItem.Id;
         }
     }
 

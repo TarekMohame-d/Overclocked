@@ -26,10 +26,10 @@ public sealed class Brand : AggregateRoot<BrandId>
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    public static Brand Create(BrandId id, string name, string imageUrl)
+    public static Brand Create(string name, string imageUrl)
     {
-        return new Brand(
-            id: id,
+        return new(
+            id: BrandId.Create(),
             name: name,
             imageUrl: imageUrl);
     }

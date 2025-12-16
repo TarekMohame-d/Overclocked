@@ -1,8 +1,7 @@
 using Bogus;
 using Overclocked.Application.Abstractions.Services;
-using Overclocked.Domain.Common.StaticData;
-using Overclocked.Domain.RoleAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 
 namespace Overclocked.Architecture.Tests.FakeData;
@@ -15,8 +14,6 @@ public sealed class UserFaker : Faker<User>
         _passwordHasher = passwordHasher;
         CustomInstantiator(f =>
             User.Create(
-                UserId.Create(),
-                RoleId.Create((int)RoleType.Customer),
                 $"{f.Person.FirstName}-{f.UniqueIndex}",
                 $"{f.Person.LastName}/{f.UniqueIndex}",
                 $"{f.Internet.Email()}",

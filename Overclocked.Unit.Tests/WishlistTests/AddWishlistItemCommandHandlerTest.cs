@@ -45,7 +45,7 @@ public class AddWishlistItemCommandHandlerTest
             ProductId = products[0].Id.Value
         };
 
-        var wishlist = Wishlist.Create(WishlistId.Create(), userId);
+        var wishlist = Wishlist.Create(userId);
 
         _wishlistRepositoryMock.GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
             .Returns(wishlist);

@@ -11,7 +11,7 @@ using Overclocked.Application.Category.Queries.GetCategoryById;
 using Overclocked.Contracts.Category;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers;
 
@@ -52,7 +52,7 @@ public class CategoryController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpPost]
     [Route(CategoryRoutes.Create)]
     public async Task<IActionResult> Create(
@@ -72,7 +72,7 @@ public class CategoryController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpPut]
     [Route(CategoryRoutes.Update)]
     public async Task<IActionResult> Put(
@@ -94,7 +94,7 @@ public class CategoryController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpDelete]
     [Route(CategoryRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)

@@ -9,7 +9,7 @@ using Overclocked.Application.Tag.Commands.UpdateTag;
 using Overclocked.Application.Tag.Queries.GetPagedTags;
 using Overclocked.Contracts.Tag;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers;
 
@@ -35,7 +35,7 @@ public class TagController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpPost]
     [Route(TagRoutes.Create)]
     public async Task<IActionResult> Create([FromBody] CreateTagRequest request, CancellationToken cancellationToken)
@@ -52,7 +52,7 @@ public class TagController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpPut]
     [Route(TagRoutes.Update)]
     public async Task<IActionResult> Put(
@@ -73,7 +73,7 @@ public class TagController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpDelete]
     [Route(TagRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)

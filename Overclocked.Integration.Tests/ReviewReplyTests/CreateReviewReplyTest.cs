@@ -8,10 +8,10 @@ using Overclocked.Api.Routing;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.BrandAggregate;
 using Overclocked.Domain.CategoryAggregate;
-using Overclocked.Domain.Common.StaticData;
 using Overclocked.Domain.ProductAggregate;
 using Overclocked.Domain.ReviewAggregate;
 using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Infrastructure.Authentication;
 using Overclocked.Infrastructure.Persistence;
 using Overclocked.Integration.Tests.Shared;
@@ -104,7 +104,7 @@ public class CreateReviewReplyTest(CustomWebApplicationFactory factory) : IAsync
         Review review = new ReviewFaker(user.Id.Value, product.Id.Value).Generate();
 
         User admin = new UserFaker(new PasswordHasher()).Generate();
-        admin.ChangeRole(RoleType.Admin);
+        admin.ChangeRole(Role.Admin);
 
         using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

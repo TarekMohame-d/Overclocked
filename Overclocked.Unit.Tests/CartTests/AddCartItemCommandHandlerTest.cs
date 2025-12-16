@@ -46,7 +46,7 @@ public class AddCartItemCommandHandlerTest
             Quantity = 1
         };
 
-        var cart = Cart.Create(CartId.Create(), userId);
+        var cart = Cart.Create(userId);
 
         _cartRepositoryMock.GetAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>())
             .Returns(cart);

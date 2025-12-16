@@ -1,9 +1,7 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Overclocked.Domain.Common.Primitives;
-using Overclocked.Domain.Common.StaticData;
-using Overclocked.Domain.RoleAggregate;
-using Overclocked.Domain.RoleAggregate.ValueObjects;
+using Overclocked.Domain.Common.Shared.ValueObjects;
 using Overclocked.Domain.UserAggregate.Entities;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Domain.UserAggregate.Events;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 
@@ -11,12 +9,7 @@ namespace Overclocked.Domain.UserAggregate;
 
 public class User : AggregateRoot<UserId>
 {
-    public RoleId RoleId { get; private set; }
-    [NotMapped]
-    public RoleType RoleType
-    {
-        get => (RoleType)RoleId.Value;
-    }
+    public Role Role { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     public string Email { get; private set; }
@@ -34,14 +27,11 @@ public class User : AggregateRoot<UserId>
     private readonly List<Address> _addresses = [];
     public IReadOnlyList<Address> Addresses => _addresses.AsReadOnly();
 
-    public Role? Role { get; }
-
     private User()
     {
     }
     private User(
         UserId id,
-        RoleId roleId,
         string firstName,
         string lastName,
         string email,
@@ -49,7 +39,7 @@ public class User : AggregateRoot<UserId>
         string phone,
         bool isActive = true) : base(id)
     {
-        RoleId = roleId;
+        Role = Role.Customer;
         FirstName = firstName;
         LastName = lastName;
         Email = email;
@@ -63,8 +53,6 @@ public class User : AggregateRoot<UserId>
     }
 
     public static User Create(
-        UserId id,
-        RoleId roleId,
         string firstName,
         string lastName,
         string email,
@@ -75,8 +63,7 @@ public class User : AggregateRoot<UserId>
         bool isActive = true)
     {
         var user = new User(
-            id: id,
-            roleId: roleId,
+            id: UserId.Create(),
             firstName: firstName,
             lastName: lastName,
             email: email,
@@ -120,10 +107,7 @@ public class User : AggregateRoot<UserId>
         }
         else
         {
-            refreshToken = RefreshToken.Create(
-                RefreshTokenId.Create(),
-                deviceId,
-                tokenHash);
+            refreshToken = RefreshToken.Create(deviceId, tokenHash);
 
             _refreshTokens.Add(refreshToken);
         }
@@ -145,9 +129,9 @@ public class User : AggregateRoot<UserId>
         EmailConfirmationCode = EmailConfirmationCode.Create(codeHash, false, DateTime.UtcNow.AddMinutes(10));
     }
 
-    public void ChangeRole(RoleType roleType)
+    public void ChangeRole(Role role)
     {
-        RoleId = RoleId.Create((int)roleType);
+        Role = role;
         UpdatedAt = DateTime.UtcNow;
     }
 }

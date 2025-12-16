@@ -11,7 +11,7 @@ using Overclocked.Application.Brand.Queries.GetBrandById;
 using Overclocked.Contracts.Brand;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers;
 
@@ -52,7 +52,7 @@ public class BrandController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpPost]
     [Route(BrandRoutes.Create)]
     public async Task<IActionResult> Create([FromBody] CreateBrandRequest request, CancellationToken cancellationToken)
@@ -70,7 +70,7 @@ public class BrandController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpPut]
     [Route(BrandRoutes.Update)]
     public async Task<IActionResult> Put(
@@ -92,7 +92,7 @@ public class BrandController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [HttpDelete]
     [Route(BrandRoutes.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)

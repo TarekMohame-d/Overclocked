@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Overclocked.Api.Routing;
 using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Common;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers;
 
@@ -12,7 +12,7 @@ namespace Overclocked.Api.Controllers;
 public class CloudinaryController(ICloudinaryService cloudinaryService) : ControllerBase
 {
     [HttpGet]
-    [Authorize(Policy = nameof(PermissionType.AddEditDelete))]
+    [Authorize(Policy = nameof(Permission.AddEditDelete))]
     [Route(CloudinarySignatureRoute.UploadSignature)]
     public IActionResult GenerateSignature([FromQuery] string category)
     {

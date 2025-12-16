@@ -23,8 +23,8 @@ public sealed class Tag : AggregateRoot<TagId>
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    public static Tag Create(TagId id, string name) =>
-        new(id: id, name: name);
+    public static Tag Create(string name) =>
+        new(id: TagId.Create(), name: name);
 
     public void Update(string name)
     {

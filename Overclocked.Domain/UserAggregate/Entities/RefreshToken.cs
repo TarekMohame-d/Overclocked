@@ -30,13 +30,10 @@ public class RefreshToken : Entity<RefreshTokenId>
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public static RefreshToken Create(
-        RefreshTokenId id,
-        string deviceId,
-        string tokenHash)
+    public static RefreshToken Create(string deviceId, string tokenHash)
     {
         return new RefreshToken(
-            id: id,
+            id: RefreshTokenId.Create(),
             deviceId: deviceId,
             tokenHash: tokenHash);
     }

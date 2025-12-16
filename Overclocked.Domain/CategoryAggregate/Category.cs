@@ -26,10 +26,10 @@ public sealed class Category : AggregateRoot<CategoryId>
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    public static Category Create(CategoryId id, string name, string imageUrl)
+    public static Category Create(string name, string imageUrl)
     {
         return new Category(
-            id: id,
+            id: CategoryId.Create(),
             name: name,
             imageUrl: imageUrl);
     }

@@ -4,8 +4,8 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Overclocked.Api.Routing;
 using Overclocked.Architecture.Tests.FakeData;
-using Overclocked.Domain.Common.StaticData;
 using Overclocked.Domain.TagAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Infrastructure.Persistence;
 using Overclocked.Integration.Tests.Shared;
 using Shouldly;
@@ -22,7 +22,7 @@ public class DeleteTagTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         await factory.ResetDatabaseAsync();
 
         var token = CustomWebApplicationFactory.GenerateJwtToken(
-            permissions: [PermissionType.AddEditDelete.ToString()]);
+            permissions: [Permission.AddEditDelete.ToString()]);
         factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 

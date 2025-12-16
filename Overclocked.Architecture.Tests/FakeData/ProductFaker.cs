@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
+using Overclocked.Domain.Common.Shared.ValueObjects;
 using Overclocked.Domain.ProductAggregate;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 

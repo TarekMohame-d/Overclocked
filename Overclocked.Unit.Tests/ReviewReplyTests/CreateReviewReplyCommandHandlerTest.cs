@@ -75,7 +75,7 @@ public class CreateReviewReplyCommandHandlerTest
 
         Review review = new ReviewFaker(Guid.NewGuid(), Guid.NewGuid()).Generate();
 
-        review.AddReviewReply(ReviewReply.Create(ReviewReplyId.Create(), UserId.Create(), "Reply"));
+        review.AddReviewReply(ReviewReply.Create(UserId.Create(), "Reply"));
 
         _reviewRepositoryMock.GetForUpdateAsync(
             Arg.Any<Expression<Func<Review, bool>>>(),

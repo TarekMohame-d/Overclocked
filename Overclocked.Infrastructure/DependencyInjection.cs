@@ -11,7 +11,7 @@ using Overclocked.Application.Abstractions;
 using Overclocked.Application.Abstractions.Messaging;
 using Overclocked.Application.Abstractions.Persistence;
 using Overclocked.Application.Abstractions.Services;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Infrastructure.Authentication;
 using Overclocked.Infrastructure.Authorization;
 using Overclocked.Infrastructure.Configurations;
@@ -59,7 +59,8 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-                .AddInterceptors(sp.GetRequiredService<InsertOutboxMessagesInterceptor>());
+                .AddInterceptors(sp.GetRequiredService<InsertOutboxMessagesInterceptor>())
+                .UseSnakeCaseNamingConvention();
         });
 
         services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
@@ -147,7 +148,7 @@ public static class DependencyInjection
         services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
 
         AuthorizationBuilder builder = services.AddAuthorizationBuilder();
-        foreach(PermissionType permission in Enum.GetValues<PermissionType>())
+        foreach(Permission permission in Enum.GetValues<Permission>())
         {
             var permissionName = permission.ToString();
 

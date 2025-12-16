@@ -75,7 +75,7 @@ public class ClearCartTest(CustomWebApplicationFactory factory) : IAsyncLifetime
         Category category = new CategoryFaker().Generate();
         List<Product> products = new ProductFaker(brand.Id.Value, category.Id.Value).Generate(5);
         User user = new UserFaker(new PasswordHasher()).Generate();
-        var cart = Cart.Create(CartId.Create(), user.Id);
+        var cart = Cart.Create(user.Id);
         CartItemId cartItemId = cart.AddCartItem(products[0].Id, 1);
         cart.AddCartItem(products[1].Id, 4);
         cart.AddCartItem(products[2].Id, 2);

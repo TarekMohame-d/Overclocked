@@ -6,15 +6,14 @@ using Overclocked.Application.Authentication.Commands.Common;
 using Overclocked.Contracts.Authentication;
 using Overclocked.Domain.Common.Errors;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
 using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Domain.UserAggregate.ValueObjects;
 
 namespace Overclocked.Application.Authentication.Commands.RefreshToken;
 
 public class RefreshTokenCommandHandler(
     IUserRepository userRepository,
-    IPermissionRepository permissionRepository,
     IUnitOfWork unitOfWork,
     IRefreshTokenHasher refreshTokenHasher,
     ITokenReaderService tokenReaderService,
@@ -49,14 +48,14 @@ public class RefreshTokenCommandHandler(
             return Result.Failure<AuthResponse>(AuthenticationErrors.InvalidRefreshToken);
         }
 
-        List<string> permissions = await permissionRepository
-            .GetPermissionsByRoleIdAsync(user.RoleId, cancellationToken);
+        List<string> permissions = await userRepository
+            .GetPermissionsByRoleAsync(user.Role, cancellationToken);
 
         var tokenClaims = new TokenClaims(
             user.Id.Value.ToString(),
             user.Email,
             claims.Value.deviceId,
-            ((RoleType)user.RoleId.Value).ToString(),
+            user.Role.ToString(),
             permissions);
 
         var accessToken = tokenProvider.GenerateAccessToken(tokenClaims);

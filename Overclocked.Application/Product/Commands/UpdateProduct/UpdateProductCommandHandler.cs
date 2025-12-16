@@ -5,6 +5,7 @@ using Overclocked.Domain.BrandAggregate.ValueObjects;
 using Overclocked.Domain.CategoryAggregate.ValueObjects;
 using Overclocked.Domain.Common.Errors;
 using Overclocked.Domain.Common.Results;
+using Overclocked.Domain.Common.Shared.ValueObjects;
 using Overclocked.Domain.ProductAggregate.ValueObjects;
 using ProductEntity = Overclocked.Domain.ProductAggregate.Product;
 

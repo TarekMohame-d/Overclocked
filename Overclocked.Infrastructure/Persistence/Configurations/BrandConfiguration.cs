@@ -9,7 +9,7 @@ public class BrandConfiguration : IEntityTypeConfiguration<Brand>
 {
     public void Configure(EntityTypeBuilder<Brand> builder)
     {
-        builder.ToTable("Brands");
+        builder.ToTable("brands");
 
         // Attributes
         builder.HasKey(b => b.Id);

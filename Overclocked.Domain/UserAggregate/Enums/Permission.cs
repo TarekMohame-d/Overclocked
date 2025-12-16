@@ -1,6 +1,6 @@
-﻿namespace Overclocked.Domain.Common.StaticData;
+﻿namespace Overclocked.Domain.UserAggregate.Enums;
 
-public enum PermissionType
+public enum Permission
 {
     // === Super Admin ===
     ManageUsers = 1,

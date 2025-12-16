@@ -7,8 +7,8 @@ using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Contracts.Authentication;
 using Overclocked.Domain.Common.Enums;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.RoleAggregate.ValueObjects;
 using Overclocked.Domain.UserAggregate;
+using Overclocked.Domain.UserAggregate.Enums;
 using Overclocked.Infrastructure.Authentication;
 using Shouldly;
 
@@ -17,7 +17,6 @@ namespace Overclocked.Unit.Tests.AuthenticationTests;
 public class LoginCommandHandlerTest
 {
     private readonly IUserRepository _userRepositoryMock;
-    private readonly IPermissionRepository _permissionRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IEmailConfirmationCodeService _emailConfirmationCodeServiceMock;
     private readonly IPasswordHasher _passwordHasherMock;
@@ -28,7 +27,6 @@ public class LoginCommandHandlerTest
     public LoginCommandHandlerTest()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
-        _permissionRepositoryMock = Substitute.For<IPermissionRepository>();
         _emailConfirmationCodeServiceMock = Substitute.For<IEmailConfirmationCodeService>();
         _passwordHasherMock = Substitute.For<IPasswordHasher>();
         _tokenProviderMock = Substitute.For<ITokenProvider>();
@@ -37,7 +35,6 @@ public class LoginCommandHandlerTest
 
         _loginCommandHandler = new LoginCommandHandler(
             _userRepositoryMock,
-            _permissionRepositoryMock,
             _unitOfWorkMock,
             _emailConfirmationCodeServiceMock,
             _passwordHasherMock,
@@ -167,7 +164,7 @@ public class LoginCommandHandlerTest
         _passwordHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>())
             .Returns(true);
 
-        _permissionRepositoryMock.GetPermissionsByRoleIdAsync(Arg.Any<RoleId>(), Arg.Any<CancellationToken>())
+        _userRepositoryMock.GetPermissionsByRoleAsync(Arg.Any<Role>(), Arg.Any<CancellationToken>())
             .Returns([]);
 
         _unitOfWorkMock.SaveChangesAsync(Arg.Any<CancellationToken>())
@@ -186,8 +183,8 @@ public class LoginCommandHandlerTest
         _passwordHasherMock.Received(1)
             .Verify(Arg.Any<string>(), Arg.Any<string>());
 
-        await _permissionRepositoryMock.Received(1)
-            .GetPermissionsByRoleIdAsync(Arg.Any<RoleId>(), Arg.Any<CancellationToken>());
+        await _userRepositoryMock.Received(1)
+            .GetPermissionsByRoleAsync(Arg.Any<Role>(), Arg.Any<CancellationToken>());
 
         await _unitOfWorkMock.Received(1)
             .SaveChangesAsync(Arg.Any<CancellationToken>());

@@ -111,7 +111,7 @@ public class DeleteReviewReplyCommandHandlerTest
         };
 
         Review review = new ReviewFaker(Guid.NewGuid(), Guid.NewGuid()).Generate();
-        review.AddReviewReply(ReviewReply.Create(reviewReplyId, userId, "Reply"));
+        review.AddReviewReply(ReviewReply.Create(userId, "Reply"));
 
         _reviewRepositoryMock.GetForUpdateAsync(
             Arg.Any<Expression<Func<Review, bool>>>(),
@@ -149,7 +149,7 @@ public class DeleteReviewReplyCommandHandlerTest
         };
 
         Review review = new ReviewFaker(Guid.NewGuid(), Guid.NewGuid()).Generate();
-        review.AddReviewReply(ReviewReply.Create(reviewReplyId, userId, "Reply"));
+        review.AddReviewReply(ReviewReply.Create(userId, "Reply"));
 
         _reviewRepositoryMock.GetForUpdateAsync(
             Arg.Any<Expression<Func<Review, bool>>>(),

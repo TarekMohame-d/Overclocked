@@ -36,7 +36,6 @@ public class CreateReviewReplyCommandHandler(
         }
 
         var reviewReply = ReviewReplyEntity.Create(
-            id: ReviewReplyId.Create(),
             employeeId: employeeId,
             reply: command.Reply);
 

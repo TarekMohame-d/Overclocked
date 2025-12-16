@@ -1,6 +1,6 @@
 using Overclocked.Domain.Common.Primitives;
 
-namespace Overclocked.Domain.UserAggregate.ValueObjects;
+namespace Overclocked.Domain.Common.Shared.ValueObjects;
 
 public record Address : IValueObject
 {
@@ -8,6 +8,7 @@ public record Address : IValueObject
     public string City { get; private set; }
     public string PostalCode { get; private set; }
     public string Description { get; private set; }
+    public bool IsDeleted { get; private set; }
 
     private Address()
     {
@@ -18,6 +19,7 @@ public record Address : IValueObject
         City = city;
         PostalCode = postalCode;
         Description = description;
+        IsDeleted = false;
     }
 
     public static Address Create(string street, string city, string postalCode, string description)

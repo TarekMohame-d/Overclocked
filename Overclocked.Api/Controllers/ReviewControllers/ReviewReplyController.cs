@@ -8,7 +8,7 @@ using Overclocked.Application.ReviewReply.Commands.DeleteReviewReply;
 using Overclocked.Application.ReviewReply.Commands.UpdateReviewReply;
 using Overclocked.Contracts.ReviewReply;
 using Overclocked.Domain.Common.Results;
-using Overclocked.Domain.Common.StaticData;
+using Overclocked.Domain.UserAggregate.Enums;
 
 namespace Overclocked.Api.Controllers.ReviewControllers;
 
@@ -18,7 +18,7 @@ public class ReviewReplyController(
     ICommandHandler<UpdateReviewReplyCommand> updateHandler,
     ICommandHandler<DeleteReviewReplyCommand> deleteHandler) : ControllerBase
 {
-    [Authorize(Roles = $"{nameof(RoleType.Admin)}, {nameof(RoleType.SuperAdmin)}")]
+    [Authorize(Roles = $"{nameof(Role.Admin)}, {nameof(Role.SuperAdmin)}")]
     [HttpPost]
     [Route(ReviewReplyRoutes.Create)]
     public async Task<IActionResult> Create(
@@ -48,7 +48,7 @@ public class ReviewReplyController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = $"{nameof(RoleType.Admin)}, {nameof(RoleType.SuperAdmin)}")]
+    [Authorize(Roles = $"{nameof(Role.Admin)}, {nameof(Role.SuperAdmin)}")]
     [HttpPut]
     [Route(ReviewReplyRoutes.Update)]
     public async Task<IActionResult> Update(
@@ -80,7 +80,7 @@ public class ReviewReplyController(
             onFailure: error => error.ToProblemDetails(this));
     }
 
-    [Authorize(Roles = $"{nameof(RoleType.Admin)}, {nameof(RoleType.SuperAdmin)}")]
+    [Authorize(Roles = $"{nameof(Role.Admin)}, {nameof(Role.SuperAdmin)}")]
     [HttpDelete]
     [Route(ReviewReplyRoutes.Delete)]
     public async Task<IActionResult> Delete(

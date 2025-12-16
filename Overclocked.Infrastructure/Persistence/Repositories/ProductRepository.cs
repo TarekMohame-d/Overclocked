@@ -36,7 +36,7 @@ public class ProductRepository(ApplicationDbContext context)
             .Include(p => p.Category)
             .Include(p => p.Images)
             .Include(p => p.Specifications)
-            .Include(p => p.Tags)
+            .Include(p => p.ProductTags)
                 .ThenInclude(pt => pt.Tag)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
@@ -48,7 +48,7 @@ public class ProductRepository(ApplicationDbContext context)
             .AsSplitQuery()
             .Include(p => p.Images)
             .Include(p => p.Specifications)
-            .Include(p => p.Tags)
+            .Include(p => p.ProductTags)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
@@ -126,7 +126,7 @@ public class ProductRepository(ApplicationDbContext context)
 
         if(tagId != Guid.Empty)
         {
-            query = query.Where(p => p.Tags.Any(pt => pt.TagId == TagId.Create(tagId)));
+            query = query.Where(p => p.ProductTags.Any(pt => pt.TagId == TagId.Create(tagId)));
         }
 
         return query;
