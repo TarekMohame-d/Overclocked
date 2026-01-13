@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".env" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="Overclocked.slnx" />
+    <File Path="README.md" />
+  </Folder>
+
+  <Folder Name="/src/">
+    <Project Path="src/Overclocked.Api/Overclocked.Api.csproj" />
+    <Project Path="src/Overclocked.Application/Overclocked.Application.csproj" />
+    <Project Path="src/Overclocked.Domain/Overclocked.Domain.csproj" />
+    <Project Path="src/Overclocked.Infrastructure/Overclocked.Infrastructure.csproj" />
+    <Project Path="src/Overclocked.SharedKernel/Overclocked.SharedKernel.csproj" />
+  </Folder>
+
+  <Folder Name="/tests/">
+    <Project Path="tests/Overclocked.Architecture.Tests/Overclocked.Architecture.Tests.csproj" />
+    <Project Path="tests/Overclocked.Integration.Tests/Overclocked.Integration.Tests.csproj" />
+    <Project Path="tests/Overclocked.Unit.Tests/Overclocked.Unit.Tests.csproj" />
+  </Folder>
+</Solution>
