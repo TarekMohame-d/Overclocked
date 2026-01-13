@@ -1,0 +1,31 @@
+namespace Overclocked.Unit.Tests.Validations.Authentication.TestCases;
+
+public static class LoginValidationTestCases
+{
+    public static IEnumerable<object[]> InvalidEmailCases()
+    {
+        yield return [null!];
+        yield return [string.Empty];
+        yield return ["   "];
+        yield return [new string('a', 105)];
+        yield return ["wrong-email-formate"];
+        yield return ["temp@temp"];
+    }
+
+    public static IEnumerable<object[]> InvalidPasswordCases()
+    {
+        yield return [null!];
+        yield return [string.Empty];
+        yield return ["   "];
+        yield return [new string('a', 7)];
+        yield return ["wrong-password-formate"];
+        yield return ["Test12345"];
+        yield return ["test12345"];
+        yield return ["test12345@"];
+    }
+
+    public static IEnumerable<object[]> InvalidDeviceIdCases()
+    {
+        yield return [Guid.Empty];
+    }
+}
