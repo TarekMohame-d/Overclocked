@@ -4,17 +4,9 @@ on:
   pull_request:
     branches: [develop]
 
-env:
-    TESTCONTAINERS_RYUK_DISABLED: false
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
-    services:
-      docker:
-        image: docker:dind
-        options: --privileged
 
     steps:
       - name: Checkout code
@@ -32,4 +24,11 @@ jobs:
         run: dotnet build --no-restore -c Release
 
       - name: Test
-        run: dotnet test --no-restore --no-build -c Release
+        run: dotnet test --no-restore --no-build -c Release --verbosity detailed --logger "console;verbosity=detailed"
+
+      - name: Upload test logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: test-output.log

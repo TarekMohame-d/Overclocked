@@ -13,6 +13,7 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using NSubstitute;
@@ -39,12 +40,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
         .WithDatabase("OverclockedDBTest")
         .WithUsername("admin")
         .WithPassword("admin-pw")
-        .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("pg_isready"))
         .Build();
 
-    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:latest")
-        .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("redis-cli", "ping"))
-        .Build();
+    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:latest").Build();
 
     private DbConnection _dbConnection = null!;
     private Respawner _respawner = null!;
@@ -100,6 +98,12 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
 
         builder.ConfigureServices(services =>
         {
+            services.AddLogging(logging =>
+            {
+                logging.AddConsole();
+                logging.SetMinimumLevel(LogLevel.Warning);
+            });
+
             services.Configure<RedisCacheOptions>(options =>
             {
                 options.Configuration = _redisContainer.GetConnectionString();
