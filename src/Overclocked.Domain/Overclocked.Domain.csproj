@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Overclocked.SharedKernel\Overclocked.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Overclocked.Infrastructure</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
