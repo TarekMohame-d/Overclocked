@@ -4,9 +4,17 @@ on:
   pull_request:
     branches: [develop]
 
+env:
+    TESTCONTAINERS_RYUK_DISABLED: false
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
 
     steps:
       - name: Checkout code

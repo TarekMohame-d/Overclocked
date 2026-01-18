@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
+using DotNet.Testcontainers.Builders;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -38,9 +39,12 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
         .WithDatabase("OverclockedDBTest")
         .WithUsername("admin")
         .WithPassword("admin-pw")
+        .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("pg_isready"))
         .Build();
 
-    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:latest").Build();
+    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:latest")
+        .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("redis-cli", "ping"))
+        .Build();
 
     private DbConnection _dbConnection = null!;
     private Respawner _respawner = null!;
