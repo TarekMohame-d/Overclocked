@@ -1,0 +1,11 @@
+namespace Overclocked.Application.Common.Configurations;
+
+public sealed class JwtSettings
+{
+    public const string SectionName = "JwtSettings";
+
+    public required string SigningKey { get; init; }
+    public int ExpiresInMinutes { get; init; }
+    public required string Issuer { get; init; }
+    public required string Audience { get; init; }
+}

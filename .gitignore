@@ -121,4 +121,6 @@ configs.json
 *.env
 .env*
 .devcontainer/logs/*.txt
+/src/Overclocked.Api/logs/
 GEMINI.md
+

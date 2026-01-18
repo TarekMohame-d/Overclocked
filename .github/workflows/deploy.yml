@@ -1,0 +1,64 @@
+name: Overclocked CI/CD
+
+on:
+  workflow_dispatch: # Manual trigger
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          # Infrastructure
+          echo "ACCEPT_EULA=${{ secrets.ACCEPT_EULA }}" > .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "SEQ_PASSWORD=${{ secrets.SEQ_PASSWORD }}" >> .env
+
+          # Connection Strings
+          echo "ConnectionStrings__DefaultConnection=${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}" >> .env
+          echo "ConnectionStrings__Redis=${{ secrets.CONNECTIONSTRINGS__REDIS }}" >> .env
+
+          # JWT Settings
+          echo "JwtSettings__Issuer=${{ secrets.JWTSETTINGS__ISSUER }}" >> .env
+          echo "JwtSettings__Audience=${{ secrets.JWTSETTINGS__AUDIENCE }}" >> .env
+          echo "JwtSettings__SigningKey=${{ secrets.JWTSETTINGS__SIGNINGKEY }}" >> .env
+          echo "JwtSettings__ExpiresInMinutes=${{ secrets.JWTSETTINGS__EXPIRESINMINUTES }}" >> .env
+
+          # Cloudinary
+          echo "CloudinarySettings__CloudName=${{ secrets.CLOUDINARYSETTINGS__CLOUDNAME }}" >> .env
+          echo "CloudinarySettings__ApiKey=${{ secrets.CLOUDINARYSETTINGS__APIKEY }}" >> .env
+          echo "CloudinarySettings__ApiSecret=${{ secrets.CLOUDINARYSETTINGS__APISECRET }}" >> .env
+
+          # Paymob
+          echo "PaymobSettings__BaseUrl=${{ secrets.PAYMOBSETTINGS__BASEURL }}" >> .env
+          echo "PaymobSettings__ApiKey=${{ secrets.PAYMOBSETTINGS__APIKEY }}" >> .env
+          echo "PaymobSettings__SecretKey=${{ secrets.PAYMOBSETTINGS__SECRETKEY }}" >> .env
+          echo "PaymobSettings__PublicKey=${{ secrets.PAYMOBSETTINGS__PUBLICKEY }}" >> .env
+          echo "PaymobSettings__Hmac=${{ secrets.PAYMOBSETTINGS__HMAC }}" >> .env
+          echo "PaymobSettings__CardIntegrationId=${{ secrets.PAYMOBSETTINGS__CARDINTEGRATIONID }}" >> .env
+          echo "PaymobSettings__EWalletIntegrationId=${{ secrets.PAYMOBSETTINGS__EWALLETINTEGRATIONID }}" >> .env
+
+          # Email
+          echo "EmailSettings__From=${{ secrets.EMAILSETTINGS__FROM }}" >> .env
+          echo "EmailSettings__AppPassword=${{ secrets.EMAILSETTINGS__APPPASSWORD }}" >> .env
+
+          # App Environment
+          echo "ASPNETCORE_ENVIRONMENT=Production" >> .env
+
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose down
+          docker compose up -d --build
+
+      - name: Cleanup
+        run: docker image prune -f
