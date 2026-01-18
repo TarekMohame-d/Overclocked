@@ -14,13 +14,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.BrandTests;
 
-public class GetAllBrandsTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class GetAllBrandsTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetAll_Should_ReturnFromDatabase_When_ThereIsDataAndCacheMiss()
@@ -109,7 +110,7 @@ public class GetAllBrandsTest(IntegrationTestWebAppFactory fixture) : IAsyncLife
 
     private async Task<IEnumerable<Brand>> SeedDatabaseAsync()
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         List<Brand> brands = new BrandFaker().Generate(10);
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -122,7 +123,7 @@ public class GetAllBrandsTest(IntegrationTestWebAppFactory fixture) : IAsyncLife
 
     private async Task<IEnumerable<BrandListResponse>> SeedCacheAsync()
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         List<Brand> brands = new BrandFaker().Generate(10);
 

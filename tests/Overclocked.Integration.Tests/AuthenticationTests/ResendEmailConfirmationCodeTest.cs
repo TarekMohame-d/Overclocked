@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Overclocked.Api.Routing;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.UserAggregate;
@@ -14,13 +13,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class ResendEmailConfirmationCodeTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class ResendEmailConfirmationCodeTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task ResendEmailConfirmationCode_Should_ReturnSuccess_When_DataIsValid()
@@ -35,7 +35,7 @@ public class ResendEmailConfirmationCodeTest(IntegrationTestWebAppFactory fixtur
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         User? userDb = await dbContext
@@ -52,7 +52,7 @@ public class ResendEmailConfirmationCodeTest(IntegrationTestWebAppFactory fixtur
     {
         User user = new UserFaker(new PasswordHasher()).Generate();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Users.Add(user);

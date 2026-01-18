@@ -14,13 +14,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.CategoryTests;
 
-public class GetAllCategorysTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class GetAllCategorysTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetAll_Should_ReturnFromDatabase_When_ThereIsDataAndCacheMiss()
@@ -111,7 +112,7 @@ public class GetAllCategorysTest(IntegrationTestWebAppFactory fixture) : IAsyncL
 
     private async Task<IEnumerable<Category>> SeedDatabaseAsync()
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         List<Category> categorys = new CategoryFaker().Generate(10);
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -124,7 +125,7 @@ public class GetAllCategorysTest(IntegrationTestWebAppFactory fixture) : IAsyncL
 
     private async Task<IEnumerable<CategoryListResponse>> SeedCacheAsync()
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         List<Category> categories = new CategoryFaker().Generate(10);
 

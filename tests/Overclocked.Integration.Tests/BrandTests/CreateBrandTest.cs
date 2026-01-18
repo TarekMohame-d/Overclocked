@@ -14,19 +14,20 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.BrandTests;
 
-public class CreateBrandTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class CreateBrandTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await fixture.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken(permissions: [nameof(Permission.AddEditDelete)]);
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(permissions: [nameof(Permission.AddEditDelete)]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Create_Should_CreateAndReturnSuccess_When_DataIsValid()
@@ -42,7 +43,7 @@ public class CreateBrandTest(IntegrationTestWebAppFactory fixture) : IAsyncLifet
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Brand? brand = await dbContext.Brands.SingleOrDefaultAsync(x => x.NormalizedName == Name.ToUpper());
@@ -72,8 +73,8 @@ public class CreateBrandTest(IntegrationTestWebAppFactory fixture) : IAsyncLifet
         Brand brand = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent(brand.Name);
 
-        var token = fixture.GenerateJwtToken();
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(BrandRoutes.Create, form);
@@ -86,7 +87,7 @@ public class CreateBrandTest(IntegrationTestWebAppFactory fixture) : IAsyncLifet
     {
         Brand brand = new BrandFaker().Generate();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

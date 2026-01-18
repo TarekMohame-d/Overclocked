@@ -19,13 +19,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ReviewTests;
 
-public class CreateReviewTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class CreateReviewTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Create_Should_CreateAndReturnSuccess_When_DataIsValid()
@@ -34,7 +35,7 @@ public class CreateReviewTest(IntegrationTestWebAppFactory fixture) : IAsyncLife
         (User user, Product product) = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent();
 
-        var token = fixture.GenerateJwtToken(user.Id.Value.ToString());
+        var token = factory.GenerateJwtToken(user.Id.Value.ToString());
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
@@ -46,7 +47,7 @@ public class CreateReviewTest(IntegrationTestWebAppFactory fixture) : IAsyncLife
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Review? review = await dbContext.Reviews.FirstOrDefaultAsync(x => x.UserId == user.Id);
@@ -62,7 +63,7 @@ public class CreateReviewTest(IntegrationTestWebAppFactory fixture) : IAsyncLife
         (User user, Product product) = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent();
 
-        var token = fixture.GenerateJwtToken(user.Id.Value.ToString());
+        var token = factory.GenerateJwtToken(user.Id.Value.ToString());
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
@@ -81,7 +82,7 @@ public class CreateReviewTest(IntegrationTestWebAppFactory fixture) : IAsyncLife
 
         response2.StatusCode.ShouldBe(HttpStatusCode.Conflict);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Review? review = await dbContext.Reviews.SingleOrDefaultAsync(x => x.UserId == user.Id);
@@ -98,7 +99,7 @@ public class CreateReviewTest(IntegrationTestWebAppFactory fixture) : IAsyncLife
         Tag tag = new TagFaker().Generate();
         Product product = new ProductFaker(brand.Id.Value, category.Id.Value, [tag.Id.Value]).Generate();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

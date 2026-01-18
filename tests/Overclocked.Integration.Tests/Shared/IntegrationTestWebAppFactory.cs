@@ -3,7 +3,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
-using DotNet.Testcontainers.Builders;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -13,7 +12,6 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using NSubstitute;
@@ -23,14 +21,10 @@ using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Common.Constants;
 using Overclocked.Infrastructure.Outbox;
 using Overclocked.Infrastructure.Persistence;
-using Overclocked.Integration.Tests.Shared;
 using Respawn;
 using StackExchange.Redis;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
-
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
-[assembly: AssemblyFixture(typeof(IntegrationTestWebAppFactory))]
 
 namespace Overclocked.Integration.Tests.Shared;
 
@@ -57,7 +51,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
     public IDomainEventDispatcher DomainEventDispatcherMock { get; } = Substitute.For<IDomainEventDispatcher>();
     public IProcessOutboxMessagesJob ProcessOutboxMessagesJobMock { get; } = Substitute.For<IProcessOutboxMessagesJob>();
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
         await _redisContainer.StartAsync();
@@ -82,15 +76,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Development");
-
-        // This helps see logs in the GitHub Actions output console
-        builder.ConfigureLogging(logging =>
-        {
-            logging.ClearProviders();
-            logging.AddConsole();
-        });
-
         builder.ConfigureAppConfiguration(
             (context, config) =>
             {

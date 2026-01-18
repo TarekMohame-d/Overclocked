@@ -20,19 +20,20 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ProductTests;
 
-public class UpdateProductTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class UpdateProductTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await fixture.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken(permissions: [nameof(Permission.AddEditDelete)]);
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(permissions: [nameof(Permission.AddEditDelete)]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Update_Should_ReturnFailure_When_ProductNotFound()
@@ -69,7 +70,7 @@ public class UpdateProductTest(IntegrationTestWebAppFactory fixture) : IAsyncLif
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Product? updatedProduct = await dbContext.Products.FindAsync(product.Id);
@@ -100,7 +101,7 @@ public class UpdateProductTest(IntegrationTestWebAppFactory fixture) : IAsyncLif
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Product? updatedProduct = await dbContext.Products.Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == product.Id);
@@ -127,8 +128,8 @@ public class UpdateProductTest(IntegrationTestWebAppFactory fixture) : IAsyncLif
         Product product = await SeedDatabaseAsync(brandId, categoryId, tags);
         StringContent form = CreateJsonContent("New Name", brandId, categoryId, tags);
 
-        var token = fixture.GenerateJwtToken();
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PutAsync(
@@ -144,7 +145,7 @@ public class UpdateProductTest(IntegrationTestWebAppFactory fixture) : IAsyncLif
     {
         Product product = new ProductFaker(brandId, categoryId, tags).Generate();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Products.Add(product);
@@ -159,7 +160,7 @@ public class UpdateProductTest(IntegrationTestWebAppFactory fixture) : IAsyncLif
         Category category = new CategoryFaker().Generate();
         List<Tag> tags = new TagFaker().Generate(3);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

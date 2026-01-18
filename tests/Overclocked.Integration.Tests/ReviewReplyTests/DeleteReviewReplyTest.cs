@@ -19,13 +19,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ReviewReplyTests;
 
-public class DeleteReviewReplyTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class DeleteReviewReplyTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Delete_Should_DeleteAndReturnSuccess_When_DataIsValid()
@@ -33,7 +34,7 @@ public class DeleteReviewReplyTest(IntegrationTestWebAppFactory fixture) : IAsyn
         // Arrange
         (User user, User admin, User admin2, Product product, Review review) = await SeedDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken(userId: admin.Id.Value.ToString(), role: "Admin");
+        var token = factory.GenerateJwtToken(userId: admin.Id.Value.ToString(), role: "Admin");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
@@ -47,7 +48,7 @@ public class DeleteReviewReplyTest(IntegrationTestWebAppFactory fixture) : IAsyn
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Review? reviewDb = await dbContext.Reviews.FirstOrDefaultAsync(x => x.UserId == user.Id);
@@ -63,7 +64,7 @@ public class DeleteReviewReplyTest(IntegrationTestWebAppFactory fixture) : IAsyn
         // Arrange
         (User user, User admin, User admin2, Product product, Review review) = await SeedDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken(userId: admin2.Id.Value.ToString(), role: "Admin");
+        var token = factory.GenerateJwtToken(userId: admin2.Id.Value.ToString(), role: "Admin");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
@@ -77,7 +78,7 @@ public class DeleteReviewReplyTest(IntegrationTestWebAppFactory fixture) : IAsyn
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Review? reviewDb = await dbContext.Reviews.SingleOrDefaultAsync(x => x.UserId == user.Id);
@@ -106,7 +107,7 @@ public class DeleteReviewReplyTest(IntegrationTestWebAppFactory fixture) : IAsyn
         User admin2 = new UserFaker(new PasswordHasher()).Generate();
         admin2.ChangeRole(Role.Admin);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

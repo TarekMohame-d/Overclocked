@@ -19,19 +19,20 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ReviewTests;
 
-public class GetPagedReviewsTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class GetPagedReviewsTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await fixture.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken();
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetPagedReviews_Should_ReturnSuccess_When_DataIsValid()
@@ -43,13 +44,6 @@ public class GetPagedReviewsTest(IntegrationTestWebAppFactory fixture) : IAsyncL
         HttpResponseMessage response = await _client.GetAsync(
             ReviewRoutes.GetPaged.Replace("{productId:guid}", product.Id.Value.ToString())
         );
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorHtml = await response.Content.ReadAsStringAsync();
-            // This will throw an exception with the server log in the message
-            throw new Exception($"SERVER CRASH REPORT: {errorHtml}");
-        }
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -71,7 +65,7 @@ public class GetPagedReviewsTest(IntegrationTestWebAppFactory fixture) : IAsyncL
         Product product = new ProductFaker(brand.Id.Value, category.Id.Value, [tag.Id.Value]).Generate();
         Review review = new ReviewFaker(user.Id.Value, product.Id.Value).Generate();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

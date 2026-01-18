@@ -13,13 +13,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class ForgetPasswordTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class ForgetPasswordTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task ForgetPassword_Should_ReturnSuccess_When_DataIsValid()
@@ -34,7 +35,7 @@ public class ForgetPasswordTest(IntegrationTestWebAppFactory fixture) : IAsyncLi
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         User? userDb = await dbContext
@@ -56,7 +57,7 @@ public class ForgetPasswordTest(IntegrationTestWebAppFactory fixture) : IAsyncLi
         User user = new UserFaker(new PasswordHasher()).Generate();
         user.ConfirmEmail();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Users.Add(user);

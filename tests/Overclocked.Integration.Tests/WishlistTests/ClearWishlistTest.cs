@@ -17,26 +17,27 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.WishlistTests;
 
-public class ClearWishlistTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class ClearWishlistTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await fixture.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken();
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task ClearWishlist_Should_ReturnForbidden_When_UserDoesNotHaveRole()
     {
         // Arrange
-        var token = fixture.GenerateJwtToken(role: "Admin");
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(role: "Admin");
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.DeleteAsync(WishlistRoutes.ClearWishlist);
@@ -51,8 +52,8 @@ public class ClearWishlistTest(IntegrationTestWebAppFactory fixture) : IAsyncLif
         // Arrange
         User user = await SeedDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken(userId: user.Id.Value.ToString());
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(userId: user.Id.Value.ToString());
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.DeleteAsync(WishlistRoutes.ClearWishlist);
@@ -60,7 +61,7 @@ public class ClearWishlistTest(IntegrationTestWebAppFactory fixture) : IAsyncLif
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Wishlist? wishlist = await dbContext.Wishlists.FirstOrDefaultAsync(x => x.UserId == user.Id);
@@ -80,7 +81,7 @@ public class ClearWishlistTest(IntegrationTestWebAppFactory fixture) : IAsyncLif
         wishlist.AddWishlistItem(products[1].Id);
         wishlist.AddWishlistItem(products[2].Id);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         await dbContext.Brands.AddAsync(brand);
