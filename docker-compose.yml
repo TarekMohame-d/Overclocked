@@ -34,6 +34,8 @@ services:
       - .env
     volumes:
       - pgdata:/var/lib/postgresql
+    ports:
+      - "5432:5432"
     networks:
       - overclocked-net
 

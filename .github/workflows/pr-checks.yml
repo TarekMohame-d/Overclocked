@@ -10,13 +10,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    env:
-      # Disabling Ryuk is often necessary in restricted CI environments
-      # to prevent permission errors when Testcontainers tries to clean up.
-      TESTCONTAINERS_RYUK_DISABLED: true
-      DOTNET_NOLOGO: true
-      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

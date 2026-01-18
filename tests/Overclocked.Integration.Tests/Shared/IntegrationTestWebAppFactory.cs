@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
+using DotNet.Testcontainers.Builders;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -67,9 +68,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
         var redisConnectionString = _redisContainer.GetConnectionString() + ",allowAdmin=true";
         _redisConnection = await ConnectionMultiplexer.ConnectAsync(redisConnectionString);
 
-        HttpClient = CreateClient();
         await ApplyMigrationsAsync();
         await InitializeRespawnerAsync();
+
+        HttpClient = CreateClient();
     }
 
     public new async Task DisposeAsync()
@@ -116,9 +118,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
             });
 
             services.RemoveAll<IConnectionMultiplexer>();
-            services.AddSingleton<IConnectionMultiplexer>(_ =>
-                ConnectionMultiplexer.Connect(_redisContainer.GetConnectionString())
-            );
+            services.AddSingleton(_ => _redisConnection);
 
             services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
             services.AddDbContext<ApplicationDbContext>(options =>
