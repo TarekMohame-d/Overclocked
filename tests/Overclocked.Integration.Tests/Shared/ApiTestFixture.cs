@@ -111,7 +111,9 @@ public class ApiTestFixture : WebApplicationFactory<IApiMarker>, IAsyncLifetime
             );
 
             services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
-            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(_dbContainer.GetConnectionString()));
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(_dbContainer.GetConnectionString()).UseSnakeCaseNamingConvention()
+            );
 
             services.RemoveAll<IFileStorageService>();
             services.AddScoped(_ => FileStorageServiceMock);
