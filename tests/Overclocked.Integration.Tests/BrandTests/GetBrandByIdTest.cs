@@ -14,7 +14,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.BrandTests;
 
-public class GetBrandByIdTest(ApiTestFixture fixture) : IAsyncLifetime
+public class GetBrandByIdTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

@@ -17,7 +17,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.CartTests;
 
-public class ClearCartTest(ApiTestFixture fixture) : IAsyncLifetime
+public class ClearCartTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

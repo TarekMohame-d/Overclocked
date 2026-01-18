@@ -17,7 +17,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ProductTests;
 
-public class CreateProductTest(ApiTestFixture fixture) : IAsyncLifetime
+public class CreateProductTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

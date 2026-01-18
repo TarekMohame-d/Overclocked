@@ -14,7 +14,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class ResendEmailConfirmationCodeTest(ApiTestFixture fixture) : IAsyncLifetime
+public class ResendEmailConfirmationCodeTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

@@ -21,7 +21,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ReviewReplyTests;
 
-public class UpdateReviewReplyTest(ApiTestFixture fixture) : IAsyncLifetime
+public class UpdateReviewReplyTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

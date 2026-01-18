@@ -12,7 +12,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.BrandTests;
 
-public class DeleteBrandTest(ApiTestFixture fixture) : IAsyncLifetime
+public class DeleteBrandTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

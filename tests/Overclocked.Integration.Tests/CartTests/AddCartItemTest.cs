@@ -19,7 +19,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.CartTests;
 
-public class AddCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
+public class AddCartItemTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

@@ -13,7 +13,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class ForgetPasswordTest(ApiTestFixture fixture) : IAsyncLifetime
+public class ForgetPasswordTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

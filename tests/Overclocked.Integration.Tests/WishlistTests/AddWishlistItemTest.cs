@@ -19,7 +19,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.WishlistTests;
 
-public class AddWishlistItemTest(ApiTestFixture fixture) : IAsyncLifetime
+public class AddWishlistItemTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

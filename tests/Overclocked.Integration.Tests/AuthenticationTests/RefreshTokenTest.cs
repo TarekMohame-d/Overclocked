@@ -16,7 +16,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class RefreshTokenTest(ApiTestFixture fixture) : IAsyncLifetime
+public class RefreshTokenTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

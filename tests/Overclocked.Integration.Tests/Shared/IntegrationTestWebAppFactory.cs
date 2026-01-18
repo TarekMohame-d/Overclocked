@@ -28,11 +28,11 @@ using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
-[assembly: AssemblyFixture(typeof(ApiTestFixture))]
+[assembly: AssemblyFixture(typeof(IntegrationTestWebAppFactory))]
 
 namespace Overclocked.Integration.Tests.Shared;
 
-public class ApiTestFixture : WebApplicationFactory<IApiMarker>, IAsyncLifetime
+public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 {
     private const string Issuer = "TestIssuer";
     private const string Audience = "TestAudience";
@@ -112,7 +112,15 @@ public class ApiTestFixture : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 
             services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(_dbContainer.GetConnectionString()).UseSnakeCaseNamingConvention()
+                options
+                    .UseNpgsql(
+                        _dbContainer.GetConnectionString(),
+                        npgsqlOptions =>
+                        {
+                            npgsqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                        }
+                    )
+                    .UseSnakeCaseNamingConvention()
             );
 
             services.RemoveAll<IFileStorageService>();

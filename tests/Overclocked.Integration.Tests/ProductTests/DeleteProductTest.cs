@@ -17,7 +17,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ProductTests;
 
-public class DeleteProductTest(ApiTestFixture fixture) : IAsyncLifetime
+public class DeleteProductTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

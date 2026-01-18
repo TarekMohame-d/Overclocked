@@ -14,7 +14,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.CategoryTests;
 
-public class GetCategoryByIdTest(ApiTestFixture fixture) : IAsyncLifetime
+public class GetCategoryByIdTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

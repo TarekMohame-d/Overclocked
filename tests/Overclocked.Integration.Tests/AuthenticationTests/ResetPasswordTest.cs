@@ -13,7 +13,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class ResetPasswordTest(ApiTestFixture fixture) : IAsyncLifetime
+public class ResetPasswordTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private const string PlainCode = "VC4R53";
     private readonly HttpClient _client = fixture.HttpClient;

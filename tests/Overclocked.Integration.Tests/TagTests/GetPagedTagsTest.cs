@@ -15,7 +15,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.TagTests;
 
-public class GetPagedTagsTest(ApiTestFixture fixture) : IAsyncLifetime
+public class GetPagedTagsTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

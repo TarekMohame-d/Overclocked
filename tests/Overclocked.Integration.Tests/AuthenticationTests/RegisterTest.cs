@@ -12,7 +12,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class RegisterTest(ApiTestFixture fixture) : IAsyncLifetime
+public class RegisterTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 

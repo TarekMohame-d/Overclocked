@@ -18,7 +18,7 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ReviewTests;
 
-public class GetRatingBreakDownTest(ApiTestFixture fixture) : IAsyncLifetime
+public class GetRatingBreakDownTest(IntegrationTestWebAppFactory fixture) : IAsyncLifetime
 {
     private readonly HttpClient _client = fixture.HttpClient;
 
