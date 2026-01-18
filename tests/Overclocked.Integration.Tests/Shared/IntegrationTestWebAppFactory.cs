@@ -13,6 +13,7 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -78,23 +79,16 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration(
-            (context, config) =>
-            {
-                config.AddInMemoryCollection(
-                    new Dictionary<string, string?>
-                    {
-                        { "ConnectionStrings:DefaultConnection", _dbContainer.GetConnectionString() },
-                        { "ConnectionStrings:Redis", _redisContainer.GetConnectionString() },
-                        { "JwtSettings:SigningKey", SigningKey },
-                        { "JwtSettings:Issuer", Issuer },
-                        { "JwtSettings:Audience", Audience },
-                        { "JwtSettings:ExpiresInMinutes", "30" },
-                        { "RateLimiting:Enabled", "false" },
-                    }
-                );
-            }
-        );
+        builder.UseEnvironment("Development");
+
+        builder.UseSetting("JwtSettings:SigningKey", SigningKey);
+        builder.UseSetting("JwtSettings:Issuer", Issuer);
+        builder.UseSetting("JwtSettings:Audience", Audience);
+        builder.UseSetting("JwtSettings:ExpiresInMinutes", "30");
+        builder.UseSetting("RateLimiting:Enabled", "false");
+
+        builder.UseSetting("ConnectionStrings:DefaultConnection", _dbContainer.GetConnectionString());
+        builder.UseSetting("ConnectionStrings:Redis", _redisContainer.GetConnectionString());
 
         builder.ConfigureServices(services =>
         {
@@ -125,6 +119,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
                     )
                     .UseSnakeCaseNamingConvention()
             );
+
+            services.RemoveAll<IHostedService>();
 
             services.RemoveAll<IFileStorageService>();
             services.AddScoped(_ => FileStorageServiceMock);

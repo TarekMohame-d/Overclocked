@@ -40,6 +40,9 @@ public class CreateBrandTest(IntegrationTestWebAppFactory factory) : IAsyncLifet
         // Act
         HttpResponseMessage response = await _client.PostAsync(BrandRoutes.Create, form);
 
+        string body = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(body);
+
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
