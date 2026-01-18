@@ -44,6 +44,13 @@ public class GetPagedReviewsTest(IntegrationTestWebAppFactory fixture) : IAsyncL
             ReviewRoutes.GetPaged.Replace("{productId:guid}", product.Id.Value.ToString())
         );
 
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorHtml = await response.Content.ReadAsStringAsync();
+            // This will throw an exception with the server log in the message
+            throw new Exception($"SERVER CRASH REPORT: {errorHtml}");
+        }
+
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 

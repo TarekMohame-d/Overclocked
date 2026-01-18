@@ -33,7 +33,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseBackgroundJobs();
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseMiddleware<RequestLogContextMiddleware>();
 
