@@ -12,6 +12,7 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using NSubstitute;
@@ -79,6 +80,15 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Development");
+
+        // This helps see logs in the GitHub Actions output console
+        builder.ConfigureLogging(logging =>
+        {
+            logging.ClearProviders();
+            logging.AddConsole();
+        });
+
         builder.ConfigureAppConfiguration(
             (context, config) =>
             {
