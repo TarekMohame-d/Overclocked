@@ -16,19 +16,20 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.BrandTests;
 
-public class UpdateBrandTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class UpdateBrandTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await fixture.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken(permissions: [nameof(Permission.AddEditDelete)]);
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(permissions: [nameof(Permission.AddEditDelete)]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Update_Should_ReturnFailure_When_IdNotFound()
@@ -61,7 +62,7 @@ public class UpdateBrandTest(ApiTestFixture fixture) : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Brand? updatedBrand = await dbContext.Brands.FindAsync(brand.Id);
@@ -76,7 +77,7 @@ public class UpdateBrandTest(ApiTestFixture fixture) : IAsyncLifetime
         Brand brand = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent("New Name", "https://res.cloudinary.com/over-clocked/new-image.jpg");
 
-        fixture.BackgroundJobClientMock.Create(Arg.Any<Job>(), Arg.Any<IState>()).Returns("a-fake-job-id");
+        factory.BackgroundJobClientMock.Create(Arg.Any<Job>(), Arg.Any<IState>()).Returns("a-fake-job-id");
 
         // Act
         HttpResponseMessage response = await _client.PutAsync(
@@ -87,7 +88,7 @@ public class UpdateBrandTest(ApiTestFixture fixture) : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Brand? updatedBrand = await dbContext.Brands.FindAsync(brand.Id);
@@ -103,8 +104,8 @@ public class UpdateBrandTest(ApiTestFixture fixture) : IAsyncLifetime
         Brand brand = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent("New Name", brand.Image.Value);
 
-        var token = fixture.GenerateJwtToken();
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PutAsync(
@@ -120,7 +121,7 @@ public class UpdateBrandTest(ApiTestFixture fixture) : IAsyncLifetime
     {
         Brand brand = new BrandFaker().Generate();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

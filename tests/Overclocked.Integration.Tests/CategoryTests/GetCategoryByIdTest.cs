@@ -14,13 +14,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.CategoryTests;
 
-public class GetCategoryByIdTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class GetCategoryByIdTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetById_Should_ReturnFailure_When_NotFound()
@@ -124,7 +125,7 @@ public class GetCategoryByIdTest(ApiTestFixture fixture) : IAsyncLifetime
 
     private async Task<Category> SeedDatabaseAsync()
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         Category category = new CategoryFaker().Generate();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -137,7 +138,7 @@ public class GetCategoryByIdTest(ApiTestFixture fixture) : IAsyncLifetime
 
     private async Task<IEnumerable<Category>> SeedDatabaseRangeAsync(int count = 10)
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         List<Category> categorys = new CategoryFaker().Generate(count);
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -150,7 +151,7 @@ public class GetCategoryByIdTest(ApiTestFixture fixture) : IAsyncLifetime
 
     private async Task<CategoryResponse> SeedCacheAsync()
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         Category category = new CategoryFaker().Generate();
 

@@ -20,26 +20,27 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.CartTests;
 
-public class DeleteCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class DeleteCartItemTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await fixture.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken();
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task DeleteCartItem_Should_ReturnForbidden_When_UserDoesNotHaveRole()
     {
         // Arrange
-        var token = fixture.GenerateJwtToken(role: "Admin");
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(role: "Admin");
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.DeleteAsync(
@@ -56,8 +57,8 @@ public class DeleteCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
         // Arrange
         (User user, CartItemId cartItemId) = await SeedDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken(userId: user.Id.Value.ToString());
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(userId: user.Id.Value.ToString());
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.DeleteAsync(
@@ -67,7 +68,7 @@ public class DeleteCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Cart? cart = await dbContext.Carts.FirstOrDefaultAsync(x => x.UserId == user.Id);
@@ -93,7 +94,7 @@ public class DeleteCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
         cart.AddCartItem(products[1].Id, 4);
         cart.AddCartItem(products[2].Id, 2);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

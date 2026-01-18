@@ -68,7 +68,7 @@ public class ConfirmEmailRequestHandlerTest
         // Assert
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldNotBe(Error.None);
-        result.Error.Type.ShouldBe(ErrorType.Conflict);
+        result.Error.Type.ShouldBe(ErrorType.BadRequest);
 
         await _authenticationRepositoryMock.Received(1).GetByEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }

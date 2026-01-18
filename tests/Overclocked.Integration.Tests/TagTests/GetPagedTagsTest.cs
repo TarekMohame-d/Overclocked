@@ -15,13 +15,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.TagTests;
 
-public class GetPagedTagsTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class GetPagedTagsTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetPagedTags_Should_ReturnFromDatabase_When_ThereIsDataAndCacheMiss()
@@ -95,7 +96,7 @@ public class GetPagedTagsTest(ApiTestFixture fixture) : IAsyncLifetime
 
     private async Task<IEnumerable<Tag>> SeedDatabaseAsync()
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         List<Tag> tags = new TagFaker().Generate(20);
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -108,7 +109,7 @@ public class GetPagedTagsTest(ApiTestFixture fixture) : IAsyncLifetime
 
     private async Task<IEnumerable<TagPagedResponse>> SeedCacheAsync()
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         List<Tag> tags = new TagFaker().Generate(20);
         var searchTerm = tags[0].Name;

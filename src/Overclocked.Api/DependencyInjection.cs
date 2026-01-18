@@ -48,7 +48,7 @@ public static class DependencyInjection
 
     private static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
     {
-        JwtSettings jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
+        JwtSettings jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()!;
 
         services
             .AddAuthentication(options =>
@@ -120,11 +120,11 @@ public static class DependencyInjection
             if (!isEnabled)
             {
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-                    RateLimitPartition.GetFixedWindowLimiter(
-                        httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                        _ => new FixedWindowRateLimiterOptions { PermitLimit = 1000, Window = TimeSpan.FromMinutes(1) }
-                    )
+                    RateLimitPartition.GetNoLimiter("global")
                 );
+
+                options.AddPolicy("per-user", context => RateLimitPartition.GetNoLimiter("per-user"));
+                options.AddPolicy("fixed", context => RateLimitPartition.GetNoLimiter("fixed"));
 
                 return;
             }

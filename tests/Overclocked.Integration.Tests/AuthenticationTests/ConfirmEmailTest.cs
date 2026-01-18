@@ -18,14 +18,15 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class ConfirmEmailTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class ConfirmEmailTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
     private const string PlainCode = "VC4R53";
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task ConfirmEmail_Should_ReturnSuccess_When_DataIsValid()
@@ -40,7 +41,7 @@ public class ConfirmEmailTest(ApiTestFixture fixture) : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await using AsyncServiceScope scope = fixture.Services.CreateAsyncScope();
+        await using AsyncServiceScope scope = factory.Services.CreateAsyncScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         User? userDb = await dbContext
@@ -86,7 +87,7 @@ public class ConfirmEmailTest(ApiTestFixture fixture) : IAsyncLifetime
         User user = new UserFaker(new PasswordHasher()).Generate();
         user.CreateEmailConfirmationCode(codeHash);
 
-        await using AsyncServiceScope scope = fixture.Services.CreateAsyncScope();
+        await using AsyncServiceScope scope = factory.Services.CreateAsyncScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         await dbContext.Users.AddAsync(user);
