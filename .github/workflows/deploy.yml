@@ -55,6 +55,8 @@ jobs:
           # App Environment
           echo "ASPNETCORE_ENVIRONMENT=Production" >> .env
 
+          echo "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> .env
+
       - name: Deploy with Docker Compose
         run: |
           docker compose down
