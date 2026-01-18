@@ -9,25 +9,29 @@ using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    Env.TraversePath().Load();
+    builder.Configuration.AddEnvironmentVariables();
+}
+
 builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddPresentation(builder.Configuration).AddInfrastructure(builder.Configuration).AddApplication();
 
 WebApplication app = builder.Build();
 
-app.UseBackgroundJobs();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    Env.TraversePath().Load();
-
     app.MapOpenApi();
 
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "Overclocked API"));
 
     app.UseHangfireDashboard(options: new DashboardOptions { DarkModeEnabled = true });
 }
+
+app.UseBackgroundJobs();
 
 app.UseHttpsRedirection();
 
