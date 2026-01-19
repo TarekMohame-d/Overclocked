@@ -2,7 +2,6 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Overclocked.Api.Routing;
 using Overclocked.Architecture.Tests.FakeData;
 using Overclocked.Domain.UserAggregate;
@@ -13,13 +12,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class LoginTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class LoginTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Login_Should_ReturnSuccess_When_DataIsValid()
@@ -40,7 +40,7 @@ public class LoginTest(ApiTestFixture fixture) : IAsyncLifetime
         User user = new UserFaker(new PasswordHasher()).Generate();
         user.ConfirmEmail();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Users.Add(user);

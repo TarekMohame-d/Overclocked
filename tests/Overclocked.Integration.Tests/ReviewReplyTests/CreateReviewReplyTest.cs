@@ -20,13 +20,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ReviewReplyTests;
 
-public class CreateReviewReplyTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class CreateReviewReplyTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Create_Should_CreateAndReturnSuccess_When_DataIsValid()
@@ -35,7 +36,7 @@ public class CreateReviewReplyTest(ApiTestFixture fixture) : IAsyncLifetime
         (User user, User admin, Product product, Review review) = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent();
 
-        var token = fixture.GenerateJwtToken(userId: admin.Id.Value.ToString(), role: "Admin");
+        var token = factory.GenerateJwtToken(userId: admin.Id.Value.ToString(), role: "Admin");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
@@ -49,7 +50,7 @@ public class CreateReviewReplyTest(ApiTestFixture fixture) : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Review? reviewDb = await dbContext.Reviews.FirstOrDefaultAsync(x => x.UserId == user.Id);
@@ -69,7 +70,7 @@ public class CreateReviewReplyTest(ApiTestFixture fixture) : IAsyncLifetime
         StringContent form1 = CreateJsonContent("reply");
         StringContent form2 = CreateJsonContent("new reply");
 
-        var token = fixture.GenerateJwtToken(userId: admin.Id.Value.ToString(), role: "Admin");
+        var token = factory.GenerateJwtToken(userId: admin.Id.Value.ToString(), role: "Admin");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
@@ -92,7 +93,7 @@ public class CreateReviewReplyTest(ApiTestFixture fixture) : IAsyncLifetime
 
         response2.StatusCode.ShouldBe(HttpStatusCode.Conflict);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Review? reviewDb = await dbContext.Reviews.SingleOrDefaultAsync(x => x.UserId == user.Id);
@@ -116,7 +117,7 @@ public class CreateReviewReplyTest(ApiTestFixture fixture) : IAsyncLifetime
         User admin = new UserFaker(new PasswordHasher()).Generate();
         admin.ChangeRole(Role.Admin);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

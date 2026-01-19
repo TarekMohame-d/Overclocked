@@ -19,13 +19,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.ProductTests;
 
-public class GetProductByIdTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class GetProductByIdTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task GetById_Should_ReturnFailure_When_NotFound()
@@ -102,7 +103,7 @@ public class GetProductByIdTest(ApiTestFixture fixture) : IAsyncLifetime
     {
         Product product = new ProductFaker(brandId, categoryId, tags.ConvertAll(x => x.Id.Value)).Generate();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Products.Add(product);
@@ -113,7 +114,7 @@ public class GetProductByIdTest(ApiTestFixture fixture) : IAsyncLifetime
 
     private async Task<ProductResponse> SeedCacheAsync(Guid id, List<Tag> tags)
     {
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
 
         var productResponse = new ProductResponse
         {
@@ -156,7 +157,7 @@ public class GetProductByIdTest(ApiTestFixture fixture) : IAsyncLifetime
         Category category = new CategoryFaker().Generate();
         List<Tag> tags = new TagFaker().Generate(3);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);

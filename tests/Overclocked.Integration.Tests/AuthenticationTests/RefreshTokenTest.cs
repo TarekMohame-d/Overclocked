@@ -4,7 +4,6 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Overclocked.Api.Routing;
 using Overclocked.Application.Features.AuthenticationUseCases.DTOs.Responses;
 using Overclocked.Architecture.Tests.FakeData;
@@ -16,13 +15,14 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.AuthenticationTests;
 
-public class RefreshTokenTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class RefreshTokenTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync() => await fixture.ResetDatabaseAsync();
+    public async Task InitializeAsync() => await factory.ResetDatabaseAsync();
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task RefreshToken_Should_ReturnSuccess_When_DataIsValid()
@@ -49,7 +49,7 @@ public class RefreshTokenTest(ApiTestFixture fixture) : IAsyncLifetime
         result.AccessToken.ShouldNotBe(loginResult.AccessToken);
         result.RefreshToken.ShouldNotBe(loginResult.RefreshToken);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         User? userId = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
@@ -61,7 +61,7 @@ public class RefreshTokenTest(ApiTestFixture fixture) : IAsyncLifetime
         User user = new UserFaker(new PasswordHasher()).Generate();
         user.ConfirmEmail();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Users.Add(user);

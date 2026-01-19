@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
+using DotNet.Testcontainers.Builders;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,8 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using NSubstitute;
@@ -21,18 +24,14 @@ using Overclocked.Application.Abstractions.Services;
 using Overclocked.Application.Common.Constants;
 using Overclocked.Infrastructure.Outbox;
 using Overclocked.Infrastructure.Persistence;
-using Overclocked.Integration.Tests.Shared;
 using Respawn;
 using StackExchange.Redis;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
-[assembly: AssemblyFixture(typeof(ApiTestFixture))]
-
 namespace Overclocked.Integration.Tests.Shared;
 
-public class ApiTestFixture : WebApplicationFactory<IApiMarker>, IAsyncLifetime
+public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 {
     private const string Issuer = "TestIssuer";
     private const string Audience = "TestAudience";
@@ -55,7 +54,7 @@ public class ApiTestFixture : WebApplicationFactory<IApiMarker>, IAsyncLifetime
     public IDomainEventDispatcher DomainEventDispatcherMock { get; } = Substitute.For<IDomainEventDispatcher>();
     public IProcessOutboxMessagesJob ProcessOutboxMessagesJobMock { get; } = Substitute.For<IProcessOutboxMessagesJob>();
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
         await _redisContainer.StartAsync();
@@ -66,9 +65,10 @@ public class ApiTestFixture : WebApplicationFactory<IApiMarker>, IAsyncLifetime
         var redisConnectionString = _redisContainer.GetConnectionString() + ",allowAdmin=true";
         _redisConnection = await ConnectionMultiplexer.ConnectAsync(redisConnectionString);
 
-        HttpClient = CreateClient();
         await ApplyMigrationsAsync();
         await InitializeRespawnerAsync();
+
+        HttpClient = CreateClient();
     }
 
     public new async Task DisposeAsync()
@@ -79,26 +79,26 @@ public class ApiTestFixture : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration(
-            (context, config) =>
-            {
-                config.AddInMemoryCollection(
-                    new Dictionary<string, string?>
-                    {
-                        { "ConnectionStrings:DefaultConnection", _dbContainer.GetConnectionString() },
-                        { "ConnectionStrings:Redis", _redisContainer.GetConnectionString() },
-                        { "JwtSettings:SigningKey", SigningKey },
-                        { "JwtSettings:Issuer", Issuer },
-                        { "JwtSettings:Audience", Audience },
-                        { "JwtSettings:ExpiresInMinutes", "30" },
-                        { "RateLimiting:Enabled", "false" },
-                    }
-                );
-            }
-        );
+        builder.UseEnvironment("Production");
+
+        builder.UseSetting("JwtSettings:SigningKey", SigningKey);
+        builder.UseSetting("JwtSettings:Issuer", Issuer);
+        builder.UseSetting("JwtSettings:Audience", Audience);
+        builder.UseSetting("JwtSettings:ExpiresInMinutes", "30");
+        builder.UseSetting("RateLimiting:Enabled", "false");
+
+        builder.UseSetting("ConnectionStrings:DefaultConnection", _dbContainer.GetConnectionString());
+        builder.UseSetting("ConnectionStrings:Redis", _redisContainer.GetConnectionString());
 
         builder.ConfigureServices(services =>
         {
+            services.AddLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.SetMinimumLevel(LogLevel.Error);
+            });
+
             services.Configure<RedisCacheOptions>(options =>
             {
                 options.Configuration = _redisContainer.GetConnectionString();
@@ -106,12 +106,22 @@ public class ApiTestFixture : WebApplicationFactory<IApiMarker>, IAsyncLifetime
             });
 
             services.RemoveAll<IConnectionMultiplexer>();
-            services.AddSingleton<IConnectionMultiplexer>(_ =>
-                ConnectionMultiplexer.Connect(_redisContainer.GetConnectionString())
-            );
+            services.AddSingleton(_ => _redisConnection);
 
             services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
-            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(_dbContainer.GetConnectionString()));
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options
+                    .UseNpgsql(
+                        _dbContainer.GetConnectionString(),
+                        npgsqlOptions =>
+                        {
+                            npgsqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                        }
+                    )
+                    .UseSnakeCaseNamingConvention()
+            );
+
+            services.RemoveAll<IHostedService>();
 
             services.RemoveAll<IFileStorageService>();
             services.AddScoped(_ => FileStorageServiceMock);

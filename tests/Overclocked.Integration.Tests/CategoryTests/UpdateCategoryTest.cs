@@ -17,21 +17,22 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.CategoryTests;
 
-public class UpdateCategoryTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class UpdateCategoryTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await fixture.ResetDatabaseAsync();
-        fixture.FileStorageServiceMock.ClearReceivedCalls();
-        fixture.BackgroundJobClientMock.ClearReceivedCalls();
+        await factory.ResetDatabaseAsync();
+        factory.FileStorageServiceMock.ClearReceivedCalls();
+        factory.BackgroundJobClientMock.ClearReceivedCalls();
 
-        var token = fixture.GenerateJwtToken(permissions: [nameof(Permission.AddEditDelete)]);
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(permissions: [nameof(Permission.AddEditDelete)]);
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Update_Should_ReturnFailure_When_IdNotFound()
@@ -64,7 +65,7 @@ public class UpdateCategoryTest(ApiTestFixture fixture) : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Category? updatedCategory = await dbContext.Categories.FindAsync(category.Id);
@@ -79,7 +80,7 @@ public class UpdateCategoryTest(ApiTestFixture fixture) : IAsyncLifetime
         Category category = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent("New Name", "https://res.cloudinary.com/over-clocked/new-image.jpg");
 
-        fixture.BackgroundJobClientMock.Create(Arg.Any<Job>(), Arg.Any<IState>()).Returns("a-fake-job-id");
+        factory.BackgroundJobClientMock.Create(Arg.Any<Job>(), Arg.Any<IState>()).Returns("a-fake-job-id");
 
         // Act
         HttpResponseMessage response = await _client.PutAsync(
@@ -90,7 +91,7 @@ public class UpdateCategoryTest(ApiTestFixture fixture) : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Category? updatedCategory = await dbContext.Categories.FindAsync(category.Id);
@@ -106,8 +107,8 @@ public class UpdateCategoryTest(ApiTestFixture fixture) : IAsyncLifetime
         Category category = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent("New Name", category.Image.Value);
 
-        var token = fixture.GenerateJwtToken();
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PutAsync(
@@ -123,7 +124,7 @@ public class UpdateCategoryTest(ApiTestFixture fixture) : IAsyncLifetime
     {
         Category category = new CategoryFaker().Generate();
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Categories.Add(category);

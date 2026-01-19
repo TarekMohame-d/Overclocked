@@ -19,19 +19,20 @@ using Shouldly;
 
 namespace Overclocked.Integration.Tests.CartTests;
 
-public class AddCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
+[Collection(nameof(IntegrationTestCollection))]
+public class AddCartItemTest(IntegrationTestWebAppFactory factory) : IAsyncLifetime
 {
-    private readonly HttpClient _client = fixture.HttpClient;
+    private readonly HttpClient _client = factory.HttpClient;
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await fixture.ResetDatabaseAsync();
+        await factory.ResetDatabaseAsync();
 
-        var token = fixture.GenerateJwtToken();
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken();
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task AddCartItem_Should_ReturnForbidden_When_UserDoesNotHaveRole()
@@ -39,8 +40,8 @@ public class AddCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
         // Arrange
         StringContent form = CreateJsonContent(Guid.NewGuid(), 1);
 
-        var token = fixture.GenerateJwtToken(role: "Admin");
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(role: "Admin");
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(CartRoutes.AddCartItem, form);
@@ -56,8 +57,8 @@ public class AddCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
         (User user, Product product) = await SeedDatabaseAsync();
         StringContent form = CreateJsonContent(product.Id.Value, 1);
 
-        var token = fixture.GenerateJwtToken(userId: user.Id.Value.ToString());
-        fixture.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = factory.GenerateJwtToken(userId: user.Id.Value.ToString());
+        factory.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
         HttpResponseMessage response = await _client.PostAsync(CartRoutes.AddCartItem, form);
@@ -65,7 +66,7 @@ public class AddCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Cart? cart = await dbContext.Carts.FirstOrDefaultAsync(x => x.UserId == user.Id);
@@ -83,7 +84,7 @@ public class AddCartItemTest(ApiTestFixture fixture) : IAsyncLifetime
         User user = new UserFaker(new PasswordHasher()).Generate();
         var cart = Cart.Create(user.Id);
 
-        using IServiceScope scope = fixture.Services.CreateScope();
+        using IServiceScope scope = factory.Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Brands.Add(brand);
