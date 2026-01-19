@@ -2,6 +2,7 @@ using DotNetEnv;
 using Hangfire;
 using Overclocked.Api;
 using Overclocked.Api.Extensions;
+using Overclocked.Api.Filters;
 using Overclocked.Api.Middleware;
 using Overclocked.Application;
 using Overclocked.Infrastructure;
@@ -27,8 +28,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "Overclocked API"));
-
-    app.UseHangfireDashboard(options: new DashboardOptions { DarkModeEnabled = true });
 }
 
 app.UseBackgroundJobs();
@@ -47,9 +46,22 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.UseRateLimiter();
+app.UseHangfireDashboard(
+    "/hangfire",
+    new DashboardOptions
+    {
+        Authorization =
+        [
+            new HangfireBasicAuthenticationFilter(
+                builder.Configuration.GetValue<string>("Hangfire_Username")!,
+                builder.Configuration.GetValue<string>("Hangfire_Password")!
+            ),
+        ],
+        DarkModeEnabled = true,
+    }
+);
 
-app.UseHangfireDashboard("/dashboard");
+app.UseRateLimiter();
 
 // app.UseStaticFiles();
 

@@ -79,7 +79,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Development");
+        builder.UseEnvironment("Production");
 
         builder.UseSetting("JwtSettings:SigningKey", SigningKey);
         builder.UseSetting("JwtSettings:Issuer", Issuer);
@@ -94,8 +94,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<IApiMarker>, I
         {
             services.AddLogging(logging =>
             {
+                logging.ClearProviders();
                 logging.AddConsole();
-                logging.SetMinimumLevel(LogLevel.Warning);
+                logging.SetMinimumLevel(LogLevel.Error);
             });
 
             services.Configure<RedisCacheOptions>(options =>
