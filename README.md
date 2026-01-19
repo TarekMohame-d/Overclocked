@@ -19,6 +19,7 @@ The project follows **Clean Architecture** to ensure separation of concerns and 
 - **CQRS (Command Query Responsibility Segregation)**: Separates read and write operations for better performance and scalability using **MediatR**.
 - **Result Pattern**: Uses a functional approach to error handling (monads) instead of exceptions for control flow.
 - **Outbox Pattern**: Ensures atomic database updates and reliable message processing.
+- **Inbox Pattern**: Ensures reliable processing of external events (e.g., payment webhooks).
 - **Pipeline Behaviors**: Handles Validation, Caching, and Logging transparently via decorators.
 - **Vertical Slices**: Features are organized by domain concept (e.g., `ProductUseCases`, `CartUseCases`) rather than technical layers inside the Application project.
 
@@ -38,6 +39,7 @@ The project follows **Clean Architecture** to ensure separation of concerns and 
 - **Background Jobs**: [Hangfire](https://www.hangfire.io/) (PostgreSQL storage)
 - **Logging**: [Serilog](https://serilog.net/) (sinking to [Seq](https://datalust.co/seq))
 - **Object Storage**: [Cloudinary](https://cloudinary.com/)
+- **Payment Gateway**: [Paymob](https://paymob.com/)
 - **Email**: MailKit
 - **Resilience**: Polly
 - **Validation**: FluentValidation
@@ -51,7 +53,7 @@ The project follows **Clean Architecture** to ensure separation of concerns and 
 
 ### Testing
 
-- **Framework**: xUnit v3
+- **Framework**: xUnit
 - **Assertions**: Shouldly / FluentAssertions
 - **Integration**: [Testcontainers](https://testcontainers.com/) (Real Postgres & Redis instances)
 - **Architecture**: NetArchTest
@@ -100,6 +102,12 @@ CloudinarySettings__CloudName="your_cloud_name"
 CloudinarySettings__ApiKey="your_api_key"
 CloudinarySettings__ApiSecret="your_api_secret"
 
+# Paymob (Payment Gateway)
+PaymobSettings__ApiKey="your_paymob_api_key"
+PaymobSettings__IntegrationId=123456
+PaymobSettings__FrameId=123456
+PaymobSettings__Hmac="your_paymob_hmac"
+
 # Email Settings
 EmailSettings__From=your_from_email
 EmailSettings__AppPassword=your_email_app_password
@@ -131,7 +139,7 @@ EmailSettings__AppPassword=your_email_app_password
 
 4.  **Access the API**:
     - 📄 **Swagger UI**: `https://localhost:7049/swagger`
-    - ⚙ **Hangfire Dashboard**: `https://localhost:7049/dashboard`
+    - ⚙ **Hangfire Dashboard**: `https://localhost:7049/hangfire`
     - 📝 **Seq Dashboard**: `http://localhost:8001`
 
 ## 🧪 Testing
