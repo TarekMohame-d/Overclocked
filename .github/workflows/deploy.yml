@@ -52,6 +52,10 @@ jobs:
           echo "EmailSettings__From=${{ secrets.EMAILSETTINGS__FROM }}" >> .env
           echo "EmailSettings__AppPassword=${{ secrets.EMAILSETTINGS__APPPASSWORD }}" >> .env
 
+          # Hangfire
+          echo "Hangfire_Username=${{ secrets.Hangfire_Username }}" >> .env
+          echo "Hangfire_Password=${{ secrets.Hangfire_Password }}" >> .env
+
           # App Environment
           echo "ASPNETCORE_ENVIRONMENT=Production" >> .env
 
