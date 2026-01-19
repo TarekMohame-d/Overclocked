@@ -4,6 +4,11 @@
 
 ---
 
+## ERD
+<img src="./Overclocked%20ERD.png" title="ERD" alt="ERD" width="800" height="600"/>
+
+---
+
 ## 🏗 Architecture
 
 The project follows **Clean Architecture** to ensure separation of concerns and testability, organized into the following layers:
@@ -151,3 +156,4 @@ To run all tests:
 ```bash
 dotnet test
 ```
+
