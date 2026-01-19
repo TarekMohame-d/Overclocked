@@ -36,7 +36,7 @@ The system must allow comprehensive management of the product catalog.
 *   **Shopping Cart:** Add, remove, and update items in a persistent or session-based cart.
 *   **Wishlist:** Save products for future consideration.
 *   **Order Management:** Process checkout, create orders, and track order status.
-*   **Payments:** Handle payment processing integrations.
+*   **Payments:** Handle payment processing integrations using **Paymob**.
 
 ### 5.4. 💬 Social & Engagement
 *   **Reviews:** Allow verified customers to review products with ratings.
@@ -53,7 +53,7 @@ The system must allow comprehensive management of the product catalog.
 *   **Pattern:** Clean Architecture (Onion Architecture).
 *   **CQRS:** Command Query Responsibility Segregation with **MediatR**.
 *   **Result Pattern:** Functional error handling using a `Result` monad (avoiding exceptions for control flow).
-*   **Resilience:** **Outbox Pattern** for atomic database operations and reliable message publishing.
+*   **Resilience:** **Outbox Pattern** for atomic database operations and reliable message publishing. **Inbox Pattern** for reliable webhook processing.
 *   **Pipeline Behaviors:** Cross-cutting concerns like Validation, Caching, and Logging handled via decorators.
 
 ### 6.2. Technology Stack
@@ -63,6 +63,7 @@ The system must allow comprehensive management of the product catalog.
 *   **Logging:** Serilog (structured logging sinking to Seq)
 *   **Background Jobs:** Hangfire
 *   **Object Storage:** Cloudinary
+*   **Payment Gateway:** Paymob
 *   **Containerization:** Docker & Docker Compose
 *   **Email:** MailKit
 

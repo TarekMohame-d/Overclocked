@@ -123,4 +123,5 @@ configs.json
 .devcontainer/logs/*.txt
 /src/Overclocked.Api/logs/
 GEMINI.md
+*.sql
 
